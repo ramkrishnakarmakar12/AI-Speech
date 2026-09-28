@@ -1,0 +1,19 @@
+Doctor: Good morning. Please have a seat. What is your name and age?
+Patient: Good morning doctor. My name is Sunil Das, I am fifty-eight years old.
+Doctor: Tell me, what problem are you facing?
+Patient: Doctor, for the last three months my left eye feels heavy, and sometimes I see rainbow-coloured rings around lights at night. Aankhon mein thoda dard bhi hota hai.
+Doctor: Any headache or vomiting with it?
+Patient: Mild headache in the evening, but no vomiting.
+Doctor: Do you have diabetes, blood pressure or asthma?
+Patient: I have blood pressure for five years, I take amlodipine. No sugar. Asthma nahi hai.
+Doctor: Does anyone in your family have glaucoma?
+Patient: Yes, my mother had glaucoma.
+Doctor: Okay. Your vision is 6/9 in the right eye and 6/12 in the left eye. The eye pressure is 18 in the right eye and 28 in the left eye. On slit lamp the anterior chamber is normal depth. The cup to disc ratio is 0.4 in the right eye and 0.7 in the left eye.
+Doctor: So, you have primary open angle glaucoma in the left eye. The right eye is a glaucoma suspect.
+Patient: Is it serious, doctor?
+Doctor: It can be controlled with drops. Start Latanoprost 0.005 percent eye drops, one drop at bedtime in the left eye, every day. Also Timolol 0.5 percent eye drops, one drop twice a day in the left eye.
+Doctor: For the dryness, use carboxymethylcellulose eye drops four times a day in both eyes for one month.
+Doctor: We will do a visual field test, HFA 24-2, and an OCT RNFL scan before your next visit.
+Doctor: After putting the drop, press the inner corner of the eye for two minutes. Keep a five minute gap between two different eye drops. These drops are lifelong, do not stop them on your own.
+Doctor: Come back after one month to check the pressure. Your children should also get their eyes checked for glaucoma.
+Patient: Thank you doctor.

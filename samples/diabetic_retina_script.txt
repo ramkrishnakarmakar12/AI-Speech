@@ -1,0 +1,19 @@
+Doctor: Hello, please come in and sit down. What is your name and age?
+Patient: Good afternoon doctor. I am Meena Agarwal, sixty-two years old.
+Doctor: What brings you here today?
+Patient: Doctor, for the last two months my vision in the right eye has become blurred, and straight lines look wavy. Reading the newspaper is very difficult now.
+Doctor: Is the left eye alright?
+Patient: The left eye is a little blurry too, but not so much.
+Doctor: How long have you had diabetes?
+Patient: Fifteen years, doctor. I take insulin twice a day. I also have high blood pressure and I take telmisartan.
+Doctor: When did you last check your HbA1c?
+Patient: Three months back, it was 8.5.
+Doctor: Okay. Your vision is 6/36 in the right eye and 6/12 in the left eye. Eye pressure is 16 in both eyes. After dilating the pupils, the fundus shows severe non-proliferative diabetic retinopathy in both eyes, with clinically significant macular edema in the right eye. The OCT shows central macular thickness of 450 microns in the right eye and 290 in the left eye.
+Doctor: So you have diabetic macular edema in the right eye and severe NPDR in both eyes.
+Patient: What is the treatment, doctor?
+Doctor: For the right eye we will give an intravitreal anti-VEGF injection, Ranibizumab, once a month for three months. Before the injection, use Moxifloxacin eye drops four times a day in the right eye for three days.
+Doctor: For the left eye, we will plan PRP laser in two weeks.
+Doctor: Also get a fundus fluorescein angiography done, and repeat your HbA1c and kidney function test.
+Doctor: Keep your sugar and blood pressure under strict control, that is very important for your eyes.
+Doctor: Come back on the day of injection, and review with a repeat OCT after one month.
+Patient: Okay doctor, thank you.

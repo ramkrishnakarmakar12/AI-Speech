@@ -1,0 +1,19 @@
+Doctor: Namaste, please sit. Aapka naam?
+Patient: Ramesh Kumar, doctor. Age 64.
+Doctor: Batayiye, kya problem hai?
+Patient: Doctor, right eye se dhundhla dikhta hai, for the last one year. Everything looks hazy. Glasses badalne se bhi fayda nahi.
+Doctor: Is it gradual? Any pain or redness?
+Patient: No pain. Slowly slowly it became worse. Night mein driving karte time lights ke around glare aata hai.
+Doctor: Do you have sugar or BP?
+Patient: Haan, diabetes for ten years, on tablets. BP bhi hai, amlodipine leta hoon.
+Doctor: Any blood thinners, aspirin?
+Patient: No doctor.
+Doctor: Okay. Your vision in the right eye is 6/36, improving to 6/18 with pinhole. Left eye is 6/9. Pressure is 16 in both eyes. On slit lamp, right eye has nuclear sclerosis grade three, left eye early cataract. Fundus after dilation shows mild non proliferative diabetic retinopathy in both eyes, no macular edema.
+Doctor: So you have motiyabind, a mature enough cataract in the right eye. I am advising phaco surgery with a foldable lens, a PCIOL, in the right eye.
+Patient: Operation mein dard hoga?
+Doctor: No, it is done under topical anaesthesia, day care, you go home the same day. Before surgery we will do biometry, syringing and blood sugar test.
+Doctor: Start Moxicip eye drops, one drop four times a day in the right eye for three days before surgery. After surgery you will use moxi-flox-acin plus dexamethasone drops six times a day, tapering over four weeks, and nepafinac drops three times a day for four weeks.
+Doctor: Also for dryness use carboxymethyl cellulose drops four times a day in both eyes.
+Doctor: Keep a five minute gap between two different eye drops. Keep your sugar under control before surgery.
+Doctor: After the operation, no water in the eye for two weeks and wear the shield at night. Review one day after surgery, then after one week and one month. New glasses after one month.
+Patient: Thik hai doctor, thank you.

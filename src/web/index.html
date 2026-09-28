@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OPD Speech → Rx</title>
+<link rel="icon" href="data:," />
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#1b1f24; --mute:#667085; --line:#e4e7ec; --acc:#1d6fd6; --warn:#b54708; --warnbg:#fffaeb; --ok:#067647; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111418; --card:#1a1e24; --ink:#e7e9ec; --mute:#98a2b3; --line:#2b3139; --acc:#5aa2ff; --warn:#fdb022; --warnbg:#2a2213; --ok:#47cd89; } }
+  * { box-sizing: border-box; }
+  body { margin:0; font: 14px/1.5 system-ui, -apple-system, Segoe UI, sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); display:flex; gap:16px; align-items:baseline; flex-wrap:wrap; }
+  header h1 { font-size:17px; margin:0; }
+  header small { color:var(--mute); }
+  main { display:grid; grid-template-columns: minmax(320px, 420px) 1fr; gap:16px; padding:16px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
+  label { display:block; font-weight:600; margin:12px 0 6px; }
+  textarea { width:100%; min-height:260px; font: 13px/1.45 ui-monospace, Menlo, monospace; padding:10px; border:1px solid var(--line); border-radius:8px; background:transparent; color:inherit; }
+  input[type=file] { width:100%; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  button { font:inherit; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:inherit; cursor:pointer; }
+  button.primary { background:var(--acc); border-color:var(--acc); color:#fff; font-weight:600; }
+  button:disabled { opacity:.5; cursor:wait; }
+  .rec { color:#d92d20; }
+  #status { color:var(--mute); margin-top:10px; min-height:20px; }
+  h2 { font-size:15px; margin:18px 0 6px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+  h2:first-child { margin-top:0; }
+  ul { margin:4px 0; padding-left:20px; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { text-align:left; border-bottom:1px solid var(--line); padding:5px 6px; vertical-align:top; }
+  th { color:var(--mute); font-weight:600; }
+  .id { font: 11px ui-monospace, Menlo, monospace; color:var(--acc); margin-left:6px; }
+  .nokb { font-size:11px; color:var(--warn); margin-left:6px; }
+  .ref { color:var(--mute); font-size:12px; }
+  .warn { background:var(--warnbg); color:var(--warn); border-radius:8px; padding:8px 12px; }
+  .chips span { display:inline-block; border:1px solid var(--line); border-radius:999px; padding:2px 8px; margin:2px; font-size:12px; }
+  .chips b { color:var(--acc); font-weight:600; }
+  .muted { color:var(--mute); }
+  details { margin-top:14px; }
+  pre { white-space:pre-wrap; font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>OPD conversation → Prescription draft</h1>
+  <small id="cfg">loading…</small>
+</header>
+<main>
+  <section class="card">
+    <label>1. Conversation audio (optional if you paste a transcript)</label>
+    <input type="file" id="audio" accept="audio/*,video/*" />
+    <label for="lang">Spoken language</label>
+    <select id="lang" style="font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:inherit">
+      <option value="auto">Auto-detect</option>
+      <option value="en">English</option>
+      <option value="hi">Hindi (हिन्दी)</option>
+      <option value="bn">Bengali (বাংলা)</option>
+    </select>
+    <div class="row">
+      <button id="recBtn">● Record</button>
+      <button id="trBtn">Transcribe only</button>
+    </div>
+    <audio id="player" controls style="width:100%;margin-top:8px;display:none"></audio>
+
+    <label>2. Transcript (optional — if given, it is used instead of ASR)</label>
+    <textarea id="transcript" placeholder="Doctor: ...&#10;Patient: ..."></textarea>
+    <label>English translation <span class="muted" style="font-weight:400">(filled automatically for Hindi/Bengali audio)</span></label>
+    <textarea id="english" style="min-height:110px" placeholder="optional"></textarea>
+    <div class="row">
+      <button id="matchBtn">Detect terms (instant, no LLM)</button>
+      <button id="goBtn" class="primary">Generate prescription</button>
+    </div>
+    <div id="status"></div>
+    <div id="chips" class="chips"></div>
+  </section>
+
+  <section class="card" id="out"><p class="muted">The prescription draft will appear here.</p></section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let recorded = null, mediaRec = null;
+
+fetch("/api/config").then(r => r.json()).then(c => {
+  $("cfg").textContent = `ASR: ${c.asr} · LLM: ${c.llm.provider} / ${c.llm.model} · KB: ${c.kbTerms} terms`;
+}).catch(() => $("cfg").textContent = "server config unavailable");
+
+function busy(on, msg = "") {
+  for (const b of document.querySelectorAll("button")) if (b.id !== "recBtn") b.disabled = on;
+  $("status").textContent = msg;
+}
+function audioBlob() {
+  if (recorded) return [recorded, "recording.webm"];
+  const f = $("audio").files[0];
+  return f ? [f, f.name] : null;
+}
+$("audio").onchange = () => { recorded = null; const f = $("audio").files[0]; if (f) { $("player").src = URL.createObjectURL(f); $("player").style.display = "block"; } };
+
+$("recBtn").onclick = async () => {
+  if (mediaRec) { mediaRec.stop(); return; }
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const chunks = [];
+  mediaRec = new MediaRecorder(stream);
+  mediaRec.ondataavailable = (e) => chunks.push(e.data);
+  mediaRec.onstop = () => {
+    recorded = new Blob(chunks, { type: mediaRec.mimeType });
+    stream.getTracks().forEach(t => t.stop());
+    $("player").src = URL.createObjectURL(recorded); $("player").style.display = "block";
+    $("recBtn").textContent = "● Record"; $("recBtn").classList.remove("rec"); mediaRec = null;
+  };
+  mediaRec.start();
+  $("recBtn").textContent = "■ Stop"; $("recBtn").classList.add("rec");
+};
+
+$("trBtn").onclick = async () => {
+  const a = audioBlob(); if (!a) return alert("Choose or record audio first");
+  const fd = new FormData(); fd.append("audio", a[0], a[1]); fd.append("language", $("lang").value);
+  busy(true, "Transcribing…");
+  try {
+    const r = await fetch("/api/transcribe", { method: "POST", body: fd }).then(r => r.json());
+    if (r.error) throw new Error(r.error);
+    $("transcript").value = r.text;
+    $("english").value = r.english || "";
+    if (r.language && [...$("lang").options].some(o => o.value === r.language)) $("lang").value = r.language;
+    busy(false, `Transcribed (${r.language || "?"}) with ${r.backend} in ${(r.ms/1000).toFixed(1)} s — edit if needed, then Generate.`);
+  } catch (e) { busy(false, "✘ " + e.message); }
+};
+
+$("matchBtn").onclick = async () => {
+  const fd = new FormData(); fd.append("transcript", $("transcript").value + "\n" + $("english").value);
+  const m = await fetch("/api/match", { method: "POST", body: fd }).then(r => r.json());
+  $("chips").innerHTML = m.length ? m.map(x => `<span title="${esc(x.category)} · heard “${esc(x.heardAs)}” · ${x.score.toFixed(2)}"><b>${esc(x.id)}</b> ${esc(x.name)}</span>`).join("") : '<span class="muted">No terms detected</span>';
+};
+
+$("goBtn").onclick = async () => {
+  const fd = new FormData();
+  const a = audioBlob(); if (a) fd.append("audio", a[0], a[1]);
+  fd.append("transcript", $("transcript").value);
+  fd.append("english", $("english").value);
+  fd.append("language", $("lang").value);
+  if (!a && !$("transcript").value.trim()) return alert("Provide audio or a transcript");
+  busy(true, a && !$("transcript").value.trim() ? "Transcribing and extracting… (first run loads the models)" : "Extracting with the LLM…");
+  const t0 = performance.now();
+  try {
+    const r = await fetch("/api/process", { method: "POST", body: fd }).then(r => r.json());
+    if (r.error) throw new Error(r.error);
+    if (!$("transcript").value.trim()) { $("transcript").value = r.transcript; $("english").value = r.english || ""; }
+    render(r);
+    busy(false, `Done in ${((performance.now()-t0)/1000).toFixed(1)} s`);
+  } catch (e) { busy(false, "✘ " + e.message); }
+};
+
+function render(r) {
+  const p = r.prescription, refs = r.kbRefs;
+  const tag = (k) => refs[k] ? `<span class="id" title="${esc(refs[k].name)} (${refs[k].verified})">${esc(refs[k].id)}</span>` : `<span class="nokb">not in KB</span>`;
+  const j = (...xs) => xs.filter(x => x && String(x).trim()).join(" ");
+  const list = (items) => items.length ? `<ul>${items.map(i => `<li>${i}</li>`).join("")}</ul>` : `<p class="muted">—</p>`;
+  let h = "";
+  const pt = [p.patient.name, p.patient.age, p.patient.sex].filter(Boolean).join(" · ");
+  h += `<h2>Patient</h2><p>${esc(pt || "—")}</p>`;
+  h += `<h2>C/o</h2>` + list(p.chief_complaints.map((c, i) => esc(j(c.complaint, c.eye, c.duration && "× " + c.duration, c.character && `(${c.character})`)) + tag("chief_complaints." + i)));
+  h += `<h2>History</h2>` + list([
+    ...p.history.systemic.map((x, i) => esc(j("k/c/o", x.condition, x.duration && "× " + x.duration, x.treatment && "— " + x.treatment)) + tag("history.systemic." + i)),
+    ...p.history.ocular.map((x, i) => esc(j("H/o", x.item, x.eye)) + tag("history.ocular." + i)),
+    ...(p.history.current_medications.length ? ["Current meds: " + esc(p.history.current_medications.join(", "))] : []),
+    ...(p.history.allergies.length ? ["Allergies: " + esc(p.history.allergies.join(", "))] : []),
+  ]);
+  h += `<h2>O/E</h2>` + list([
+    ...p.examination.map((x, i) => esc(j(x.test, x.eye, x.result && ": " + x.result)) + tag("examination." + i)),
+    ...p.clinical_findings.map((x, i) => esc(j(x.finding, x.eye)) + tag("clinical_findings." + i)),
+  ]);
+  h += `<h2>Diagnosis</h2>` + list(p.diagnosis.map((d, i) => {
+    const icd = refs["diagnosis." + i]?.reference?.["ICD-10 (indicative)"];
+    return esc(j(d.condition, d.grade_or_notes && `(${d.grade_or_notes})`, d.eye, d.certainty === "provisional" && "— provisional", icd && `[ICD-10 ${icd}]`)) + tag("diagnosis." + i);
+  }));
+  h += `<h2>Rx</h2>`;
+  h += p.medications.length ? `<table><tr><th>#</th><th>Medicine</th><th>Dose</th><th>Freq</th><th>Eye</th><th>Duration</th></tr>` + p.medications.map((m, i) => {
+    const ref = refs["medications." + i]?.reference || {};
+    return `<tr><td>${i+1}</td><td><b>${esc(j(m.form, m.generic_name, m.strength))}</b>${m.brand_said ? ` <span class="muted">(${esc(m.brand_said)})</span>` : ""}${tag("medications." + i)}${m.phase ? ` <span class="muted">[${esc(m.phase)}]</span>` : ""}
+      ${m.instructions ? `<div class="ref">${esc(m.instructions)}</div>` : ""}${ref["Typical Prescription Usage"] ? `<div class="ref">KB typical: ${esc(ref["Typical Prescription Usage"])}</div>` : ""}</td>
+      <td>${esc(m.dose)}</td><td>${esc(m.frequency)}</td><td>${esc(m.eye)}</td><td>${esc(m.duration)}</td></tr>`;
+  }).join("") + `</table>` : `<p class="muted">—</p>`;
+  if (p.procedures.length) h += `<h2>Procedure advised</h2>` + list(p.procedures.map((x, i) => esc(j(x.procedure, x.eye, x.notes && "— " + x.notes)) + tag("procedures." + i)));
+  if (p.investigations.length) h += `<h2>Investigations</h2>` + list(p.investigations.map((x, i) => esc(j(x.test, x.eye, x.purpose && "— " + x.purpose)) + tag("investigations." + i)));
+  if (p.glasses.length) h += `<h2>Glasses</h2><table><tr><th>Eye</th><th>Sph</th><th>Cyl</th><th>Axis</th><th>Add</th><th>Notes</th></tr>` + p.glasses.map(g => `<tr><td>${esc(g.eye)}</td><td>${esc(g.sph)}</td><td>${esc(g.cyl)}</td><td>${esc(g.axis)}</td><td>${esc(g.add)}</td><td>${esc(g.notes)}</td></tr>`).join("") + `</table>`;
+  h += `<h2>Advice</h2>` + list(p.advice.map(a => esc(a.text)));
+  h += `<h2>Review</h2>` + list(p.follow_up.map(f => esc(j(f.when, f.purpose && "— " + f.purpose))));
+  if (r.warnings.length) h += `<h2>Check before signing</h2><div class="warn">${list(r.warnings.map(esc))}</div>`;
+  h += `<h2>Terminology detected</h2><table><tr><th>Heard</th><th>Term</th><th>KB id</th><th>Category</th></tr>` + p.terms.map(t => `<tr><td>${esc(t.heard)}</td><td>${esc(t.canonical)}</td><td class="id">${esc(t.kb_id || "—")}</td><td>${esc(t.category)}</td></tr>`).join("") + `</table>`;
+  h += `<p class="muted" style="margin-top:12px">${r.language ? `Language: ${esc(r.language)} · ` : ""}LLM ${esc(r.llm.model)} · ${(r.llm.ms/1000).toFixed(1)} s${r.asr ? ` · ASR ${esc(r.asr.backend)} ${(r.asr.ms/1000).toFixed(1)} s` : ""}</p>`;
+  h += `<div class="row"><button onclick="navigator.clipboard.writeText(window.__md)">Copy as Markdown</button><button onclick="dl()">Download JSON</button></div>`;
+  h += `<details><summary>Raw JSON</summary><pre>${esc(JSON.stringify(r.prescription, null, 2))}</pre></details>`;
+  window.__md = r.markdown; window.__json = r;
+  $("out").innerHTML = h;
+}
+function dl() {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(window.__json, null, 2)], { type: "application/json" }));
+  a.download = "prescription.json"; a.click();
+}
+</script>
+</body>
+</html>
