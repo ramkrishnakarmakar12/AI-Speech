@@ -283,27 +283,36 @@ async function lmStudioModels(): Promise<LmModel[]> {
   return (((await r.json()) as any).data ?? []).map((m: any) => ({ id: m.id }));
 }
 
-let resolvedModel: string | null = null;
+let lastLogged: string | null = null;
 /**
- * LLM_MODEL=auto (or empty) → use the model currently loaded in LM Studio,
- * else the first downloaded chat model (LM Studio loads it on first request).
+ * LLM_MODEL=<id> → always that model.
+ * LLM_MODEL=auto (or empty) → asked fresh on every request (no caching, so switching models in
+ * LM Studio takes effect without restarting the server):
+ *   1. a loaded text model (type "llm") — preferred over vision models ("vlm", e.g. qwen3-vl-4b)
+ *   2. any loaded model
+ *   3. the first downloaded text model (LM Studio loads it on first request)
  */
 export async function resolveModel(): Promise<string> {
   const want = config.llm.model.trim();
   if (config.llm.provider === "ollama") return want;
-  if (resolvedModel) return resolvedModel;
-  if (want && want !== "auto") return (resolvedModel = want);
+  if (want && want !== "auto") return want;
   const models = (await lmStudioModels()).filter((m) => !/embed/i.test(m.id) && m.type !== "embeddings");
-  const pick = models.find((m) => m.state === "loaded") ?? models[0];
-  if (!pick) throw new Error(`No models found in LM Studio. Download one (e.g. Qwen3 8B) and load it, then retry.`);
-  resolvedModel = pick.id;
-  if (pick.state === "loaded" && pick.loaded_context_length && pick.loaded_context_length < Math.min(config.llm.numCtx, 8192))
-    console.warn(
-      `⚠ "${pick.id}" is loaded with a ${pick.loaded_context_length}-token context; this app needs ${config.llm.numCtx} (LLM_NUM_CTX). ` +
-        `Reload it with that Context Length (LM Studio → model settings, or: lms load ${pick.id} --context-length ${config.llm.numCtx}).`,
-    );
-  console.error(`  using LM Studio model: ${pick.id}${pick.state ? ` (${pick.state})` : ""}`);
-  return resolvedModel;
+  const loaded = models.filter((m) => m.state === "loaded");
+  const isText = (m: LmModel) => m.type === "llm" || (!m.type && !/[-_]vl[-_]/i.test(m.id));
+  const pick = loaded.find(isText) ?? loaded[0] ?? models.find(isText) ?? models[0];
+  if (!pick) throw new Error(`No models found in LM Studio. Download one (e.g. Qwen3-4B-Instruct-2507) and load it, then retry.`);
+  if (pick.id !== lastLogged) {
+    lastLogged = pick.id;
+    if (loaded.length > 1)
+      console.warn(`⚠ ${loaded.length} models are loaded in LM Studio (${loaded.map((m) => m.id).join(", ")}); unload the ones you don't use to free memory.`);
+    if (pick.state === "loaded" && pick.loaded_context_length && pick.loaded_context_length < Math.min(config.llm.numCtx, 8192))
+      console.warn(
+        `⚠ "${pick.id}" is loaded with a ${pick.loaded_context_length}-token context; this app needs ${config.llm.numCtx} (LLM_NUM_CTX). ` +
+          `Reload it with that Context Length (LM Studio → model settings, or: lms load ${pick.id} --context-length ${config.llm.numCtx}).`,
+      );
+    console.error(`  using LM Studio model: ${pick.id}${pick.state ? ` (${pick.state})` : ""}`);
+  }
+  return pick.id;
 }
 
 async function openaiChat(messages: ChatMessage[], schema: object): Promise<ChatResult> {
@@ -394,5 +403,5 @@ export async function listModels(): Promise<string[]> {
     const d: any = await r.json();
     return (d.models ?? []).map((m: any) => m.name);
   }
-  return (await lmStudioModels()).map((m) => (m.state ? `${m.id} [${m.state}${m.loaded_context_length ? `, ctx ${m.loaded_context_length}` : ""}]` : m.id));
+  return (await lmStudioModels()).map((m) => (m.state ? `${m.id} [${m.type ?? "?"}, ${m.state}${m.loaded_context_length ? `, ctx ${m.loaded_context_length}` : ""}]` : m.id));
 }

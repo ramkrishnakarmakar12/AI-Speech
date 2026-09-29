@@ -1,0 +1,594 @@
+{
+  "transcript": "আসুন বসুন আপনার নাম আর বয়স কত আমার নাম সয়স আট বলুন কি অসুবিধা হচ্ছে ডাক্তারবাবু ছয় মাস ধরে চাষ জিনিস করতে পারছি না খাবারের কাগজ দূরে করে পড়তে হয় মনে হয় চাষে ধরছে আর কোন সমস্যা হচ্ছে হ্যাঁ দুটো চোখে শুকনো লাগে জ্বালা করে মনে হয় ছোট মালি পরে যায় আমরা একটু বসে তুলকে নি সারাদিন কম্পিউটারে কাজ করে তো সকালে মতো পুষ্টি মনে রয়েছে সুগার প্রেশার বা থাইরয়েড আছে থাইরয়েড আছে থাইরয়েডার প্রেশার খুব নেই বলে মনে করেন আচ্ছা দূরের দৃষ্টি দু চোখে ছয় বাই ছয় কাছের দৃষ্টি এন আঠেরো প্লাস ওয়ান পয়েন্ট ফাইভ অ্যাড দিলে এন সিক্স হচ্ছে টিআর ব্রেক আপ টাইম দু চোকে পাঁচ সেকেন্ড সিনেমার টেস্ট দশ মিলিমিটার স্লিট ল্যাম্পে চোখের পাতা ধারে মেবোমিয়ান গ্ল্যান্ড প্লাগিং ও বেরফাই টেরিস আছে আপনার প্রেস বায়ু পিয়া হয়েছে মানে চালছে সাথে দুই চোখে ড্রাইয়ার আর বোডিয়ান গ্ল্যান্ড ডিসফাংশন চশমা লিখে দিচ্ছি দুই চোখে প্লেন রিডিং এর জন্য প্লাস ওয়ান পয়েন্ট ফাইভ অ্যাড প্রোগ্রেসিভ লেন্স নিতে পারেন সাথে অ্যান্টি রিফ্লেকটিভ কোটিং কার্বক্সিমিথাইল সেলুলস ড্রপ দু চোখে দিনে চারবার তিন মাস রাতে শোয়ার আগে দুই চোখে জেল দেবেন দিনে দুবার গরম সেঁক দেবেন আর চোখের পাতার ধার পরিষ্কার করবেন কম্পিউটারে কাজের সময় প্রতি বিশ মিনিট পর বিশ সেকেন্ড দূরে তাকাবেন আর ঘন ঘন পলক ফেলবেন আর দেড় মাস পর আবার দেখাতে আসবেন থ্যাংক ইউ থ্যাংক ইউ ডাক্তারবাবু আবার আসবো",
+  "english": "What is the problem?\nSugar pressure or Thyroid? Thyroid is there. Thyroxine is there. Sugar pressure is normal.\nThere is also maibomian gland plugging and barfractase. Your pressure is normal. There is also maibomian gland plugging and barfractase. There is also maibomian gland plugging and barfractase. There is also maibomian gland plugging and barfractase. There is also maibomian gland plugging and barfractase.\nBefore going to bed at night, give a gel to your eyes. Wash your eyes twice a day and clean the leaves of your eyes. After 20 minutes of working time on the computer, get out 20 seconds away and take a deep breath. After a month and a half, come to see me again. Thank you, thank you, doctor. I will come again. Thank you, thank you, doctor. I will come again.",
+  "language": "bn",
+  "prescription": {
+    "patient": {
+      "name": "Soyus",
+      "age": "At 8",
+      "sex": ""
+    },
+    "chief_complaints": [
+      {
+        "complaint": "Diminution of vision",
+        "kb_id": "SYM-001",
+        "eye": "BE",
+        "duration": "",
+        "character": "",
+        "patient_words": "খাবারের কাগজ দূরে করে পড়তে হয়"
+      },
+      {
+        "complaint": "Dryness",
+        "kb_id": "SYM-033",
+        "eye": "BE",
+        "duration": "",
+        "character": "",
+        "patient_words": "দুটো চোখে শুকনো লাগে"
+      },
+      {
+        "complaint": "Itching",
+        "kb_id": "SYM-010",
+        "eye": "BE",
+        "duration": "",
+        "character": "",
+        "patient_words": "জ্বালা করে মনে হয়"
+      },
+      {
+        "complaint": "Eye strain",
+        "kb_id": "SYM-023",
+        "eye": "BE",
+        "duration": "",
+        "character": "",
+        "patient_words": "সারাদিন কম্পিউটারে কাজ করে"
+      }
+    ],
+    "history": {
+      "systemic": [
+        {
+          "condition": "Thyroid disease",
+          "kb_id": "DIS-149",
+          "duration": "",
+          "treatment": ""
+        },
+        {
+          "condition": "Diabetes",
+          "kb_id": "ABR-005",
+          "duration": "",
+          "treatment": ""
+        }
+      ],
+      "ocular": [
+        {
+          "item": "Meibomian gland plugging",
+          "kb_id": "",
+          "eye": "BE"
+        },
+        {
+          "item": "Dry eye",
+          "kb_id": "DIS-045",
+          "eye": "BE"
+        },
+        {
+          "item": "Normal intraocular pressure",
+          "kb_id": "ABR-017",
+          "eye": "BE"
+        }
+      ],
+      "current_medications": [],
+      "allergies": []
+    },
+    "examination": [
+      {
+        "test": "Tear break-up time",
+        "kb_id": "ABR-087",
+        "eye": "BE",
+        "result": "5 seconds"
+      },
+      {
+        "test": "Slit lamp examination",
+        "kb_id": "ABR-019",
+        "eye": "BE",
+        "result": "Meibomian gland plugging and barfractase"
+      }
+    ],
+    "clinical_findings": [
+      {
+        "finding": "Meibomian gland plugging",
+        "kb_id": "SGN-055",
+        "eye": "BE"
+      },
+      {
+        "finding": "Dry eye",
+        "kb_id": "DIS-045",
+        "eye": "BE"
+      },
+      {
+        "finding": "Normal intraocular pressure",
+        "kb_id": "ABR-017",
+        "eye": "BE"
+      }
+    ],
+    "diagnosis": [
+      {
+        "condition": "Dry eye",
+        "kb_id": "DIS-045",
+        "eye": "BE",
+        "grade_or_notes": "",
+        "certainty": "confirmed"
+      },
+      {
+        "condition": "Meibomian gland plugging",
+        "kb_id": "",
+        "eye": "BE",
+        "grade_or_notes": "",
+        "certainty": "confirmed"
+      }
+    ],
+    "medications": [
+      {
+        "kb_id": "MED-062",
+        "generic_name": "Carboxymethylcellulose",
+        "brand_said": "",
+        "form": "Gel",
+        "strength": "0.5%",
+        "eye": "BE",
+        "dose": "4 times/day",
+        "frequency": "once daily",
+        "duration": "3 months",
+        "phase": "",
+        "instructions": "Apply before bedtime"
+      },
+      {
+        "kb_id": "MED-062",
+        "generic_name": "Carboxymethylcellulose",
+        "brand_said": "",
+        "form": "Gel",
+        "strength": "0.5%",
+        "eye": "BE",
+        "dose": "2 times/day",
+        "frequency": "twice daily",
+        "duration": "",
+        "phase": "",
+        "instructions": "Wash eyes twice a day"
+      }
+    ],
+    "procedures": [],
+    "investigations": [],
+    "glasses": [
+      {
+        "eye": "RE",
+        "sph": "",
+        "cyl": "",
+        "axis": "",
+        "add": "1.5 D",
+        "notes": "Progressive addition lenses (PAL)"
+      }
+    ],
+    "advice": [
+      {
+        "text": "After 20 minutes of computer work, take a break and look at something 20 feet away for 20 seconds.",
+        "kb_id": ""
+      },
+      {
+        "text": "Frequently blink to prevent dryness.",
+        "kb_id": ""
+      },
+      {
+        "text": "Clean the eyelid margins regularly.",
+        "kb_id": ""
+      }
+    ],
+    "follow_up": [
+      {
+        "when": "After 1.5 months",
+        "purpose": "Recheck for dry eye and meibomian gland plugging"
+      }
+    ],
+    "terms": [
+      {
+        "heard": "maibomian gland plugging",
+        "kb_id": "SGN-055",
+        "canonical": "Meibomian gland plugging",
+        "category": "sign"
+      },
+      {
+        "heard": "barfractase",
+        "kb_id": "",
+        "canonical": "Tear break-up time (TBUT)",
+        "category": "test"
+      },
+      {
+        "heard": "chokhe shukno",
+        "kb_id": "SYM-033",
+        "canonical": "Dryness",
+        "category": "symptom"
+      },
+      {
+        "heard": "tiaar brek aap taim du",
+        "kb_id": "ABR-087",
+        "canonical": "Tear break-up time",
+        "category": "test"
+      },
+      {
+        "heard": "dus chokhe",
+        "kb_id": "",
+        "canonical": "Both eyes",
+        "category": "eye"
+      },
+      {
+        "heard": "dus chokhe shukno",
+        "kb_id": "SYM-033",
+        "canonical": "Dryness",
+        "category": "symptom"
+      },
+      {
+        "heard": "dus chokhe maibomian gland plugging",
+        "kb_id": "SGN-055",
+        "canonical": "Meibomian gland plugging",
+        "category": "sign"
+      },
+      {
+        "heard": "ad dile en",
+        "kb_id": "OPT-021",
+        "canonical": "Anti-reflective coating",
+        "category": "optical"
+      },
+      {
+        "heard": "progresibh",
+        "kb_id": "OPT-020",
+        "canonical": "Progressive addition lenses",
+        "category": "optical"
+      },
+      {
+        "heard": "anti riphlektibh kotin",
+        "kb_id": "OPT-021",
+        "canonical": "Anti-reflective coating",
+        "category": "optical"
+      },
+      {
+        "heard": "chokhe chhay",
+        "kb_id": "",
+        "canonical": "Dryness",
+        "category": "symptom"
+      },
+      {
+        "heard": "chokhe jel",
+        "kb_id": "DIS-061",
+        "canonical": "Corneal opacity",
+        "category": "disease"
+      },
+      {
+        "heard": "your pressure",
+        "kb_id": "",
+        "canonical": "Intraocular pressure",
+        "category": "test"
+      },
+      {
+        "heard": "dus chokhe",
+        "kb_id": "",
+        "canonical": "Both eyes",
+        "category": "eye"
+      },
+      {
+        "heard": "dus chokhe shukno",
+        "kb_id": "SYM-033",
+        "canonical": "Dryness",
+        "category": "symptom"
+      },
+      {
+        "heard": "dus chokhe maibomian gland plugging",
+        "kb_id": "SGN-055",
+        "canonical": "Meibomian gland plugging",
+        "category": "sign"
+      },
+      {
+        "heard": "dus chokhe",
+        "kb_id": "",
+        "canonical": "Both eyes",
+        "category": "eye"
+      },
+      {
+        "heard": "dus chokhe shukno",
+        "kb_id": "SYM-033",
+        "canonical": "Dryness",
+        "category": "symptom"
+      },
+      {
+        "heard": "dus chokhe maibomian gland plugging",
+        "kb_id": "SGN-055",
+        "canonical": "Meibomian gland plugging",
+        "category": "sign"
+      },
+      {
+        "heard": "dus chokhe",
+        "kb_id": "",
+        "canonical": "Both eyes",
+        "category": "eye"
+      },
+      {
+        "heard": "dus chokhe shukno",
+        "kb_id": "SYM-033",
+        "canonical": "Dryness"
+      }
+    ]
+  },
+  "kbRefs": {
+    "chief_complaints.0": {
+      "id": "SYM-001",
+      "name": "Diminution of vision (DOV)",
+      "category": "symptom",
+      "verified": "resolved",
+      "reference": {}
+    },
+    "chief_complaints.1": {
+      "id": "SYM-033",
+      "name": "Dryness",
+      "category": "symptom",
+      "verified": "llm",
+      "reference": {}
+    },
+    "chief_complaints.2": {
+      "id": "SYM-010",
+      "name": "Itching",
+      "category": "symptom",
+      "verified": "resolved",
+      "reference": {}
+    },
+    "chief_complaints.3": {
+      "id": "SYM-023",
+      "name": "Eye strain",
+      "category": "symptom",
+      "verified": "resolved",
+      "reference": {}
+    },
+    "history.systemic.0": {
+      "id": "DIS-149",
+      "name": "Thyroid eye disease",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H06.2 / E05.0",
+        "Category": "Orbit",
+        "Usual Management": "Lubricants, selenium, steroids, orbital decompression"
+      }
+    },
+    "history.systemic.1": {
+      "id": "ABR-005",
+      "name": "Diabetes mellitus",
+      "category": "abbreviation",
+      "verified": "resolved",
+      "reference": {}
+    },
+    "history.ocular.1": {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "verified": "resolved",
+      "reference": {
+        "ICD-10 (indicative)": "H04.1",
+        "Category": "Ocular Surface",
+        "Usual Management": "Lubricants, warm compress, cyclosporine, punctal plugs"
+      }
+    },
+    "history.ocular.2": {
+      "id": "ABR-017",
+      "name": "Intraocular pressure",
+      "category": "abbreviation",
+      "verified": "resolved",
+      "reference": {}
+    },
+    "examination.0": {
+      "id": "ABR-087",
+      "name": "Tear break-up time",
+      "category": "abbreviation",
+      "verified": "llm",
+      "reference": {}
+    },
+    "examination.1": {
+      "id": "ABR-019",
+      "name": "Slit-lamp examination",
+      "category": "abbreviation",
+      "verified": "resolved",
+      "reference": {}
+    },
+    "clinical_findings.0": {
+      "id": "SGN-055",
+      "name": "Meibomian gland plugging",
+      "category": "sign",
+      "verified": "llm",
+      "reference": {}
+    },
+    "clinical_findings.1": {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "verified": "resolved",
+      "reference": {
+        "ICD-10 (indicative)": "H04.1",
+        "Category": "Ocular Surface",
+        "Usual Management": "Lubricants, warm compress, cyclosporine, punctal plugs"
+      }
+    },
+    "clinical_findings.2": {
+      "id": "ABR-017",
+      "name": "Intraocular pressure",
+      "category": "abbreviation",
+      "verified": "resolved",
+      "reference": {}
+    },
+    "diagnosis.0": {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "verified": "resolved",
+      "reference": {
+        "ICD-10 (indicative)": "H04.1",
+        "Category": "Ocular Surface",
+        "Usual Management": "Lubricants, warm compress, cyclosporine, punctal plugs"
+      }
+    },
+    "medications.0": {
+      "id": "MED-062",
+      "name": "Carboxymethylcellulose",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "Lubricant / artificial tears",
+        "Common Strength": "0.5% / 1%",
+        "Typical Prescription Usage": "1 drop QID–6 times/day; gel at bedtime",
+        "Key Cautions / Side Effects": "Minimal; use preservative-free if > 4–6 times/day",
+        "Example Brands (India, indicative)": "Refresh Tears, Refresh Liquigel"
+      }
+    },
+    "medications.1": {
+      "id": "MED-062",
+      "name": "Carboxymethylcellulose",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "Lubricant / artificial tears",
+        "Common Strength": "0.5% / 1%",
+        "Typical Prescription Usage": "1 drop QID–6 times/day; gel at bedtime",
+        "Key Cautions / Side Effects": "Minimal; use preservative-free if > 4–6 times/day",
+        "Example Brands (India, indicative)": "Refresh Tears, Refresh Liquigel"
+      }
+    }
+  },
+  "warnings": [
+    "⚠ The model's answer was cut short (the model started repeating itself); some items may be missing — check against the transcript.",
+    "\"Meibomian gland plugging\" (diagnosis) is not in the knowledge base — verify spelling.",
+    "Carboxymethylcellulose: duration not stated in the conversation."
+  ],
+  "detectedTerms": [
+    {
+      "id": "DIS-143",
+      "name": "Presbyopia",
+      "category": "disease",
+      "heardAs": "pres bayu piya",
+      "score": 0.95
+    },
+    {
+      "id": "SGN-055",
+      "name": "Meibomian gland plugging",
+      "category": "sign",
+      "heardAs": "maibomian gland plugging",
+      "score": 0.91
+    },
+    {
+      "id": "ANT-037",
+      "name": "Meibomian glands",
+      "category": "anatomy",
+      "heardAs": "mebomiyan gland",
+      "score": 0.82
+    },
+    {
+      "id": "OPT-021",
+      "name": "Anti-reflective coating",
+      "category": "optical",
+      "heardAs": "anti riphlektibh kotin",
+      "score": 0.81
+    },
+    {
+      "id": "SYM-033",
+      "name": "Dryness",
+      "category": "symptom",
+      "heardAs": "chokhe shukno",
+      "score": 0.78
+    },
+    {
+      "id": "TST-043",
+      "name": "Tear break-up time",
+      "category": "test",
+      "heardAs": "tiaar brek aap taim du",
+      "score": 0.78
+    },
+    {
+      "id": "MED-062",
+      "name": "Carboxymethylcellulose",
+      "category": "medicine",
+      "heardAs": "karbaksimithail selulas",
+      "score": 0.78
+    },
+    {
+      "id": "ABR-087",
+      "name": "Tear break-up time",
+      "category": "abbreviation",
+      "heardAs": "tiaar brek aap taim du",
+      "score": 0.78
+    },
+    {
+      "id": "OPT-007",
+      "name": "Addition",
+      "category": "optical",
+      "heardAs": "ad dile en",
+      "score": 0.77
+    },
+    {
+      "id": "DIS-149",
+      "name": "Thyroid eye disease",
+      "category": "disease",
+      "heardAs": "thairyed",
+      "score": 0.76
+    },
+    {
+      "id": "OPT-020",
+      "name": "Progressive addition lenses",
+      "category": "optical",
+      "heardAs": "progresibh",
+      "score": 0.75
+    },
+    {
+      "id": "MED-086",
+      "name": "Viscoelastic (OVD)",
+      "category": "medicine",
+      "heardAs": "bayas kat",
+      "score": 0.74
+    },
+    {
+      "id": "DIS-001",
+      "name": "Age-related (senile) cataract",
+      "category": "disease",
+      "heardAs": "chokhe chhay",
+      "score": 0.71
+    },
+    {
+      "id": "DIS-059",
+      "name": "Corneal abrasion",
+      "category": "disease",
+      "heardAs": "chokhe chhay",
+      "score": 0.7
+    },
+    {
+      "id": "DIS-061",
+      "name": "Corneal opacity",
+      "category": "disease",
+      "heardAs": "chokhe jel",
+      "score": 0.7
+    },
+    {
+      "id": "DIS-017",
+      "name": "Primary open-angle glaucoma",
+      "category": "disease",
+      "heardAs": "your pressure",
+      "score": 0.68
+    },
+    {
+      "id": "DIS-018",
+      "name": "Primary angle-closure glaucoma",
+      "category": "disease",
+      "heardAs": "your pressure",
+      "score": 0.68
+    }
+  ],
+  "llm": {
+    "model": "qwen3-4b-instruct-2507-mlx",
+    "ms": 285908
+  },
+  "asr": {
+    "language": "bn",
+    "model": "ai4bharat/indic-conformer-600m-multilingual",
+    "backend": "indic",
+    "ms": 45601
+  },
+  "markdown": "# Prescription draft\n_Auto-generated from the consultation audio/transcript. Must be reviewed and signed by the treating ophthalmologist._\n\n**Patient:** Soyus · At 8\n\n## C/o\n- Diminution of vision BE `SYM-001`\n- Dryness BE `SYM-033`\n- Itching BE `SYM-010`\n- Eye strain BE `SYM-023`\n\n## History\n- k/c/o Thyroid disease `DIS-149`\n- k/c/o Diabetes `ABR-005`\n- H/o Meibomian gland plugging BE ⚠︎`not in KB`\n- H/o Dry eye BE `DIS-045`\n- H/o Normal intraocular pressure BE `ABR-017`\n\n## O/E\n- Tear break-up time BE : 5 seconds `ABR-087`\n- Slit lamp examination BE : Meibomian gland plugging and barfractase `ABR-019`\n- Meibomian gland plugging BE `SGN-055`\n- Dry eye BE `DIS-045`\n- Normal intraocular pressure BE `ABR-017`\n\n## Diagnosis\n- Dry eye BE [ICD-10 H04.1] `DIS-045`\n- Meibomian gland plugging BE ⚠︎`not in KB`\n\n## Rx\n1. Gel Carboxymethylcellulose 0.5% — 4 times/day once daily BE × 3 months `MED-062`  \n   _Apply before bedtime_\n   <sub>KB typical usage: 1 drop QID–6 times/day; gel at bedtime</sub>\n2. Gel Carboxymethylcellulose 0.5% — 2 times/day twice daily BE `MED-062`  \n   _Wash eyes twice a day_\n   <sub>KB typical usage: 1 drop QID–6 times/day; gel at bedtime</sub>\n\n## Glasses\n| Eye | Sph | Cyl | Axis | Add | Notes |\n|---|---|---|---|---|---|\n| RE | — | — | — | 1.5 D | Progressive addition lenses (PAL) |\n\n## Advice\n- After 20 minutes of computer work, take a break and look at something 20 feet away for 20 seconds.\n- Frequently blink to prevent dryness.\n- Clean the eyelid margins regularly.\n\n## Review\n- After 1.5 months — Recheck for dry eye and meibomian gland plugging\n\n## Check before signing\n- ⚠ The model's answer was cut short (the model started repeating itself); some items may be missing — check against the transcript.\n- \"Meibomian gland plugging\" (diagnosis) is not in the knowledge base — verify spelling.\n- Carboxymethylcellulose: duration not stated in the conversation.\n\n## Terminology detected\n| Heard | Term | KB id | Category |\n|---|---|---|---|\n| maibomian gland plugging | Meibomian gland plugging | SGN-055 | sign |\n| barfractase | Tear break-up time (TBUT) | — | test |\n| chokhe shukno | Dryness | SYM-033 | symptom |\n| tiaar brek aap taim du | Tear break-up time | ABR-087 | test |\n| dus chokhe | Both eyes | — | eye |\n| ad dile en | Anti-reflective coating | OPT-021 | optical |\n| progresibh | Progressive addition lenses | OPT-020 | optical |\n| chokhe chhay | Dryness | — | symptom |\n| chokhe jel | Corneal opacity | DIS-061 | disease |\n| your pressure | Intraocular pressure | — | test |\n\n<sub>LLM: qwen3-4b-instruct-2507-mlx · 285.9 s · ASR: indic 45.6 s</sub>"
+}

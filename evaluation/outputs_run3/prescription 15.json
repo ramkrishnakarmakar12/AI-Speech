@@ -1,0 +1,520 @@
+{
+  "transcript": "Good morning, Mr. Sharma. Please, have a seat. What brings you in today? Good morning, doctor. Thank you. For the past three or four days, I've been having some trouble with my right eye. It feels quite dry, it gets red by the end of the day, and my vision gets a bit blurry when I'm working on my laptop. I see. Are you experiencing any pain, discharge, or sensitivity to light?\nNo severe pain, just a mild gritty sensation, like there's a grain of sand stuck in it. No discharge, but my eye waters occasionally when I strain. Doctor. All right. How many hours a day do you typically spend looking at screens? Patient. Quite a bit, actually. Around eight to ten hours a day for work, plus using my phone in the evening. Doctor. That's very common. Let's do a quick physical examination first.\nWe'll check your vision using the eye chart and take a look at the front of your eye using the slit lamp microscope. The doctor conducts the visual acuity test and examines the patient's eyes with the slit lamp. Doctor. Everything structurally looks healthy. Your retina and intraocular pressure are normal, and there's no sign of infection. What you're experiencing is classic digital eye strain combined with dry eye syndrome.\nIf you've been on screens for long periods, our blink rate drops by about 50%, which causes the tear film on the eye surface to dry out quickly. Patient. Ah, that makes sense. I definitely forget to take breaks. Is it reversible, doctor? Doctor. Absolutely. Here is what we'll do. Lubricating eye drops. I'm prescribing preservative-free artificial tears.\nKeep them hydrated. The 20-20-20 rule. Every 20 minutes of screen time, look at something at least 20 feet away for 20 seconds. This relaxes your eyes-focusing muscles. Screen ergonomics. Keep your screen about an arm's length away, positioned slightly below eye level, and adjust the brightness so it matches your room lighting. Patient. That sounds very manageable.\nDoctor. Try this routine for two weeks. If the dryness or blurriness doesn't improve, or if you develop severe pain or sudden vision changes, come back sooner. Otherwise, you should start feeling relief within a few days. Patient. Thank you so much, doctor. I'll start using the drops today and stick to the 20-20-20 rule. Doctor. You're very welcome. Take care.",
+  "language": "en",
+  "prescription": {
+    "patient": {
+      "name": "Mr. Sharma",
+      "age": "",
+      "sex": "male"
+    },
+    "chief_complaints": [
+      {
+        "complaint": "dryness",
+        "kb_id": "SYM-033",
+        "eye": "RE",
+        "duration": "past three or four days",
+        "character": "feels quite dry, gets red by the end of the day, vision gets blurry when working on laptop",
+        "patient_words": "It feels quite dry, it gets red by the end of the day, and my vision gets a bit blurry when I'm working on my laptop"
+      },
+      {
+        "complaint": "eye strain",
+        "kb_id": "SYM-033",
+        "eye": "RE",
+        "duration": "past three or four days",
+        "character": "mild gritty sensation, like there's a grain of sand stuck in it, eye waters occasionally when straining",
+        "patient_words": "No severe pain, just a mild gritty sensation, like there's a grain of sand stuck in it. No discharge, but my eye waters occasionally when I strain"
+      },
+      {
+        "complaint": "sensitivity to light",
+        "kb_id": "SYM-045",
+        "eye": "RE",
+        "duration": "past three or four days",
+        "character": "no discharge, no severe pain, eye waters occasionally when straining",
+        "patient_words": "No discharge, but my eye waters occasionally when I strain"
+      }
+    ],
+    "history": {
+      "systemic": [],
+      "ocular": [],
+      "current_medications": [],
+      "allergies": []
+    },
+    "examination": [
+      {
+        "test": "visual acuity",
+        "kb_id": "ABR-017",
+        "eye": "RE",
+        "result": "normal"
+      },
+      {
+        "test": "intraocular pressure",
+        "kb_id": "ABR-017",
+        "eye": "RE",
+        "result": "normal"
+      },
+      {
+        "test": "slit lamp microscope",
+        "kb_id": "TST-018",
+        "eye": "RE",
+        "result": "normal"
+      },
+      {
+        "test": "retina",
+        "kb_id": "",
+        "eye": "RE",
+        "result": "normal"
+      }
+    ],
+    "clinical_findings": [
+      {
+        "finding": "no sign of infection",
+        "kb_id": "ABR-061",
+        "eye": "RE"
+      },
+      {
+        "finding": "no discharge",
+        "kb_id": "",
+        "eye": "RE"
+      },
+      {
+        "finding": "no severe pain",
+        "kb_id": "",
+        "eye": "RE"
+      }
+    ],
+    "diagnosis": [
+      {
+        "condition": "digital eye strain",
+        "kb_id": "DIS-145",
+        "eye": "RE",
+        "grade_or_notes": "classic digital eye strain combined with dry eye syndrome",
+        "certainty": "confirmed"
+      },
+      {
+        "condition": "dry eye",
+        "kb_id": "DIS-045",
+        "eye": "RE",
+        "grade_or_notes": "caused by prolonged screen use, blink rate drops by 50%",
+        "certainty": "confirmed"
+      }
+    ],
+    "medications": [
+      {
+        "kb_id": "MED-028",
+        "generic_name": "preservative-free artificial tears",
+        "brand_said": "preservative-free artificial tears",
+        "form": "Other",
+        "strength": "",
+        "eye": "RE",
+        "dose": "",
+        "frequency": "",
+        "duration": "",
+        "phase": "pre-op",
+        "instructions": "Keep them hydrated. The 20-20-20 rule. Every 20 minutes of screen time, look at something at least 20 feet away for 20 seconds. Screen ergonomics. Keep your screen about an arm's length away, positioned slightly below eye level, and adjust the brightness so it matches your room lighting."
+      },
+      {
+        "kb_id": "MED-028",
+        "generic_name": "preservative-free artificial tears",
+        "brand_said": "preservative-free artificial tears",
+        "form": "Other",
+        "strength": "",
+        "eye": "RE",
+        "dose": "",
+        "frequency": "",
+        "duration": "",
+        "phase": "pre-op",
+        "instructions": "Keep them hydrated. The 20-20-20 rule. Every 20 minutes of screen time, look at something at least 20 feet away for 20 seconds. Screen ergonomics. Keep your screen about an arm's length away, positioned slightly below eye level, and adjust the brightness so it matches your room lighting."
+      }
+    ],
+    "procedures": [],
+    "investigations": [],
+    "glasses": [],
+    "advice": [
+      {
+        "text": "Try this routine for two weeks. If the dryness or blurriness doesn't improve, or if you develop severe pain or sudden vision changes, come back sooner. Otherwise, you should start feeling relief within a few days.",
+        "kb_id": "CNS-024"
+      },
+      {
+        "text": "Spend at least 2 hours outdoors daily and reduce mobile / screen time.",
+        "kb_id": "CNS-050"
+      }
+    ],
+    "follow_up": [
+      {
+        "when": "two weeks",
+        "purpose": "assess improvement of dryness or blurriness"
+      },
+      {
+        "when": "if severe pain or sudden vision changes",
+        "purpose": "urgent follow-up"
+      }
+    ],
+    "terms": [
+      {
+        "heard": "dryness",
+        "kb_id": "SYM-033",
+        "canonical": "Dryness",
+        "category": "symptom"
+      },
+      {
+        "heard": "eye strain",
+        "kb_id": "SYM-033",
+        "canonical": "Dryness",
+        "category": "symptom"
+      },
+      {
+        "heard": "sensitivity to light",
+        "kb_id": "SYM-045",
+        "canonical": "Sensitivity to wind / dust",
+        "category": "symptom"
+      },
+      {
+        "heard": "visual acuity",
+        "kb_id": "ABR-017",
+        "canonical": "Intraocular pressure",
+        "category": "test"
+      },
+      {
+        "heard": "intraocular pressure",
+        "kb_id": "ABR-017",
+        "canonical": "Intraocular pressure",
+        "category": "test"
+      },
+      {
+        "heard": "slit lamp microscope",
+        "kb_id": "TST-018",
+        "canonical": "Slit-lamp biomicroscopy",
+        "category": "test"
+      },
+      {
+        "heard": "right eye",
+        "kb_id": "OPT-001",
+        "canonical": "Right eye",
+        "category": "anatomy"
+      },
+      {
+        "heard": "digital eye strain",
+        "kb_id": "DIS-145",
+        "canonical": "Computer vision syndrome",
+        "category": "disease"
+      },
+      {
+        "heard": "dry eye",
+        "kb_id": "DIS-045",
+        "canonical": "Dry eye disease",
+        "category": "disease"
+      },
+      {
+        "heard": "20-20-20 rule",
+        "kb_id": "CNS-023",
+        "canonical": "Follow the 20-20-20 rule: every 20 minutes, look 20 feet away for 20 seconds.",
+        "category": "counselling"
+      },
+      {
+        "heard": "screen time",
+        "kb_id": "CNS-050",
+        "canonical": "Spend at least 2 hours outdoors daily and reduce mobile / screen time.",
+        "category": "counselling"
+      }
+    ]
+  },
+  "kbRefs": {
+    "chief_complaints.0": {
+      "id": "SYM-033",
+      "name": "Dryness",
+      "category": "symptom",
+      "verified": "llm",
+      "reference": {}
+    },
+    "chief_complaints.1": {
+      "id": "SYM-033",
+      "name": "Dryness",
+      "category": "symptom",
+      "verified": "llm",
+      "reference": {}
+    },
+    "chief_complaints.2": {
+      "id": "SYM-045",
+      "name": "Sensitivity to wind / dust",
+      "category": "symptom",
+      "verified": "llm",
+      "reference": {}
+    },
+    "examination.0": {
+      "id": "ABR-017",
+      "name": "Intraocular pressure",
+      "category": "abbreviation",
+      "verified": "llm",
+      "reference": {}
+    },
+    "examination.1": {
+      "id": "ABR-017",
+      "name": "Intraocular pressure",
+      "category": "abbreviation",
+      "verified": "llm",
+      "reference": {}
+    },
+    "examination.2": {
+      "id": "TST-018",
+      "name": "Slit-lamp biomicroscopy",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "SLE, SLB"
+      }
+    },
+    "clinical_findings.0": {
+      "id": "ABR-061",
+      "name": "Tablet / capsule / injection",
+      "category": "abbreviation",
+      "verified": "resolved",
+      "reference": {}
+    },
+    "diagnosis.0": {
+      "id": "DIS-145",
+      "name": "Computer vision syndrome",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H53.1",
+        "Category": "Refractive Error",
+        "Usual Management": "20-20-20 rule, lubricants, correct glasses, anti-reflective coating"
+      }
+    },
+    "diagnosis.1": {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H04.1",
+        "Category": "Ocular Surface",
+        "Usual Management": "Lubricants, warm compress, cyclosporine, punctal plugs"
+      }
+    },
+    "medications.0": {
+      "id": "MED-028",
+      "name": "Nepafenac",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "NSAID",
+        "Common Strength": "0.1% / 0.3%",
+        "Typical Prescription Usage": "1 drop TID (0.1%) starting 1 day pre-op, continue 2–4 weeks",
+        "Key Cautions / Side Effects": "Corneal melt with prolonged use",
+        "Example Brands (India, indicative)": "Nevanac"
+      }
+    },
+    "medications.1": {
+      "id": "MED-028",
+      "name": "Nepafenac",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "NSAID",
+        "Common Strength": "0.1% / 0.3%",
+        "Typical Prescription Usage": "1 drop TID (0.1%) starting 1 day pre-op, continue 2–4 weeks",
+        "Key Cautions / Side Effects": "Corneal melt with prolonged use",
+        "Example Brands (India, indicative)": "Nevanac"
+      }
+    },
+    "advice.0": {
+      "id": "CNS-024",
+      "name": "Blink fully and often; keep the screen slightly below eye level.",
+      "category": "counselling",
+      "verified": "llm",
+      "reference": {}
+    },
+    "advice.1": {
+      "id": "CNS-050",
+      "name": "Spend at least 2 hours outdoors daily and reduce mobile / screen time.",
+      "category": "counselling",
+      "verified": "llm",
+      "reference": {}
+    }
+  },
+  "warnings": [
+    "preservative-free artificial tears: frequency, duration not stated in the conversation.",
+    "preservative-free artificial tears: frequency, duration not stated in the conversation."
+  ],
+  "detectedTerms": [
+    {
+      "id": "SYM-008",
+      "name": "Discharge",
+      "category": "symptom",
+      "heardAs": "discharge",
+      "score": 1
+    },
+    {
+      "id": "SYM-023",
+      "name": "Eye strain",
+      "category": "symptom",
+      "heardAs": "eye strain",
+      "score": 1
+    },
+    {
+      "id": "SYM-033",
+      "name": "Dryness",
+      "category": "symptom",
+      "heardAs": "dryness",
+      "score": 1
+    },
+    {
+      "id": "TST-013",
+      "name": "Intraocular pressure",
+      "category": "test",
+      "heardAs": "intraocular pressure",
+      "score": 1
+    },
+    {
+      "id": "OPT-001",
+      "name": "Right eye",
+      "category": "optical",
+      "heardAs": "right eye",
+      "score": 1
+    },
+    {
+      "id": "ABR-012",
+      "name": "Visual acuity",
+      "category": "abbreviation",
+      "heardAs": "visual acuity",
+      "score": 1
+    },
+    {
+      "id": "ABR-017",
+      "name": "Intraocular pressure",
+      "category": "abbreviation",
+      "heardAs": "intraocular pressure",
+      "score": 1
+    },
+    {
+      "id": "ABR-058",
+      "name": "Eye drops",
+      "category": "abbreviation",
+      "heardAs": "eye drops",
+      "score": 1
+    },
+    {
+      "id": "ANT-025",
+      "name": "Retina",
+      "category": "anatomy",
+      "heardAs": "retina",
+      "score": 1
+    },
+    {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "heardAs": "dry eye",
+      "score": 0.95
+    },
+    {
+      "id": "DIS-145",
+      "name": "Computer vision syndrome",
+      "category": "disease",
+      "heardAs": "digital eye strain",
+      "score": 0.95
+    },
+    {
+      "id": "TST-001",
+      "name": "Visual acuity (distance)",
+      "category": "test",
+      "heardAs": "visual acuity",
+      "score": 0.95
+    },
+    {
+      "id": "ABR-011",
+      "name": "Right eye / left eye / both eyes (Latin)",
+      "category": "abbreviation",
+      "heardAs": "right eye",
+      "score": 0.95
+    },
+    {
+      "id": "ABR-072",
+      "name": "For number of days / weeks",
+      "category": "abbreviation",
+      "heardAs": "weeks",
+      "score": 0.95
+    },
+    {
+      "id": "CNS-050",
+      "name": "Spend at least 2 hours outdoors daily and reduce mobile / screen time.",
+      "category": "counselling",
+      "heardAs": "screen time",
+      "score": 0.95
+    },
+    {
+      "id": "ANT-011",
+      "name": "Tear film (lipid / aqueous / mucin)",
+      "category": "anatomy",
+      "heardAs": "tear film",
+      "score": 0.95
+    },
+    {
+      "id": "TST-018",
+      "name": "Slit-lamp biomicroscopy",
+      "category": "test",
+      "heardAs": "slit lamp microscope",
+      "score": 0.81
+    },
+    {
+      "id": "CNS-023",
+      "name": "Follow the 20-20-20 rule: every 20 minutes, look 20 feet away for 20 seconds.",
+      "category": "counselling",
+      "heardAs": "them hydrated the 20 20 20 rule every 20 minutes of screen time look at something at least 20 feet away for 20 seconds",
+      "score": 0.81
+    },
+    {
+      "id": "ABR-061",
+      "name": "Tablet / capsule / injection",
+      "category": "abbreviation",
+      "heardAs": "infection",
+      "score": 0.8
+    },
+    {
+      "id": "TST-005",
+      "name": "Near visual acuity",
+      "category": "test",
+      "heardAs": "the visual acuity",
+      "score": 0.77
+    },
+    {
+      "id": "SYM-044",
+      "name": "Eye rubbing",
+      "category": "symptom",
+      "heardAs": "eye using",
+      "score": 0.76
+    },
+    {
+      "id": "SYM-045",
+      "name": "Sensitivity to wind / dust",
+      "category": "symptom",
+      "heardAs": "sensitivity to light",
+      "score": 0.75
+    },
+    {
+      "id": "CNS-024",
+      "name": "Blink fully and often; keep the screen slightly below eye level.",
+      "category": "counselling",
+      "heardAs": "20 feet away for 20 seconds this relaxes your eyes focusing muscles screen ergonomics keep your screen about an arms length away positioned slightly below eye level",
+      "score": 0.73
+    },
+    {
+      "id": "SYM-036",
+      "name": "Bulging eye",
+      "category": "symptom",
+      "heardAs": "causes the tear film on the eye surface to dry out quickly",
+      "score": 0.66
+    }
+  ],
+  "llm": {
+    "model": "qwen/qwen3-vl-4b",
+    "ms": 67011
+  },
+  "asr": {
+    "language": "en",
+    "backend": "indic",
+    "ms": 34184
+  },
+  "markdown": "# Prescription draft\n_Auto-generated from the consultation audio/transcript. Must be reviewed and signed by the treating ophthalmologist._\n\n**Patient:** Mr. Sharma · male\n\n## C/o\n- dryness RE × past three or four days (feels quite dry, gets red by the end of the day, vision gets blurry when working on laptop) `SYM-033`\n- eye strain RE × past three or four days (mild gritty sensation, like there's a grain of sand stuck in it, eye waters occasionally when straining) `SYM-033`\n- sensitivity to light RE × past three or four days (no discharge, no severe pain, eye waters occasionally when straining) `SYM-045`\n\n## History\n- —\n\n## O/E\n- visual acuity RE : normal `ABR-017`\n- intraocular pressure RE : normal `ABR-017`\n- slit lamp microscope RE : normal `TST-018`\n- retina RE : normal ⚠︎`not in KB`\n- no sign of infection RE `ABR-061`\n- no discharge RE ⚠︎`not in KB`\n- no severe pain RE ⚠︎`not in KB`\n\n## Diagnosis\n- digital eye strain (classic digital eye strain combined with dry eye syndrome) RE [ICD-10 H53.1] `DIS-145`\n- dry eye (caused by prolonged screen use, blink rate drops by 50%) RE [ICD-10 H04.1] `DIS-045`\n\n## Rx\n1. Other preservative-free artificial tears (preservative-free artificial tears) — RE [pre-op] `MED-028`  \n   _Keep them hydrated. The 20-20-20 rule. Every 20 minutes of screen time, look at something at least 20 feet away for 20 seconds. Screen ergonomics. Keep your screen about an arm's length away, positioned slightly below eye level, and adjust the brightness so it matches your room lighting._\n   <sub>KB typical usage: 1 drop TID (0.1%) starting 1 day pre-op, continue 2–4 weeks</sub>\n2. Other preservative-free artificial tears (preservative-free artificial tears) — RE [pre-op] `MED-028`  \n   _Keep them hydrated. The 20-20-20 rule. Every 20 minutes of screen time, look at something at least 20 feet away for 20 seconds. Screen ergonomics. Keep your screen about an arm's length away, positioned slightly below eye level, and adjust the brightness so it matches your room lighting._\n   <sub>KB typical usage: 1 drop TID (0.1%) starting 1 day pre-op, continue 2–4 weeks</sub>\n\n## Advice\n- Try this routine for two weeks. If the dryness or blurriness doesn't improve, or if you develop severe pain or sudden vision changes, come back sooner. Otherwise, you should start feeling relief within a few days.\n- Spend at least 2 hours outdoors daily and reduce mobile / screen time.\n\n## Review\n- two weeks — assess improvement of dryness or blurriness\n- if severe pain or sudden vision changes — urgent follow-up\n\n## Check before signing\n- preservative-free artificial tears: frequency, duration not stated in the conversation.\n- preservative-free artificial tears: frequency, duration not stated in the conversation.\n\n## Terminology detected\n| Heard | Term | KB id | Category |\n|---|---|---|---|\n| dryness | Dryness | SYM-033 | symptom |\n| sensitivity to light | Sensitivity to wind / dust | SYM-045 | symptom |\n| visual acuity | Intraocular pressure | ABR-017 | test |\n| slit lamp microscope | Slit-lamp biomicroscopy | TST-018 | test |\n| right eye | Right eye | OPT-001 | anatomy |\n| digital eye strain | Computer vision syndrome | DIS-145 | disease |\n| dry eye | Dry eye disease | DIS-045 | disease |\n| 20-20-20 rule | Follow the 20-20-20 rule: every 20 minutes, look 20 feet away for 20 seconds. | CNS-023 | counselling |\n| screen time | Spend at least 2 hours outdoors daily and reduce mobile / screen time. | CNS-050 | counselling |\n\n<sub>LLM: qwen/qwen3-vl-4b · 67.0 s · ASR: indic 34.2 s</sub>"
+}

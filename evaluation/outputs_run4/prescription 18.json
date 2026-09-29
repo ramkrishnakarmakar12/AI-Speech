@@ -1,0 +1,279 @@
+{
+  "transcript": "ডাক্তার নমস্কার বিসন আপনার নামার বাইস ব্লুন রোগী নমস্কার ডাক্তার বাবু আমার নাম গোপাল মন্দল বাইস নিতালিশ ডাক্তার ব্লুন কি সমস্যা হছে রোগী ডাক্তার বাবু খাড়দিন আগে মাথে কাার স্ময় ধানর পাতা দান চোখে লেগেছিল তারপর থেকে কোখলাল খুব বেথা চলপটছে আর আলোর দিকে তাকাতে পারছি না ডাক্তার খোকে কিছু দিয়েছিলে রোগী দোকান থেকে একটা দ্রপকিনে দিয়েছিলাম নাম জানি না ডাক্তার সুগার বাপরে সার আছে রোগী সুগার আছে দশাবছরে মেথর্মিখাই দাগতার আচ্ছা ডাঁচোখে দৃষ্টি সাত ভাগছি বাঁচোখনি ভাগড়ছি স্লিট লিআে ডাঁচোখে করনিয়তে একটা আলসারাছে সাথে হাইপোপি বাঁকোক্স বা ভাবিক ডাক্তার আপনার দাঁ কোকে কর্ণিয়াল আলসার হিয়েছি গাছের পাতা থেকে তাই ফাং আলকেরা তাইত্রিস সন্দেহ করছি আজ কি কর্ণিয়ালস্ক্রিয়াপিন ক্রিস্মি আর কালকার পাথাব রোগী সেরে ইবে তো ডাকতার বাবু ডাকর নিমিত সুদ দিল সেবে নিয়াতম আয়সন পান শিতানশ দর্পডান প্রতী এক ঘন্টা পর পড়দে মকসি প্লসা দর্পডডানোকে দিনে কারবার আয়াত্রুপিয়ান দরডা চোখে দিনে দুবার বেথা কমবে ডাকার দোকান রোয় দরপতা বন্ধ খেদিন ওতে স্টেড থাকতে পারে চোখ গসবেন না চোখে জল দেবেন না কালুকা পরবে ডাক্তার সুগারতা কন্ট্রোলে রাখু একটা ব্লড সুগার টেস্ট ক্রিয়ে আনবেন ডাক্তার দুই দিন প্রিয় বাড় দি খাতে আঁসবেন বথাবা দৃ রি কমলে সাথে সাথে কলে আঁসবেন রোগী থিক আঁচে ডাক্তারবাবু ধন্যবাদ",
+  "english": "Doctor, Namaskar, Bison. Your name is Mr. Bloom. Patient, Namaskar, Dr. Babu. My name is Gopal Mandal, 22 years old. Dr. Bloom, what is your name? Patient, Dr. Babu. The day before yesterday, I had received an appointment at the Dhanarpatan Chowkhe, which is located in Kokhalal. It was very cold, and I couldn't walk.\r\nI am not aware of the name. I am not aware of the name. I am not aware of the name. The doctor has a fever. The patient has a fever. The patient has a fever. The patient has a fever.\r\nThe patient has a fever. The patient has a fever. The patient has a fever. The patient has a fever. The patient has a fever.\r\nThe doctor has a fever. The patient has a fever.",
+  "language": "bn",
+  "prescription": {
+    "patient": {
+      "name": "Gopal Mandal",
+      "age": "",
+      "sex": "male"
+    },
+    "chief_complaints": [
+      {
+        "complaint": "Diminution of vision",
+        "kb_id": "DIS-045",
+        "eye": "BE",
+        "duration": "recent",
+        "character": "severe",
+        "patient_words": "খুব বেথা চলপটছে আর আলোর দিকে তাকাতে পারছি না"
+      },
+      {
+        "complaint": "Itching",
+        "kb_id": "DIS-053",
+        "eye": "BE",
+        "duration": "recent",
+        "character": "severe",
+        "patient_words": "কোখলাল খুব বেথা চলপটछে"
+      },
+      {
+        "complaint": "Itching",
+        "kb_id": "DIS-053",
+        "eye": "BE",
+        "duration": "recent",
+        "character": "severe",
+        "patient_words": "কোখলাল খুব বেথা চলপটछে"
+      },
+      {
+        "complaint": "Itching",
+        "kb_id": "DIS-053",
+        "eye": "BE",
+        "duration": "recent",
+        "character": "severe",
+        "patient_words": "কোখলাল খুব বেথা চলপটछে"
+      },
+      {
+        "complaint": "Itching",
+        "kb_id": "DIS-053",
+        "eye": "BE",
+        "duration": "recent",
+        "character": "severe",
+        "patient_words": "কোখলাল খুব বেথা চলপটछে"
+      },
+      {
+        "complaint": "Itching",
+        "kb_id": "DIS-053",
+        "eye": "BE",
+        "duration": "recent",
+        "character": "severe",
+        "patient_words": "কোখলাল খুব বেথা চলপটछে"
+      },
+      {
+        "complaint": "Itching",
+        "kb_id": "DIS-053",
+        "eye": "BE",
+        "duration": "recent",
+        "character": "severe",
+        "patient_words": "কোখলাল খুব বেথা চলপটछে"
+      },
+      {
+        "complaint": "Itching",
+        "kb_id": "DIS-053",
+        "eye": "BE",
+        "duration": "recent",
+        "character": "severe",
+        "patient_words": "কোখলাল খুব বেথা চলপটछে"
+      },
+      {
+        "complaint": "Itching",
+        "kb_id": "DIS-053",
+        "eye": "BE",
+        "duration": "recent",
+        "character": "severe",
+        "patient_words": "কোখলাল খুব বেথা চলপটछে"
+      },
+      {
+        "complaint": "Itching",
+        "kb_id": "DIS-053",
+        "eye": "BE",
+        "duration": "recent"
+      }
+    ],
+    "history": {
+      "systemic": [],
+      "ocular": [],
+      "current_medications": [],
+      "allergies": []
+    },
+    "examination": [],
+    "clinical_findings": [],
+    "diagnosis": [],
+    "medications": [],
+    "procedures": [],
+    "investigations": [],
+    "glasses": [],
+    "advice": [],
+    "follow_up": [],
+    "terms": []
+  },
+  "kbRefs": {
+    "chief_complaints.0": {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H04.1",
+        "Category": "Ocular Surface",
+        "Usual Management": "Lubricants, warm compress, cyclosporine, punctal plugs"
+      }
+    },
+    "chief_complaints.1": {
+      "id": "DIS-053",
+      "name": "Bacterial keratitis / corneal ulcer",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H16.0",
+        "Category": "Cornea",
+        "Usual Management": "Scraping for smear/culture, fortified or fluoroquinolone drops hourly, cycloplegic"
+      }
+    },
+    "chief_complaints.2": {
+      "id": "DIS-053",
+      "name": "Bacterial keratitis / corneal ulcer",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H16.0",
+        "Category": "Cornea",
+        "Usual Management": "Scraping for smear/culture, fortified or fluoroquinolone drops hourly, cycloplegic"
+      }
+    },
+    "chief_complaints.3": {
+      "id": "DIS-053",
+      "name": "Bacterial keratitis / corneal ulcer",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H16.0",
+        "Category": "Cornea",
+        "Usual Management": "Scraping for smear/culture, fortified or fluoroquinolone drops hourly, cycloplegic"
+      }
+    },
+    "chief_complaints.4": {
+      "id": "DIS-053",
+      "name": "Bacterial keratitis / corneal ulcer",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H16.0",
+        "Category": "Cornea",
+        "Usual Management": "Scraping for smear/culture, fortified or fluoroquinolone drops hourly, cycloplegic"
+      }
+    },
+    "chief_complaints.5": {
+      "id": "DIS-053",
+      "name": "Bacterial keratitis / corneal ulcer",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H16.0",
+        "Category": "Cornea",
+        "Usual Management": "Scraping for smear/culture, fortified or fluoroquinolone drops hourly, cycloplegic"
+      }
+    },
+    "chief_complaints.6": {
+      "id": "DIS-053",
+      "name": "Bacterial keratitis / corneal ulcer",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H16.0",
+        "Category": "Cornea",
+        "Usual Management": "Scraping for smear/culture, fortified or fluoroquinolone drops hourly, cycloplegic"
+      }
+    },
+    "chief_complaints.7": {
+      "id": "DIS-053",
+      "name": "Bacterial keratitis / corneal ulcer",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H16.0",
+        "Category": "Cornea",
+        "Usual Management": "Scraping for smear/culture, fortified or fluoroquinolone drops hourly, cycloplegic"
+      }
+    },
+    "chief_complaints.8": {
+      "id": "DIS-053",
+      "name": "Bacterial keratitis / corneal ulcer",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H16.0",
+        "Category": "Cornea",
+        "Usual Management": "Scraping for smear/culture, fortified or fluoroquinolone drops hourly, cycloplegic"
+      }
+    },
+    "chief_complaints.9": {
+      "id": "DIS-053",
+      "name": "Bacterial keratitis / corneal ulcer",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H16.0",
+        "Category": "Cornea",
+        "Usual Management": "Scraping for smear/culture, fortified or fluoroquinolone drops hourly, cycloplegic"
+      }
+    }
+  },
+  "warnings": [
+    "⚠ The model's answer was cut short (the model started repeating itself); some items may be missing — check against the transcript."
+  ],
+  "detectedTerms": [
+    {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "heardAs": "dri",
+      "score": 0.9
+    },
+    {
+      "id": "SGN-017",
+      "name": "Hypopyon",
+      "category": "sign",
+      "heardAs": "haipopi",
+      "score": 0.83
+    },
+    {
+      "id": "TST-067",
+      "name": "Blood sugar / HbA1c",
+      "category": "test",
+      "heardAs": "blad sugar",
+      "score": 0.81
+    },
+    {
+      "id": "DIS-053",
+      "name": "Bacterial keratitis / corneal ulcer",
+      "category": "disease",
+      "heardAs": "karniyal aalsar",
+      "score": 0.74
+    },
+    {
+      "id": "TST-048",
+      "name": "Corneal scraping (smear and culture)",
+      "category": "test",
+      "heardAs": "karniyalaskriyapin",
+      "score": 0.74
+    },
+    {
+      "id": "DIS-155",
+      "name": "Periorbital contusion",
+      "category": "disease",
+      "heardAs": "niyatam aayasan",
+      "score": 0.73
+    },
+    {
+      "id": "DIS-061",
+      "name": "Corneal opacity",
+      "category": "disease",
+      "heardAs": "chokhe jal",
+      "score": 0.7
+    }
+  ],
+  "llm": {
+    "model": "qwen/qwen3-vl-4b",
+    "ms": 35837
+  },
+  "markdown": "# Prescription draft\n_Auto-generated from the consultation audio/transcript. Must be reviewed and signed by the treating ophthalmologist._\n\n**Patient:** Gopal Mandal · male\n\n## C/o\n- Diminution of vision BE × recent (severe) `DIS-045`\n- Itching BE × recent (severe) `DIS-053`\n- Itching BE × recent (severe) `DIS-053`\n- Itching BE × recent (severe) `DIS-053`\n- Itching BE × recent (severe) `DIS-053`\n- Itching BE × recent (severe) `DIS-053`\n- Itching BE × recent (severe) `DIS-053`\n- Itching BE × recent (severe) `DIS-053`\n- Itching BE × recent (severe) `DIS-053`\n- Itching BE × recent `DIS-053`\n\n## History\n- —\n\n## O/E\n- —\n\n## Diagnosis\n- —\n\n## Rx\n—\n\n## Advice\n- —\n\n## Review\n- —\n\n## Check before signing\n- ⚠ The model's answer was cut short (the model started repeating itself); some items may be missing — check against the transcript.\n\n## Terminology detected\n| Heard | Term | KB id | Category |\n|---|---|---|---|\n\n<sub>LLM: qwen/qwen3-vl-4b · 35.8 s</sub>"
+}

@@ -1,0 +1,163 @@
+{
+  "transcript": "आज चौकेर कौन समस्या में अपनी क्लिनिक के एस एस सेन शुक्रवात हाँ डॉक्टर बाबु हां डौक्शनिया एक मास दौरे हमारे बारह चूके छाड़ा और पाका टाका समसा एवं डिस्टी उनोभव कुर्सी सेवा बढ़ोत तो खैर क्लांति अल्पी ताकाते उस अविदा उच्चे काश उन्हें चुटे सामने आलोक साल्कोनिक एवं केंद्रोस्थाल कंदरस्पाले जैसे बड़ानो कालो खुडकी देखते पाई आलोक झोलकन एवं फुटकी हटात आविर वावेर कार्य में अपना पोस्टेरियर विटियर्स डिटचमेंट पीवी डिया रेटिअर कोनो छिद्र परीक्षा करो प्रयोजन प्वातवेंस लेलेन चाट दे अबना दृष्टि चोक परिक्खा करबो जल्दी और डीजीएम डीएसपी डॉक्टर बापू नाकि टायबिटीज लेपिनो पुत्ती इटीस हुस्कोबार ड्राई एज रिलेटेड मैकुला डिजेनरेशन स्पेक्ट्रल डोमेन ऑप्टिकल कोविडेंस टोमोग्राफी स्कैनिंग शॉप आरपी दुसानो ऊपर एलिपसाइड जोनिक होते रखा है छे तबे भागो कोरोइदाल यो हॉस्कुलाइज़ेशन बा चौकिन तोरल जोमे तेजारा फ्लुरिसिन एनर्जी ग्रफिटो माइक्रो एनालिज्म बा कॉटन हुल स्पॉच छे आमी आज ठिके सप्लीमेंट एवं ग्रेड डे चौक परिकल करबा तोमत का आया तीन माह पर रेडी आर आवास ते पज्यावर कर्ब करवा तेज आमरा वरेक टी सी टी एज स्कैन एबं वाइट प्रिंट मोटोग्राफी करगो फालो थैंक बेली गुड बाय",
+  "english": "Thank you very much Dr. Sharma. Please sit down. What problems do you have in your clinic today? Thank you very much, Dr. Babu. For the past one month, I have been suffering from constipation, nausea, nausea in my stomach, and constipation in my chest.\nI have been suffering from constipation, nausea, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest.\nI have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest.\nI have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest.\nI have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest.\nI have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest.\nI have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest.",
+  "language": "hi",
+  "prescription": {
+    "patient": {
+      "name": "Dr. Babu",
+      "age": "",
+      "sex": "male"
+    },
+    "chief_complaints": [],
+    "history": {
+      "systemic": [],
+      "ocular": [],
+      "current_medications": [],
+      "allergies": []
+    },
+    "examination": [],
+    "clinical_findings": [],
+    "diagnosis": [],
+    "medications": [],
+    "procedures": [],
+    "investigations": [],
+    "glasses": [],
+    "advice": [],
+    "follow_up": [],
+    "terms": [
+      {
+        "heard": "constipation",
+        "kb_id": "",
+        "canonical": "constipation",
+        "category": "symptom"
+      },
+      {
+        "heard": "nausea",
+        "kb_id": "SYM-046",
+        "canonical": "Nausea / vomiting with eye pain",
+        "category": "symptom"
+      },
+      {
+        "heard": "red eye",
+        "kb_id": "SYM-006",
+        "canonical": "Red eye",
+        "category": "symptom"
+      },
+      {
+        "heard": "dry eye",
+        "kb_id": "DIS-045",
+        "canonical": "Dry eye disease",
+        "category": "disease"
+      },
+      {
+        "heard": "posterior vitreous detachment",
+        "kb_id": "ABR-036",
+        "canonical": "Posterior vitreous detachment",
+        "category": "anatomy"
+      },
+      {
+        "heard": "macula",
+        "kb_id": "ANT-026",
+        "canonical": "Macula",
+        "category": "anatomy"
+      },
+      {
+        "heard": "Schiøtz / iCare / Tono-Pen tonometry",
+        "kb_id": "TST-016",
+        "canonical": "Schiøtz / iCare / Tono-Pen tonometry",
+        "category": "test"
+      },
+      {
+        "heard": "fluorescein",
+        "kb_id": "MED-084",
+        "canonical": "Fluorescein sodium",
+        "category": "medicine"
+      }
+    ]
+  },
+  "kbRefs": {},
+  "warnings": [],
+  "detectedTerms": [
+    {
+      "id": "SYM-046",
+      "name": "Nausea / vomiting with eye pain",
+      "category": "symptom",
+      "heardAs": "nausea",
+      "score": 0.95
+    },
+    {
+      "id": "SYM-006",
+      "name": "Red eye",
+      "category": "symptom",
+      "heardAs": "redi",
+      "score": 0.95
+    },
+    {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "heardAs": "draee",
+      "score": 0.9
+    },
+    {
+      "id": "ABR-027",
+      "name": "Posterior / anterior chamber intraocular lens",
+      "category": "abbreviation",
+      "heardAs": "posteriyar",
+      "score": 0.9
+    },
+    {
+      "id": "ANT-021",
+      "name": "Lens capsule (anterior / posterior)",
+      "category": "anatomy",
+      "heardAs": "posteriyar",
+      "score": 0.9
+    },
+    {
+      "id": "DIS-119",
+      "name": "Posterior vitreous detachment",
+      "category": "disease",
+      "heardAs": "posteriyar vitiyars ditachment",
+      "score": 0.85
+    },
+    {
+      "id": "ABR-036",
+      "name": "Posterior vitreous detachment",
+      "category": "abbreviation",
+      "heardAs": "posteriyar vitiyars ditachment",
+      "score": 0.85
+    },
+    {
+      "id": "ANT-026",
+      "name": "Macula",
+      "category": "anatomy",
+      "heardAs": "maikula",
+      "score": 0.81
+    },
+    {
+      "id": "TST-016",
+      "name": "Schiøtz / iCare / Tono-Pen tonometry",
+      "category": "test",
+      "heardAs": "si ti",
+      "score": 0.75
+    },
+    {
+      "id": "MED-084",
+      "name": "Fluorescein sodium",
+      "category": "medicine",
+      "heardAs": "phlurisin",
+      "score": 0.74
+    }
+  ],
+  "llm": {
+    "model": "qwen/qwen3-vl-4b",
+    "ms": 41922
+  },
+  "asr": {
+    "language": "hi",
+    "model": "ARTPARK-IISc/whisper-large-v3-vaani-hindi",
+    "backend": "indic",
+    "ms": 164410
+  },
+  "markdown": "# Prescription draft\n_Auto-generated from the consultation audio/transcript. Must be reviewed and signed by the treating ophthalmologist._\n\n**Patient:** Dr. Babu · male\n\n## C/o\n- —\n\n## History\n- —\n\n## O/E\n- —\n\n## Diagnosis\n- —\n\n## Rx\n—\n\n## Advice\n- —\n\n## Review\n- —\n\n## Terminology detected\n| Heard | Term | KB id | Category |\n|---|---|---|---|\n| constipation | constipation | — | symptom |\n| nausea | Nausea / vomiting with eye pain | SYM-046 | symptom |\n| red eye | Red eye | SYM-006 | symptom |\n| dry eye | Dry eye disease | DIS-045 | disease |\n| posterior vitreous detachment | Posterior vitreous detachment | ABR-036 | anatomy |\n| macula | Macula | ANT-026 | anatomy |\n| Schiøtz / iCare / Tono-Pen tonometry | Schiøtz / iCare / Tono-Pen tonometry | TST-016 | test |\n| fluorescein | Fluorescein sodium | MED-084 | medicine |\n\n<sub>LLM: qwen/qwen3-vl-4b · 41.9 s · ASR: indic 164.4 s</sub>"
+}

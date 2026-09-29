@@ -1,0 +1,299 @@
+{
+  "transcript": "্যে সুগার পেশার বা থাইরাইড আছে? থাইরাইড আছে, থাইরাক্সিন থাইরাইড সুগার পেশার প্বার্তে নিয়েলো পারে আছে\n্বের্বের্বের্বের্বের্বের্বের্বের্বের্বের্বের্বের্বের্বের্বের্বের্বের্বের্বের্বের্বের\n্রাতে সহার আগে দুই চোকে জেল দেবেন। দিনে দু বার গরম শেক দেবেন আ চোকের পাতার ধার পরিশ্কার করবেন। কম্পুটারে কাজেস",
+  "english": "What is the problem?\nSugar pressure or Thyroid? Thyroid is there. Thyroxine is there. Sugar pressure is normal.\nThere is also maibomian gland plugging and barfractase. Your pressure is normal. There is also maibomian gland plugging and barfractase. There is also maibomian gland plugging and barfractase. There is also maibomian gland plugging and barfractase. There is also maibomian gland plugging and barfractase.\nBefore going to bed at night, give a gel to your eyes. Wash your eyes twice a day and clean the leaves of your eyes. After 20 minutes of working time on the computer, get out 20 seconds away and take a deep breath. After a month and a half, come to see me again. Thank you, thank you, doctor. I will come again. Thank you, thank you, doctor. I will come again.",
+  "language": "bn",
+  "prescription": {
+    "patient": {
+      "name": "",
+      "age": "",
+      "sex": ""
+    },
+    "chief_complaints": [],
+    "history": {
+      "systemic": [
+        {
+          "condition": "Thyroid",
+          "kb_id": "DIS-149",
+          "duration": "ongoing",
+          "treatment": "Thyroxine"
+        }
+      ],
+      "ocular": [
+        {
+          "item": "Maibomian gland plugging",
+          "kb_id": "",
+          "eye": "BE"
+        }
+      ],
+      "current_medications": [
+        "Thyroxine"
+      ],
+      "allergies": []
+    },
+    "examination": [
+      {
+        "test": "Intraocular pressure",
+        "kb_id": "TST-013",
+        "eye": "BE",
+        "result": "Normal"
+      }
+    ],
+    "clinical_findings": [
+      {
+        "finding": "Maibomian gland plugging",
+        "kb_id": "SGN-055",
+        "eye": "BE"
+      },
+      {
+        "finding": "Corneal opacity",
+        "kb_id": "DIS-061",
+        "eye": "BE"
+      }
+    ],
+    "diagnosis": [
+      {
+        "condition": "Thyroid eye disease",
+        "kb_id": "DIS-149",
+        "eye": "BE",
+        "grade_or_notes": "Not specified",
+        "certainty": "confirmed"
+      },
+      {
+        "condition": "Corneal opacity",
+        "kb_id": "DIS-061",
+        "eye": "BE",
+        "grade_or_notes": "Not specified",
+        "certainty": "confirmed"
+      },
+      {
+        "condition": "Meibomian gland plugging",
+        "kb_id": "",
+        "eye": "BE",
+        "grade_or_notes": "Not specified",
+        "certainty": "confirmed"
+      }
+    ],
+    "medications": [
+      {
+        "kb_id": "MED-022",
+        "generic_name": "Prednisolone acetate",
+        "brand_said": "Prednisolone acetate",
+        "form": "Other",
+        "strength": "Not specified",
+        "eye": "BE",
+        "dose": "Not specified",
+        "frequency": "Not specified",
+        "duration": "Not specified",
+        "phase": "current",
+        "instructions": "Not specified"
+      },
+      {
+        "kb_id": "MED-023",
+        "generic_name": "Dexamethasone",
+        "brand_said": "Dexamethasone",
+        "form": "Other",
+        "strength": "Not specified",
+        "eye": "BE",
+        "dose": "Not specified",
+        "frequency": "Not specified",
+        "duration": "Not specified",
+        "phase": "current",
+        "instructions": "Not specified"
+      }
+    ],
+    "procedures": [],
+    "investigations": [],
+    "glasses": [],
+    "advice": [
+      {
+        "text": "Apply gel to eyes before bed at night",
+        "kb_id": ""
+      },
+      {
+        "text": "Wash eyes twice daily and clean eyelashes",
+        "kb_id": ""
+      },
+      {
+        "text": "After 20 minutes of computer work, take 20 seconds break and deep breath",
+        "kb_id": ""
+      }
+    ],
+    "follow_up": [
+      {
+        "when": "After 1.5 months",
+        "purpose": "Revisit for review"
+      }
+    ],
+    "terms": [
+      {
+        "heard": "Thairaid",
+        "kb_id": "DIS-149",
+        "canonical": "Thyroid eye disease",
+        "category": "disease"
+      },
+      {
+        "heard": "maibomian gland plugging",
+        "kb_id": "SGN-055",
+        "canonical": "Meibomian gland plugging",
+        "category": "sign"
+      },
+      {
+        "heard": "barfractase",
+        "kb_id": "DIS-061",
+        "canonical": "Corneal opacity",
+        "category": "disease"
+      },
+      {
+        "heard": "chokhe jel",
+        "kb_id": "DIS-061",
+        "canonical": "Corneal opacity",
+        "category": "disease"
+      },
+      {
+        "heard": "your pressure",
+        "kb_id": "DIS-017",
+        "canonical": "Primary open-angle glaucoma",
+        "category": "disease"
+      }
+    ]
+  },
+  "kbRefs": {
+    "history.systemic.0": {
+      "id": "DIS-149",
+      "name": "Thyroid eye disease",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H06.2 / E05.0",
+        "Category": "Orbit",
+        "Usual Management": "Lubricants, selenium, steroids, orbital decompression"
+      }
+    },
+    "examination.0": {
+      "id": "TST-013",
+      "name": "Intraocular pressure",
+      "category": "test",
+      "verified": "resolved",
+      "reference": {
+        "Abbreviation": "IOP",
+        "Normal / Reference Value": "10–21 mmHg"
+      }
+    },
+    "clinical_findings.0": {
+      "id": "SGN-055",
+      "name": "Meibomian gland plugging",
+      "category": "sign",
+      "verified": "llm",
+      "reference": {}
+    },
+    "clinical_findings.1": {
+      "id": "DIS-061",
+      "name": "Corneal opacity",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H17",
+        "Category": "Cornea",
+        "Usual Management": "Glasses / RGP, keratoplasty, cosmetic lens / tattoo"
+      }
+    },
+    "diagnosis.0": {
+      "id": "DIS-149",
+      "name": "Thyroid eye disease",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H06.2 / E05.0",
+        "Category": "Orbit",
+        "Usual Management": "Lubricants, selenium, steroids, orbital decompression"
+      }
+    },
+    "diagnosis.1": {
+      "id": "DIS-061",
+      "name": "Corneal opacity",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H17",
+        "Category": "Cornea",
+        "Usual Management": "Glasses / RGP, keratoplasty, cosmetic lens / tattoo"
+      }
+    },
+    "medications.0": {
+      "id": "MED-022",
+      "name": "Prednisolone acetate",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "Corticosteroid (strong)",
+        "Common Strength": "1%",
+        "Typical Prescription Usage": "1 drop QID / 2-hourly then taper weekly; SHAKE WELL",
+        "Key Cautions / Side Effects": "Raised IOP, cataract, infection risk – monitor IOP",
+        "Example Brands (India, indicative)": "Pred Forte"
+      }
+    },
+    "medications.1": {
+      "id": "MED-023",
+      "name": "Dexamethasone",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "Corticosteroid (strong)",
+        "Common Strength": "0.1%",
+        "Typical Prescription Usage": "1 drop QID then taper",
+        "Key Cautions / Side Effects": "Raised IOP, cataract",
+        "Example Brands (India, indicative)": "Maxidex"
+      }
+    }
+  },
+  "warnings": [
+    "\"Meibomian gland plugging\" (diagnosis) is not in the knowledge base — verify spelling."
+  ],
+  "detectedTerms": [
+    {
+      "id": "SGN-055",
+      "name": "Meibomian gland plugging",
+      "category": "sign",
+      "heardAs": "maibomian gland plugging",
+      "score": 0.91
+    },
+    {
+      "id": "DIS-149",
+      "name": "Thyroid eye disease",
+      "category": "disease",
+      "heardAs": "thairaid",
+      "score": 0.76
+    },
+    {
+      "id": "DIS-061",
+      "name": "Corneal opacity",
+      "category": "disease",
+      "heardAs": "choke jel",
+      "score": 0.7
+    },
+    {
+      "id": "DIS-017",
+      "name": "Primary open-angle glaucoma",
+      "category": "disease",
+      "heardAs": "your pressure",
+      "score": 0.68
+    },
+    {
+      "id": "DIS-018",
+      "name": "Primary angle-closure glaucoma",
+      "category": "disease",
+      "heardAs": "your pressure",
+      "score": 0.68
+    }
+  ],
+  "llm": {
+    "model": "qwen/qwen3-vl-4b",
+    "ms": 54927
+  },
+  "asr": {
+    "language": "bn",
+    "backend": "whisper-cli",
+    "ms": 136125
+  },
+  "markdown": "# Prescription draft\n_Auto-generated from the consultation audio/transcript. Must be reviewed and signed by the treating ophthalmologist._\n\n**Patient:** —\n\n## C/o\n- —\n\n## History\n- k/c/o Thyroid × ongoing — Thyroxine `DIS-149`\n- H/o Maibomian gland plugging BE ⚠︎`not in KB`\n- Current meds: Thyroxine\n\n## O/E\n- Intraocular pressure BE : Normal `TST-013`\n- Maibomian gland plugging BE `SGN-055`\n- Corneal opacity BE `DIS-061`\n\n## Diagnosis\n- Thyroid eye disease (Not specified) BE [ICD-10 H06.2 / E05.0] `DIS-149`\n- Corneal opacity (Not specified) BE [ICD-10 H17] `DIS-061`\n- Meibomian gland plugging (Not specified) BE ⚠︎`not in KB`\n\n## Rx\n1. Other Prednisolone acetate Not specified (Prednisolone acetate) — Not specified Not specified BE × Not specified [current] `MED-022`  \n   _Not specified_\n   <sub>KB typical usage: 1 drop QID / 2-hourly then taper weekly; SHAKE WELL</sub>\n2. Other Dexamethasone Not specified (Dexamethasone) — Not specified Not specified BE × Not specified [current] `MED-023`  \n   _Not specified_\n   <sub>KB typical usage: 1 drop QID then taper</sub>\n\n## Advice\n- Apply gel to eyes before bed at night\n- Wash eyes twice daily and clean eyelashes\n- After 20 minutes of computer work, take 20 seconds break and deep breath\n\n## Review\n- After 1.5 months — Revisit for review\n\n## Check before signing\n- \"Meibomian gland plugging\" (diagnosis) is not in the knowledge base — verify spelling.\n\n## Terminology detected\n| Heard | Term | KB id | Category |\n|---|---|---|---|\n| Thairaid | Thyroid eye disease | DIS-149 | disease |\n| maibomian gland plugging | Meibomian gland plugging | SGN-055 | sign |\n| barfractase | Corneal opacity | DIS-061 | disease |\n| your pressure | Primary open-angle glaucoma | DIS-017 | disease |\n\n<sub>LLM: qwen/qwen3-vl-4b · 54.9 s · ASR: whisper-cli 136.1 s</sub>"
+}

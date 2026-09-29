@@ -1,0 +1,66 @@
+{
+  "transcript": "\" ਡਾਕਤਾਰ ਨਮਸਕਾਰ ਬੀਸੋਨ । ਆਪਨਾਰ ਨਾਮਾਰ ਬੈਸ ਬ੍ਲੂਨ । ਰੋਗੀ ਨਮਸਕਾਰ ਡਾਕਤਾਰ ਬਾਬੁ । ਆਮਾਰ ਨਾਮ ਗੋਪਾਲ ਮੰਦਲ ॥ ਬੈਸ ਪੀਨੀ ਤਾਲੀਸ । ਡਾਕ\nਰੋਗੀ\n- ਤੈ ਫਾਂਗਾਲ ਕੇਰਾ ਤੈ ਤੀਸ ਸਨਦੇ ਕਰਛੀ। ਆਜ ਕੀ ਕਰਣੀਆਲਸ ਕੀਰੀਆਪੀਂ ਕਿਰੀਸਮੀ ਆਰਾਰ ਕਾਲਕਾਰ ਭਾ ਥਾਬ। ਰੋਗੀ ਸੇਰੀਆਬੇ ਤੋ ਡਾਕਤਾਰ ਬਾ�\n... ... ... ... ... ... ... ... ...",
+  "language": "pa",
+  "prescription": {
+    "patient": {
+      "name": "Gopal Mandal",
+      "age": "40",
+      "sex": "male"
+    },
+    "chief_complaints": [],
+    "history": {
+      "systemic": [],
+      "ocular": [],
+      "current_medications": [],
+      "allergies": []
+    },
+    "examination": [],
+    "clinical_findings": [],
+    "diagnosis": [],
+    "medications": [],
+    "procedures": [],
+    "investigations": [],
+    "glasses": [],
+    "advice": [],
+    "follow_up": [],
+    "terms": [
+      {
+        "heard": "फांगाल केरा",
+        "kb_id": "",
+        "canonical": "Fungal infection",
+        "category": "ocular"
+      },
+      {
+        "heard": "तीस सनदेकरछी",
+        "kb_id": "",
+        "canonical": "Three times",
+        "category": "frequency"
+      },
+      {
+        "heard": "किरीसमी आरार कालकार भाथाब",
+        "kb_id": "",
+        "canonical": "Keratitis",
+        "category": "ocular"
+      },
+      {
+        "heard": "बैस पीनी तालीस",
+        "kb_id": "",
+        "canonical": "Bis pini talis",
+        "category": "ocular"
+      }
+    ]
+  },
+  "kbRefs": {},
+  "warnings": [],
+  "detectedTerms": [],
+  "llm": {
+    "model": "qwen/qwen3-vl-4b",
+    "ms": 14021
+  },
+  "asr": {
+    "language": "pa",
+    "backend": "indic",
+    "ms": 109802
+  },
+  "markdown": "# Prescription draft\n_Auto-generated from the consultation audio/transcript. Must be reviewed and signed by the treating ophthalmologist._\n\n**Patient:** Gopal Mandal · 40 · male\n\n## C/o\n- —\n\n## History\n- —\n\n## O/E\n- —\n\n## Diagnosis\n- —\n\n## Rx\n—\n\n## Advice\n- —\n\n## Review\n- —\n\n## Terminology detected\n| Heard | Term | KB id | Category |\n|---|---|---|---|\n| फांगाल केरा | Fungal infection | — | ocular |\n| तीस सनदेकरछी | Three times | — | frequency |\n| किरीसमी आरार कालकार भाथाब | Keratitis | — | ocular |\n| बैस पीनी तालीस | Bis pini talis | — | ocular |\n\n<sub>LLM: qwen/qwen3-vl-4b · 14.0 s · ASR: indic 109.8 s</sub>"
+}

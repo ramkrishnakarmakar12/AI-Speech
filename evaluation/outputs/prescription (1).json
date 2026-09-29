@@ -1,0 +1,432 @@
+{
+  "transcript": "Doctor. Good morning, Mr. Sharma. Please, have a seat. What brings you in today? Patient. Good morning, doctor. Thank you. For the past three or four days, I've been having some trouble with my right eye. It feels quite dry, it gets red by the end of the day, and my vision gets a bit blurry when I'm working on my laptop. Doctor. I see. Are you experiencing any pain, discharge, or sensitivity to light? Patient.\nNo severe pain, just a mild gritty sensation, like there's a grain of sand stuck in it. No discharge, but my eye waters occasionally when I strain. Doctor. All right. How many hours a day do you typically spend looking at screens? Patient. Quite a bit, actually. Around eight to ten hours a day for work, plus using my phone in the evening. Doctor. That's very common. Let's do a quick physical examination first.\nWe'll check your vision using the eye chart and take a look at the front of your eye using the slit lamp microscope. The doctor conducts the visual acuity test and examines the patient's eyes with the slit lamp. Doctor. Everything structurally looks healthy. Your retina and intraocular pressure are normal, and there's no sign of infection. What you're experiencing is classic digital eye strain combined with dry eye syndrome.\nPatient. Ah, that makes sense. I definitely forget to take breaks. Is it reversible, doctor? Doctor. Absolutely. Here is what we'll do. Lubricating eye drops. I'm prescribing preservative-free artificial tears. Use one drop in each eye three to four times a day to keep your eyes clean. Patient.\nPatient. Patient. Patient. Patient. Patient. Patient.\nPatient. Patient. Patient.",
+  "language": "en",
+  "prescription": {
+    "patient": {
+      "name": "Mr. Sharma",
+      "age": "",
+      "sex": "male"
+    },
+    "chief_complaints": [
+      {
+        "complaint": "dry eye",
+        "kb_id": "DIS-045",
+        "eye": "RE",
+        "duration": "past 3-4 days",
+        "character": "feels dry, red by end of day, blurry vision when working on laptop",
+        "patient_words": "It feels quite dry, it gets red by the end of the day, and my vision gets a bit blurry when I'm working on my laptop"
+      },
+      {
+        "complaint": "digital eye strain",
+        "kb_id": "DIS-145",
+        "eye": "RE",
+        "duration": "chronic",
+        "character": "mild gritty sensation, like grain of sand stuck in it, eye waters occasionally when straining",
+        "patient_words": "mild gritty sensation, like there's a grain of sand stuck in it. No discharge, but my eye waters occasionally when I strain"
+      },
+      {
+        "complaint": "sensitivity to light",
+        "kb_id": "SYM-045",
+        "eye": "RE",
+        "duration": "chronic",
+        "character": "no severe pain, no discharge, no infection",
+        "patient_words": ""
+      },
+      {
+        "complaint": "eye strain",
+        "kb_id": "SYM-023",
+        "eye": "RE",
+        "duration": "chronic",
+        "character": "spends 8-10 hours/day on screens, plus phone in evening",
+        "patient_words": "Quite a bit, actually. Around eight to ten hours a day for work, plus using my phone in the evening"
+      }
+    ],
+    "history": {
+      "systemic": [],
+      "ocular": [],
+      "current_medications": [],
+      "allergies": []
+    },
+    "examination": [
+      {
+        "test": "visual acuity",
+        "kb_id": "ABR-017",
+        "eye": "RE",
+        "result": "normal"
+      },
+      {
+        "test": "intraocular pressure",
+        "kb_id": "ABR-017",
+        "eye": "RE",
+        "result": "normal"
+      },
+      {
+        "test": "slit lamp microscope",
+        "kb_id": "TST-018",
+        "eye": "RE",
+        "result": "structurally healthy, no sign of infection"
+      },
+      {
+        "test": "retina",
+        "kb_id": "",
+        "eye": "RE",
+        "result": "normal"
+      }
+    ],
+    "clinical_findings": [
+      {
+        "finding": "no discharge",
+        "kb_id": "",
+        "eye": "RE"
+      },
+      {
+        "finding": "no infection",
+        "kb_id": "ABR-061",
+        "eye": "RE"
+      },
+      {
+        "finding": "no pain",
+        "kb_id": "",
+        "eye": "RE"
+      }
+    ],
+    "diagnosis": [
+      {
+        "condition": "digital eye strain",
+        "kb_id": "DIS-145",
+        "eye": "RE",
+        "grade_or_notes": "chronic, associated with prolonged screen use",
+        "certainty": "confirmed"
+      },
+      {
+        "condition": "dry eye syndrome",
+        "kb_id": "DIS-045",
+        "eye": "RE",
+        "grade_or_notes": "chronic, associated with screen use",
+        "certainty": "confirmed"
+      }
+    ],
+    "medications": [
+      {
+        "kb_id": "MED-028",
+        "generic_name": "preservative-free artificial tears",
+        "brand_said": "",
+        "form": "Other",
+        "strength": "",
+        "eye": "RE",
+        "dose": "1 drop",
+        "frequency": "3-4 times daily",
+        "duration": "",
+        "phase": "pre-op",
+        "instructions": "Use one drop in each eye three to four times a day to keep your eyes clean"
+      }
+    ],
+    "procedures": [],
+    "investigations": [],
+    "glasses": [],
+    "advice": [
+      {
+        "text": "Take breaks every 20 minutes, look away from screen, focus on distant object, blink frequently",
+        "kb_id": ""
+      },
+      {
+        "text": "Use lubricating eye drops as prescribed",
+        "kb_id": ""
+      }
+    ],
+    "follow_up": [],
+    "terms": [
+      {
+        "heard": "dry eye",
+        "kb_id": "DIS-045",
+        "canonical": "Dry eye disease",
+        "category": "disease"
+      },
+      {
+        "heard": "digital eye strain",
+        "kb_id": "DIS-145",
+        "canonical": "Computer vision syndrome",
+        "category": "disease"
+      },
+      {
+        "heard": "eye strain",
+        "kb_id": "SYM-023",
+        "canonical": "Eye strain",
+        "category": "symptom"
+      },
+      {
+        "heard": "intraocular pressure",
+        "kb_id": "ABR-017",
+        "canonical": "Intraocular pressure",
+        "category": "test"
+      },
+      {
+        "heard": "visual acuity",
+        "kb_id": "ABR-017",
+        "canonical": "Intraocular pressure",
+        "category": "test"
+      },
+      {
+        "heard": "slit lamp microscope",
+        "kb_id": "TST-018",
+        "canonical": "Slit-lamp biomicroscopy",
+        "category": "test"
+      },
+      {
+        "heard": "right eye",
+        "kb_id": "ABR-011",
+        "canonical": "Right eye / left eye / both eyes (Latin)",
+        "category": "eye"
+      },
+      {
+        "heard": "retina",
+        "kb_id": "ANT-025",
+        "canonical": "Retina",
+        "category": "anatomy"
+      },
+      {
+        "heard": "sensitivity to light",
+        "kb_id": "SYM-045",
+        "canonical": "Sensitivity to wind / dust",
+        "category": "symptom"
+      }
+    ]
+  },
+  "kbRefs": {
+    "chief_complaints.0": {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H04.1",
+        "Category": "Ocular Surface",
+        "Usual Management": "Lubricants, warm compress, cyclosporine, punctal plugs"
+      }
+    },
+    "chief_complaints.1": {
+      "id": "DIS-145",
+      "name": "Computer vision syndrome",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H53.1",
+        "Category": "Refractive Error",
+        "Usual Management": "20-20-20 rule, lubricants, correct glasses, anti-reflective coating"
+      }
+    },
+    "chief_complaints.2": {
+      "id": "SYM-045",
+      "name": "Sensitivity to wind / dust",
+      "category": "symptom",
+      "verified": "llm",
+      "reference": {}
+    },
+    "chief_complaints.3": {
+      "id": "SYM-023",
+      "name": "Eye strain",
+      "category": "symptom",
+      "verified": "llm",
+      "reference": {}
+    },
+    "examination.0": {
+      "id": "ABR-017",
+      "name": "Intraocular pressure",
+      "category": "abbreviation",
+      "verified": "llm",
+      "reference": {}
+    },
+    "examination.1": {
+      "id": "ABR-017",
+      "name": "Intraocular pressure",
+      "category": "abbreviation",
+      "verified": "llm",
+      "reference": {}
+    },
+    "examination.2": {
+      "id": "TST-018",
+      "name": "Slit-lamp biomicroscopy",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "SLE, SLB"
+      }
+    },
+    "clinical_findings.1": {
+      "id": "ABR-061",
+      "name": "Tablet / capsule / injection",
+      "category": "abbreviation",
+      "verified": "llm",
+      "reference": {}
+    },
+    "diagnosis.0": {
+      "id": "DIS-145",
+      "name": "Computer vision syndrome",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H53.1",
+        "Category": "Refractive Error",
+        "Usual Management": "20-20-20 rule, lubricants, correct glasses, anti-reflective coating"
+      }
+    },
+    "diagnosis.1": {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H04.1",
+        "Category": "Ocular Surface",
+        "Usual Management": "Lubricants, warm compress, cyclosporine, punctal plugs"
+      }
+    },
+    "medications.0": {
+      "id": "MED-028",
+      "name": "Nepafenac",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "NSAID",
+        "Common Strength": "0.1% / 0.3%",
+        "Typical Prescription Usage": "1 drop TID (0.1%) starting 1 day pre-op, continue 2–4 weeks",
+        "Key Cautions / Side Effects": "Corneal melt with prolonged use",
+        "Example Brands (India, indicative)": "Nevanac"
+      }
+    }
+  },
+  "warnings": [
+    "preservative-free artificial tears: duration not stated in the conversation."
+  ],
+  "detectedTerms": [
+    {
+      "id": "SYM-008",
+      "name": "Discharge",
+      "category": "symptom",
+      "heardAs": "discharge",
+      "score": 1
+    },
+    {
+      "id": "SYM-023",
+      "name": "Eye strain",
+      "category": "symptom",
+      "heardAs": "eye strain",
+      "score": 1
+    },
+    {
+      "id": "TST-013",
+      "name": "Intraocular pressure",
+      "category": "test",
+      "heardAs": "intraocular pressure",
+      "score": 1
+    },
+    {
+      "id": "OPT-001",
+      "name": "Right eye",
+      "category": "optical",
+      "heardAs": "right eye",
+      "score": 1
+    },
+    {
+      "id": "ABR-012",
+      "name": "Visual acuity",
+      "category": "abbreviation",
+      "heardAs": "visual acuity",
+      "score": 1
+    },
+    {
+      "id": "ABR-017",
+      "name": "Intraocular pressure",
+      "category": "abbreviation",
+      "heardAs": "intraocular pressure",
+      "score": 1
+    },
+    {
+      "id": "ABR-058",
+      "name": "Eye drops",
+      "category": "abbreviation",
+      "heardAs": "eye drops",
+      "score": 1
+    },
+    {
+      "id": "ANT-025",
+      "name": "Retina",
+      "category": "anatomy",
+      "heardAs": "retina",
+      "score": 1
+    },
+    {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "heardAs": "dry eye",
+      "score": 0.95
+    },
+    {
+      "id": "DIS-145",
+      "name": "Computer vision syndrome",
+      "category": "disease",
+      "heardAs": "digital eye strain",
+      "score": 0.95
+    },
+    {
+      "id": "TST-001",
+      "name": "Visual acuity (distance)",
+      "category": "test",
+      "heardAs": "visual acuity",
+      "score": 0.95
+    },
+    {
+      "id": "ABR-011",
+      "name": "Right eye / left eye / both eyes (Latin)",
+      "category": "abbreviation",
+      "heardAs": "right eye",
+      "score": 0.95
+    },
+    {
+      "id": "TST-018",
+      "name": "Slit-lamp biomicroscopy",
+      "category": "test",
+      "heardAs": "slit lamp microscope",
+      "score": 0.81
+    },
+    {
+      "id": "ABR-061",
+      "name": "Tablet / capsule / injection",
+      "category": "abbreviation",
+      "heardAs": "infection",
+      "score": 0.8
+    },
+    {
+      "id": "TST-005",
+      "name": "Near visual acuity",
+      "category": "test",
+      "heardAs": "the visual acuity",
+      "score": 0.77
+    },
+    {
+      "id": "SYM-044",
+      "name": "Eye rubbing",
+      "category": "symptom",
+      "heardAs": "eye using",
+      "score": 0.76
+    },
+    {
+      "id": "SYM-045",
+      "name": "Sensitivity to wind / dust",
+      "category": "symptom",
+      "heardAs": "sensitivity to light",
+      "score": 0.75
+    }
+  ],
+  "llm": {
+    "model": "qwen/qwen3-vl-4b",
+    "ms": 84097
+  },
+  "asr": {
+    "language": "en",
+    "backend": "whisper-cli",
+    "ms": 39373
+  },
+  "markdown": "# Prescription draft\n_Auto-generated from the consultation audio/transcript. Must be reviewed and signed by the treating ophthalmologist._\n\n**Patient:** Mr. Sharma · male\n\n## C/o\n- dry eye RE × past 3-4 days (feels dry, red by end of day, blurry vision when working on laptop) `DIS-045`\n- digital eye strain RE × chronic (mild gritty sensation, like grain of sand stuck in it, eye waters occasionally when straining) `DIS-145`\n- sensitivity to light RE × chronic (no severe pain, no discharge, no infection) `SYM-045`\n- eye strain RE × chronic (spends 8-10 hours/day on screens, plus phone in evening) `SYM-023`\n\n## History\n- —\n\n## O/E\n- visual acuity RE : normal `ABR-017`\n- intraocular pressure RE : normal `ABR-017`\n- slit lamp microscope RE : structurally healthy, no sign of infection `TST-018`\n- retina RE : normal ⚠︎`not in KB`\n- no discharge RE ⚠︎`not in KB`\n- no infection RE `ABR-061`\n- no pain RE ⚠︎`not in KB`\n\n## Diagnosis\n- digital eye strain (chronic, associated with prolonged screen use) RE [ICD-10 H53.1] `DIS-145`\n- dry eye syndrome (chronic, associated with screen use) RE [ICD-10 H04.1] `DIS-045`\n\n## Rx\n1. Other preservative-free artificial tears — 1 drop 3-4 times daily RE [pre-op] `MED-028`  \n   _Use one drop in each eye three to four times a day to keep your eyes clean_\n   <sub>KB typical usage: 1 drop TID (0.1%) starting 1 day pre-op, continue 2–4 weeks</sub>\n\n## Advice\n- Take breaks every 20 minutes, look away from screen, focus on distant object, blink frequently\n- Use lubricating eye drops as prescribed\n\n## Review\n- —\n\n## Check before signing\n- preservative-free artificial tears: duration not stated in the conversation.\n\n## Terminology detected\n| Heard | Term | KB id | Category |\n|---|---|---|---|\n| dry eye | Dry eye disease | DIS-045 | disease |\n| digital eye strain | Computer vision syndrome | DIS-145 | disease |\n| eye strain | Eye strain | SYM-023 | symptom |\n| intraocular pressure | Intraocular pressure | ABR-017 | test |\n| slit lamp microscope | Slit-lamp biomicroscopy | TST-018 | test |\n| right eye | Right eye / left eye / both eyes (Latin) | ABR-011 | eye |\n| retina | Retina | ANT-025 | anatomy |\n| sensitivity to light | Sensitivity to wind / dust | SYM-045 | symptom |\n\n<sub>LLM: qwen/qwen3-vl-4b · 84.1 s · ASR: whisper-cli 39.4 s</sub>"
+}

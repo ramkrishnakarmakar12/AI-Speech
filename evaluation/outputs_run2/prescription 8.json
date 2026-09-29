@@ -1,0 +1,771 @@
+{
+  "transcript": "Good morning Mr. Sharma. Please take a seat. What primary symptoms bring you to the eye clinic today?\nGiven the sudden onset of autopsy and vitreous floaters, we must evaluate for posterior vitreous detachment or a peripheral retinal tear. First, we will check the visual acuity, then perform dynamic retinoscopy and Goldman appellation tonometry to measure your intracolar pressure and screen.\nUnder slit-lamp bio-microscopy, your anterior segment, including the cornea and iridocorneal angle, is unremarkable. However, after installing tropic amide for pharmacological midraises, indirect ophthalmoscopy reveals radiographic retinal pigment\nand epithelium atrophy, drusen deposition, and mild localized macular edema. Is it age-related macular degeneration, doctor, or diabetic rectaloscopy? It is dry age-related muscular degeneration. Spectral domain optical coherence tomography shows disruption of the ellipsoid zone\nand the anterior subarpeal drusen, but no critical neovascularization or subretinal fluid. Furthermore, fluorescein angiography shows window defects without microneumatism or cotton wool spots. What is the prognosis and what are the symptoms?\nTherapies are available. Since there is no activate neovascular membrane, anti-VEGF intravenous injection, B-danivizumab are not indicated. We will initiate oral antioxidant R-side H2 supplement to retard disease progression and give you an abstract date for home surgery. If word conversion occurs, anionic therapy will be considered.\nUnderstood, doctor. I will start the ARDS-2 supplements and monitor you in my visual fields. Excellent. We will schedule a repeat OCD scan and wait for you to find us. Photography in three months. Take care.",
+  "language": "en",
+  "prescription": {
+    "patient": {
+      "name": "Mr. Sharma",
+      "age": "",
+      "sex": ""
+    },
+    "chief_complaints": [],
+    "history": {
+      "systemic": [],
+      "ocular": [],
+      "current_medications": [],
+      "allergies": []
+    },
+    "examination": [
+      {
+        "test": "visual acuity",
+        "kb_id": "ABR-017",
+        "eye": "BE",
+        "result": ""
+      },
+      {
+        "test": "retinoscopy",
+        "kb_id": "TST-009",
+        "eye": "BE",
+        "result": ""
+      },
+      {
+        "test": "Goldman appellation tonometry",
+        "kb_id": "TST-015",
+        "eye": "BE",
+        "result": ""
+      },
+      {
+        "test": "slit lamp bio microscopy",
+        "kb_id": "TST-018",
+        "eye": "BE",
+        "result": "anterior segment unremarkable"
+      },
+      {
+        "test": "indirect ophthalmoscopy",
+        "kb_id": "TST-021",
+        "eye": "BE",
+        "result": "retinal pigment and epithelium atrophy, drusen deposition, mild localized macular edema"
+      },
+      {
+        "test": "optical coherence tomography",
+        "kb_id": "TST-029",
+        "eye": "BE",
+        "result": "disruption of ellipsoid zone and anterior subretinal drusen, no critical neovascularization or subretinal fluid"
+      },
+      {
+        "test": "fluorescein angiography",
+        "kb_id": "TST-018",
+        "eye": "BE",
+        "result": "window defects without microneumatism or cotton wool spots"
+      },
+      {
+        "test": "fundus photography",
+        "kb_id": "TST-034",
+        "eye": "BE",
+        "result": ""
+      }
+    ],
+    "clinical_findings": [
+      {
+        "finding": "posterior vitreous detachment",
+        "kb_id": "DIS-120",
+        "eye": "BE"
+      },
+      {
+        "finding": "vitreous floaters",
+        "kb_id": "DIS-120",
+        "eye": "BE"
+      },
+      {
+        "finding": "retinal pigment and epithelium atrophy",
+        "kb_id": "",
+        "eye": "BE"
+      },
+      {
+        "finding": "drusen deposition",
+        "kb_id": "SGN-048",
+        "eye": "BE"
+      },
+      {
+        "finding": "macular edema",
+        "kb_id": "SGN-049",
+        "eye": "BE"
+      },
+      {
+        "finding": "window defects",
+        "kb_id": "",
+        "eye": "BE"
+      },
+      {
+        "finding": "no subretinal fluid",
+        "kb_id": "SGN-050",
+        "eye": "BE"
+      },
+      {
+        "finding": "no cotton wool spots",
+        "kb_id": "SGN-043",
+        "eye": "BE"
+      }
+    ],
+    "diagnosis": [
+      {
+        "condition": "dry age-related macular degeneration",
+        "kb_id": "DIS-104",
+        "eye": "BE",
+        "grade_or_notes": "no active neovascular membrane, no subretinal fluid, no cotton wool spots, no macular edema progression yet, no window defects with microneumatism",
+        "certainty": "confirmed"
+      }
+    ],
+    "medications": [
+      {
+        "kb_id": "MED-106",
+        "generic_name": "AREDS2 formula",
+        "brand_said": "AREDS-2 supplements",
+        "form": "Other",
+        "strength": "",
+        "eye": "BE",
+        "dose": "",
+        "frequency": "",
+        "duration": "",
+        "phase": "current",
+        "instructions": "to retard disease progression"
+      },
+      {
+        "kb_id": "MED-095",
+        "generic_name": "Dexamethasone intravitreal implant",
+        "brand_said": "abstract date for home surgery",
+        "form": "Other",
+        "strength": "",
+        "eye": "BE",
+        "dose": "",
+        "frequency": "",
+        "duration": "",
+        "phase": "current",
+        "instructions": "scheduled for home surgery"
+      }
+    ],
+    "procedures": [
+      {
+        "procedure": "intravitreal injection",
+        "kb_id": "PRC-050",
+        "eye": "BE",
+        "notes": "not indicated due to no active neovascular membrane"
+      }
+    ],
+    "investigations": [
+      {
+        "test": "spectral domain optical coherence tomography",
+        "kb_id": "TST-029",
+        "eye": "BE",
+        "purpose": "to assess retinal structure and drusen distribution"
+      },
+      {
+        "test": "fluorescein angiography",
+        "kb_id": "TST-018",
+        "eye": "BE",
+        "purpose": "to detect window defects and exclude cotton wool spots"
+      }
+    ],
+    "glasses": [],
+    "advice": [
+      {
+        "text": "monitor visual fields",
+        "kb_id": ""
+      },
+      {
+        "text": "schedule repeat OCT scan",
+        "kb_id": ""
+      },
+      {
+        "text": "photography in three months",
+        "kb_id": ""
+      }
+    ],
+    "follow_up": [
+      {
+        "when": "in three months",
+        "purpose": "repeat OCT scan and fundus photography"
+      }
+    ],
+    "terms": [
+      {
+        "heard": "posterior vitreous detachment",
+        "kb_id": "DIS-120",
+        "canonical": "Vitreous floaters",
+        "category": "disease"
+      },
+      {
+        "heard": "vitreous floaters",
+        "kb_id": "SYM-018",
+        "canonical": "Floaters",
+        "category": "symptom"
+      },
+      {
+        "heard": "retinal pigment and epithelium atrophy",
+        "kb_id": "ANT-029",
+        "canonical": "Retinal pigment epithelium",
+        "category": "anatomy"
+      },
+      {
+        "heard": "drusen deposition",
+        "kb_id": "SGN-048",
+        "canonical": "Drusen",
+        "category": "sign"
+      },
+      {
+        "heard": "macular edema",
+        "kb_id": "SGN-049",
+        "canonical": "Macular oedema",
+        "category": "sign"
+      },
+      {
+        "heard": "age related macular degeneration",
+        "kb_id": "ABR-036",
+        "canonical": "Posterior vitreous detachment",
+        "category": "disease"
+      },
+      {
+        "heard": "anti vegf",
+        "kb_id": "MED-089",
+        "canonical": "Ranibizumab",
+        "category": "medicine"
+      },
+      {
+        "heard": "danivizumab",
+        "kb_id": "MED-089",
+        "canonical": "Ranibizumab",
+        "category": "medicine"
+      },
+      {
+        "heard": "intracolar pressure",
+        "kb_id": "ABR-017",
+        "canonical": "Intraocular pressure",
+        "category": "test"
+      },
+      {
+        "heard": "tropic amide",
+        "kb_id": "MED-052",
+        "canonical": "Tropicamide",
+        "category": "medicine"
+      },
+      {
+        "heard": "fluorescein",
+        "kb_id": "MED-084",
+        "canonical": "Fluorescein sodium",
+        "category": "medicine"
+      },
+      {
+        "heard": "indirect ophthalmoscopy",
+        "kb_id": "TST-021",
+        "canonical": "Fundoscopy (direct / indirect)",
+        "category": "test"
+      },
+      {
+        "heard": "optical coherence tomography",
+        "kb_id": "TST-029",
+        "canonical": "Optical coherence tomography",
+        "category": "test"
+      },
+      {
+        "heard": "visual acuity",
+        "kb_id": "ABR-017",
+        "canonical": "Intraocular pressure",
+        "category": "test"
+      },
+      {
+        "heard": "retinoscopy",
+        "kb_id": "TST-009",
+        "canonical": "Refraction",
+        "category": "test"
+      },
+      {
+        "heard": "Goldman appellation tonometry",
+        "kb_id": "TST-015",
+        "canonical": "Goldmann applanation tonometry",
+        "category": "test"
+      },
+      {
+        "heard": "slit lamp bio microscopy",
+        "kb_id": "TST-018",
+        "canonical": "Slit-lamp biomicroscopy",
+        "category": "test"
+      },
+      {
+        "heard": "fluorescein angiography",
+        "kb_id": "TST-018",
+        "canonical": "Slit-lamp biomicroscopy",
+        "category": "test"
+      },
+      {
+        "heard": "fundus photography",
+        "kb_id": "TST-034",
+        "canonical": "Fundus photography",
+        "category": "test"
+      },
+      {
+        "heard": "abstract date for home surgery",
+        "kb_id": "MED-095",
+        "canonical": "Dexamethasone intravitreal implant",
+        "category": "procedure"
+      }
+    ]
+  },
+  "kbRefs": {
+    "examination.0": {
+      "id": "ABR-017",
+      "name": "Intraocular pressure",
+      "category": "abbreviation",
+      "verified": "llm",
+      "reference": {}
+    },
+    "examination.1": {
+      "id": "TST-009",
+      "name": "Refraction",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "Ref, Retinoscopy (Ret), Subjective refraction (SR)",
+        "Normal / Reference Value": "Emmetropia (plano)"
+      }
+    },
+    "examination.2": {
+      "id": "TST-015",
+      "name": "Goldmann applanation tonometry",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "GAT, AT",
+        "Normal / Reference Value": "10–21 mmHg"
+      }
+    },
+    "examination.3": {
+      "id": "TST-018",
+      "name": "Slit-lamp biomicroscopy",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "SLE, SLB"
+      }
+    },
+    "examination.4": {
+      "id": "TST-021",
+      "name": "Fundoscopy (direct / indirect)",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "DO, IDO (indirect ophthalmoscopy)"
+      }
+    },
+    "examination.5": {
+      "id": "TST-029",
+      "name": "Optical coherence tomography",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "OCT",
+        "Normal / Reference Value": "CMT ~250 µm (device-dependent)"
+      }
+    },
+    "examination.6": {
+      "id": "TST-018",
+      "name": "Slit-lamp biomicroscopy",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "SLE, SLB"
+      }
+    },
+    "examination.7": {
+      "id": "TST-034",
+      "name": "Fundus photography",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "Fundus photo"
+      }
+    },
+    "clinical_findings.0": {
+      "id": "DIS-120",
+      "name": "Vitreous floaters",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H43.3",
+        "Category": "Vitreous",
+        "Usual Management": "Reassurance after dilated exam"
+      }
+    },
+    "clinical_findings.1": {
+      "id": "DIS-120",
+      "name": "Vitreous floaters",
+      "category": "disease",
+      "verified": "resolved",
+      "reference": {
+        "ICD-10 (indicative)": "H43.3",
+        "Category": "Vitreous",
+        "Usual Management": "Reassurance after dilated exam"
+      }
+    },
+    "clinical_findings.3": {
+      "id": "SGN-048",
+      "name": "Drusen",
+      "category": "sign",
+      "verified": "llm",
+      "reference": {}
+    },
+    "clinical_findings.4": {
+      "id": "SGN-049",
+      "name": "Macular oedema",
+      "category": "sign",
+      "verified": "llm",
+      "reference": {}
+    },
+    "clinical_findings.6": {
+      "id": "SGN-050",
+      "name": "Subretinal fluid",
+      "category": "sign",
+      "verified": "llm",
+      "reference": {}
+    },
+    "clinical_findings.7": {
+      "id": "SGN-043",
+      "name": "Cotton-wool spots",
+      "category": "sign",
+      "verified": "llm",
+      "reference": {}
+    },
+    "diagnosis.0": {
+      "id": "DIS-104",
+      "name": "Dry age-related macular degeneration",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H35.3",
+        "Category": "Retina",
+        "Usual Management": "AREDS2 supplements, Amsler grid monitoring, low-vision aids"
+      }
+    },
+    "medications.0": {
+      "id": "MED-106",
+      "name": "AREDS2 formula (lutein, zeaxanthin, vit C, vit E, zinc, copper)",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "Antioxidant supplement",
+        "Common Strength": "As per AREDS2",
+        "Typical Prescription Usage": "1 tablet daily",
+        "Key Cautions / Side Effects": "Zinc GI upset",
+        "Example Brands (India, indicative)": "Ocuvite"
+      }
+    },
+    "medications.1": {
+      "id": "MED-095",
+      "name": "Dexamethasone intravitreal implant",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "Corticosteroid (sustained-release)",
+        "Common Strength": "0.7 mg",
+        "Typical Prescription Usage": "Every 3–6 months",
+        "Key Cautions / Side Effects": "IOP rise, cataract",
+        "Example Brands (India, indicative)": "Ozurdex"
+      }
+    },
+    "procedures.0": {
+      "id": "PRC-050",
+      "name": "Intravitreal injection",
+      "category": "procedure",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "IVI (anti-VEGF / steroid)",
+        "Anaesthesia / Setting": "Topical; OT / clean room"
+      }
+    },
+    "investigations.0": {
+      "id": "TST-029",
+      "name": "Optical coherence tomography",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "OCT",
+        "Normal / Reference Value": "CMT ~250 µm (device-dependent)"
+      }
+    },
+    "investigations.1": {
+      "id": "TST-018",
+      "name": "Slit-lamp biomicroscopy",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "SLE, SLB"
+      }
+    }
+  },
+  "warnings": [
+    "AREDS2 formula: frequency, duration not stated in the conversation.",
+    "Dexamethasone intravitreal implant: frequency, duration not stated in the conversation."
+  ],
+  "detectedTerms": [
+    {
+      "id": "SGN-048",
+      "name": "Drusen",
+      "category": "sign",
+      "heardAs": "drusen",
+      "score": 1
+    },
+    {
+      "id": "ANT-024",
+      "name": "Vitreous",
+      "category": "anatomy",
+      "heardAs": "vitreous",
+      "score": 1
+    },
+    {
+      "id": "DIS-119",
+      "name": "Posterior vitreous detachment",
+      "category": "disease",
+      "heardAs": "posterior vitreous detachment",
+      "score": 1
+    },
+    {
+      "id": "DIS-120",
+      "name": "Vitreous floaters",
+      "category": "disease",
+      "heardAs": "vitreous floaters",
+      "score": 1
+    },
+    {
+      "id": "SYM-018",
+      "name": "Floaters",
+      "category": "symptom",
+      "heardAs": "floaters",
+      "score": 1
+    },
+    {
+      "id": "TST-029",
+      "name": "Optical coherence tomography",
+      "category": "test",
+      "heardAs": "optical coherence tomography",
+      "score": 1
+    },
+    {
+      "id": "SGN-043",
+      "name": "Cotton-wool spots",
+      "category": "sign",
+      "heardAs": "cotton wool spots",
+      "score": 1
+    },
+    {
+      "id": "SGN-050",
+      "name": "Subretinal fluid",
+      "category": "sign",
+      "heardAs": "subretinal fluid",
+      "score": 1
+    },
+    {
+      "id": "ABR-012",
+      "name": "Visual acuity",
+      "category": "abbreviation",
+      "heardAs": "visual acuity",
+      "score": 1
+    },
+    {
+      "id": "ABR-033",
+      "name": "Age-related macular degeneration",
+      "category": "abbreviation",
+      "heardAs": "age related macular degeneration",
+      "score": 1
+    },
+    {
+      "id": "ABR-036",
+      "name": "Posterior vitreous detachment",
+      "category": "abbreviation",
+      "heardAs": "posterior vitreous detachment",
+      "score": 1
+    },
+    {
+      "id": "ANT-001",
+      "name": "Cornea",
+      "category": "anatomy",
+      "heardAs": "cornea",
+      "score": 1
+    },
+    {
+      "id": "DIS-073",
+      "name": "Blepharitis",
+      "category": "disease",
+      "heardAs": "anterior",
+      "score": 0.95
+    },
+    {
+      "id": "DIS-099",
+      "name": "Scleritis",
+      "category": "disease",
+      "heardAs": "anterior",
+      "score": 0.95
+    },
+    {
+      "id": "DIS-107",
+      "name": "Retinal tear / hole",
+      "category": "disease",
+      "heardAs": "retinal tear",
+      "score": 0.95
+    },
+    {
+      "id": "TST-001",
+      "name": "Visual acuity (distance)",
+      "category": "test",
+      "heardAs": "visual acuity",
+      "score": 0.95
+    },
+    {
+      "id": "TST-009",
+      "name": "Refraction",
+      "category": "test",
+      "heardAs": "retinoscopy",
+      "score": 0.95
+    },
+    {
+      "id": "TST-018",
+      "name": "Slit-lamp biomicroscopy",
+      "category": "test",
+      "heardAs": "slit lamp bio microscopy",
+      "score": 0.95
+    },
+    {
+      "id": "TST-021",
+      "name": "Fundoscopy (direct / indirect)",
+      "category": "test",
+      "heardAs": "indirect ophthalmoscopy",
+      "score": 0.95
+    },
+    {
+      "id": "MED-052",
+      "name": "Tropicamide",
+      "category": "medicine",
+      "heardAs": "tropic amide",
+      "score": 0.95
+    },
+    {
+      "id": "MED-084",
+      "name": "Fluorescein sodium",
+      "category": "medicine",
+      "heardAs": "fluorescein",
+      "score": 0.95
+    },
+    {
+      "id": "PRC-050",
+      "name": "Intravitreal injection",
+      "category": "procedure",
+      "heardAs": "anti vegf",
+      "score": 0.95
+    },
+    {
+      "id": "ABR-027",
+      "name": "Posterior / anterior chamber intraocular lens",
+      "category": "abbreviation",
+      "heardAs": "posterior",
+      "score": 0.95
+    },
+    {
+      "id": "ABR-061",
+      "name": "Tablet / capsule / injection",
+      "category": "abbreviation",
+      "heardAs": "injection",
+      "score": 0.95
+    },
+    {
+      "id": "ANT-013",
+      "name": "Angle (iridocorneal)",
+      "category": "anatomy",
+      "heardAs": "angle",
+      "score": 0.95
+    },
+    {
+      "id": "ANT-021",
+      "name": "Lens capsule (anterior / posterior)",
+      "category": "anatomy",
+      "heardAs": "posterior",
+      "score": 0.95
+    },
+    {
+      "id": "SGN-049",
+      "name": "Macular oedema",
+      "category": "sign",
+      "heardAs": "macular edema",
+      "score": 0.88
+    },
+    {
+      "id": "MED-089",
+      "name": "Ranibizumab",
+      "category": "medicine",
+      "heardAs": "danivizumab",
+      "score": 0.86
+    },
+    {
+      "id": "DIS-104",
+      "name": "Dry age-related macular degeneration",
+      "category": "disease",
+      "heardAs": "edema is it age related macular degeneration doctor or diabetic rectaloscopy it is dry age",
+      "score": 0.85
+    },
+    {
+      "id": "TST-013",
+      "name": "Intraocular pressure",
+      "category": "test",
+      "heardAs": "intracolar pressure",
+      "score": 0.85
+    },
+    {
+      "id": "ABR-017",
+      "name": "Intraocular pressure",
+      "category": "abbreviation",
+      "heardAs": "intracolar pressure",
+      "score": 0.85
+    },
+    {
+      "id": "TST-015",
+      "name": "Goldmann applanation tonometry",
+      "category": "test",
+      "heardAs": "goldman appellation tonometry",
+      "score": 0.85
+    },
+    {
+      "id": "TST-034",
+      "name": "Fundus photography",
+      "category": "test",
+      "heardAs": "find us photography",
+      "score": 0.84
+    },
+    {
+      "id": "ANT-029",
+      "name": "Retinal pigment epithelium",
+      "category": "anatomy",
+      "heardAs": "retinal pigment and epithelium",
+      "score": 0.79
+    },
+    {
+      "id": "DIS-105",
+      "name": "Wet age-related macular degeneration",
+      "category": "disease",
+      "heardAs": "epithelium atrophy drusen deposition and mild localized macular edema is it age related macular degeneration",
+      "score": 0.78
+    },
+    {
+      "id": "TST-005",
+      "name": "Near visual acuity",
+      "category": "test",
+      "heardAs": "the visual acuity",
+      "score": 0.77
+    }
+  ],
+  "llm": {
+    "model": "qwen/qwen3-vl-4b",
+    "ms": 87595
+  },
+  "asr": {
+    "language": "en",
+    "backend": "indic",
+    "ms": 36747
+  },
+  "markdown": "# Prescription draft\n_Auto-generated from the consultation audio/transcript. Must be reviewed and signed by the treating ophthalmologist._\n\n**Patient:** Mr. Sharma\n\n## C/o\n- —\n\n## History\n- —\n\n## O/E\n- visual acuity BE `ABR-017`\n- retinoscopy BE `TST-009`\n- Goldman appellation tonometry BE `TST-015`\n- slit lamp bio microscopy BE : anterior segment unremarkable `TST-018`\n- indirect ophthalmoscopy BE : retinal pigment and epithelium atrophy, drusen deposition, mild localized macular edema `TST-021`\n- optical coherence tomography BE : disruption of ellipsoid zone and anterior subretinal drusen, no critical neovascularization or subretinal fluid `TST-029`\n- fluorescein angiography BE : window defects without microneumatism or cotton wool spots `TST-018`\n- fundus photography BE `TST-034`\n- posterior vitreous detachment BE `DIS-120`\n- vitreous floaters BE `DIS-120`\n- retinal pigment and epithelium atrophy BE ⚠︎`not in KB`\n- drusen deposition BE `SGN-048`\n- macular edema BE `SGN-049`\n- window defects BE ⚠︎`not in KB`\n- no subretinal fluid BE `SGN-050`\n- no cotton wool spots BE `SGN-043`\n\n## Diagnosis\n- dry age-related macular degeneration (no active neovascular membrane, no subretinal fluid, no cotton wool spots, no macular edema progression yet, no window defects with microneumatism) BE [ICD-10 H35.3] `DIS-104`\n\n## Rx\n1. Other AREDS2 formula (AREDS-2 supplements) — BE [current] `MED-106`  \n   _to retard disease progression_\n   <sub>KB typical usage: 1 tablet daily</sub>\n2. Other Dexamethasone intravitreal implant (abstract date for home surgery) — BE [current] `MED-095`  \n   _scheduled for home surgery_\n   <sub>KB typical usage: Every 3–6 months</sub>\n\n## Procedure / Surgery advised\n- intravitreal injection BE — not indicated due to no active neovascular membrane `PRC-050`\n\n## Investigations\n- spectral domain optical coherence tomography BE — to assess retinal structure and drusen distribution `TST-029`\n- fluorescein angiography BE — to detect window defects and exclude cotton wool spots `TST-018`\n\n## Advice\n- monitor visual fields\n- schedule repeat OCT scan\n- photography in three months\n\n## Review\n- in three months — repeat OCT scan and fundus photography\n\n## Check before signing\n- AREDS2 formula: frequency, duration not stated in the conversation.\n- Dexamethasone intravitreal implant: frequency, duration not stated in the conversation.\n\n## Terminology detected\n| Heard | Term | KB id | Category |\n|---|---|---|---|\n| posterior vitreous detachment | Vitreous floaters | DIS-120 | disease |\n| vitreous floaters | Floaters | SYM-018 | symptom |\n| retinal pigment and epithelium atrophy | Retinal pigment epithelium | ANT-029 | anatomy |\n| drusen deposition | Drusen | SGN-048 | sign |\n| macular edema | Macular oedema | SGN-049 | sign |\n| age related macular degeneration | Posterior vitreous detachment | ABR-036 | disease |\n| anti vegf | Ranibizumab | MED-089 | medicine |\n| intracolar pressure | Intraocular pressure | ABR-017 | test |\n| tropic amide | Tropicamide | MED-052 | medicine |\n| fluorescein | Fluorescein sodium | MED-084 | medicine |\n| indirect ophthalmoscopy | Fundoscopy (direct / indirect) | TST-021 | test |\n| optical coherence tomography | Optical coherence tomography | TST-029 | test |\n| retinoscopy | Refraction | TST-009 | test |\n| Goldman appellation tonometry | Goldmann applanation tonometry | TST-015 | test |\n| slit lamp bio microscopy | Slit-lamp biomicroscopy | TST-018 | test |\n| fundus photography | Fundus photography | TST-034 | test |\n| abstract date for home surgery | Dexamethasone intravitreal implant | MED-095 | procedure |\n\n<sub>LLM: qwen/qwen3-vl-4b · 87.6 s · ASR: indic 36.7 s</sub>"
+}

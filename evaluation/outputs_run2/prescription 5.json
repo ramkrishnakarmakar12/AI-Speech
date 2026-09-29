@@ -1,0 +1,433 @@
+{
+  "transcript": "আশন বসুন আপনার নিয়ামাড় বয়স্কত আবাব নয় সবনীষ্ করা ব‌সী ব��লুণ কি অস�ুবিধা হচ্‌ছে আ ক সমসর ব ব�যাঙ্বজ এ ক�জ রিংস ক‌ত ব </ স ব পুকুর প্রেসার বা থাইররীট আছে থ্যাড়াবসের ‌থিয়াুলি দুই চোখে মেয়ে বোমিয়ান গ্লাইন বলগিং ও ব‍রফারিট্রীস আছেএ আ আবনাড় প্‌ে‌স ব‌োবিবা হয় আ‌ছু মাণে </ চালছী সাথে</ দুই চো কে  ড্¯াবই য় </ আ </ মীয়§ে‍ল ব��ডি আ‍ন ‌গুলিরাউন্ নিসপাংশন  চ‌শমনএ রডসমএ ‌লকুন   রে�ডং র এর ব জনব ব </ পল্‍যাস  ও ওন ‍পররব  ্ </ ফিভ এনু ব প প র‍� রাতে শহার আগেদুই চোখের বাঁধাড় দে�বে�ন দিনে দীউবি দ��বভাব গরম শে‌ দ�বব়ে�� আর ‌চৌখীর ‍পাদাঽ ধির  ধডাঢ় পরিস্কা় করবরে কম্‌পিউটাু এ ক‍যাজে‍র  </সমীয় বৈতি ব‍বনিশ মিণিট পড় ¨্বীশ ব¨ি‌সিকে </স দ¨ীয় তাকিব�বৌ আ ঘনগণও প′ক ফে�বমবুন ্¯া আ ডে ‍দরগুলো",
+  "english": "What is the problem?\nSugar pressure or Thyroid? Thyroid is there. Thyroxine is there. Sugar pressure is normal.\nThere is also maibomian gland plugging and barfractase. Your pressure is normal. There is also maibomian gland plugging and barfractase. There is also maibomian gland plugging and barfractase. There is also maibomian gland plugging and barfractase. There is also maibomian gland plugging and barfractase.\nBefore going to bed at night, give a gel to your eyes. Wash your eyes twice a day and clean the leaves of your eyes. After 20 minutes of working time on the computer, get out 20 seconds away and take a deep breath. After a month and a half, come to see me again. Thank you, thank you, doctor. I will come again. Thank you, thank you, doctor. I will come again.",
+  "language": "bn",
+  "prescription": {
+    "patient": {
+      "name": "Ashan Bhusun",
+      "age": "",
+      "sex": "male"
+    },
+    "chief_complaints": [],
+    "history": {
+      "systemic": [
+        {
+          "condition": "Thyroid eye disease",
+          "kb_id": "DIS-149",
+          "duration": "chronic",
+          "treatment": "none stated"
+        }
+      ],
+      "ocular": [
+        {
+          "item": "Meibomian gland plugging",
+          "kb_id": "",
+          "eye": "BE"
+        },
+        {
+          "item": "Dry eye disease",
+          "kb_id": "DIS-045",
+          "eye": "BE"
+        },
+        {
+          "item": "Primary open-angle glaucoma",
+          "kb_id": "DIS-017",
+          "eye": "BE"
+        },
+        {
+          "item": "Primary angle-closure glaucoma",
+          "kb_id": "DIS-018",
+          "eye": "BE"
+        }
+      ],
+      "current_medications": [],
+      "allergies": []
+    },
+    "examination": [
+      {
+        "test": "Intraocular pressure",
+        "kb_id": "TST-013",
+        "eye": "BE",
+        "result": "normal"
+      },
+      {
+        "test": "Intraocular pressure",
+        "kb_id": "TST-013",
+        "eye": "BE",
+        "result": "normal"
+      }
+    ],
+    "clinical_findings": [
+      {
+        "finding": "Meibomian gland plugging",
+        "kb_id": "SGN-055",
+        "eye": "BE"
+      },
+      {
+        "finding": "Dry eye disease",
+        "kb_id": "DIS-045",
+        "eye": "BE"
+      },
+      {
+        "finding": "Primary open-angle glaucoma",
+        "kb_id": "DIS-017",
+        "eye": "BE"
+      },
+      {
+        "finding": "Primary angle-closure glaucoma",
+        "kb_id": "DIS-018",
+        "eye": "BE"
+      }
+    ],
+    "diagnosis": [
+      {
+        "condition": "Thyroid eye disease",
+        "kb_id": "DIS-149",
+        "eye": "BE",
+        "grade_or_notes": "chronic",
+        "certainty": "confirmed"
+      },
+      {
+        "condition": "Meibomian gland plugging",
+        "kb_id": "",
+        "eye": "BE",
+        "grade_or_notes": "chronic",
+        "certainty": "confirmed"
+      },
+      {
+        "condition": "Dry eye disease",
+        "kb_id": "DIS-045",
+        "eye": "BE",
+        "grade_or_notes": "chronic",
+        "certainty": "confirmed"
+      },
+      {
+        "condition": "Primary open-angle glaucoma",
+        "kb_id": "DIS-017",
+        "eye": "BE",
+        "grade_or_notes": "chronic",
+        "certainty": "confirmed"
+      },
+      {
+        "condition": "Primary angle-closure glaucoma",
+        "kb_id": "DIS-018",
+        "eye": "BE",
+        "grade_or_notes": "chronic",
+        "certainty": "confirmed"
+      }
+    ],
+    "medications": [
+      {
+        "kb_id": "MED-022",
+        "generic_name": "Prednisolone acetate",
+        "brand_said": "Prednisolone acetate",
+        "form": "Other",
+        "strength": "0.5%",
+        "eye": "BE",
+        "dose": "1 drop",
+        "frequency": "once daily",
+        "duration": "1 month",
+        "phase": "pre-op",
+        "instructions": "Apply before bed at night"
+      },
+      {
+        "kb_id": "MED-022",
+        "generic_name": "Prednisolone acetate",
+        "brand_said": "Prednisolone acetate",
+        "form": "Other",
+        "strength": "0.5%",
+        "eye": "BE",
+        "dose": "1 drop",
+        "frequency": "once daily",
+        "duration": "1 month",
+        "phase": "pre-op",
+        "instructions": "Apply before bed at night"
+      },
+      {
+        "kb_id": "MED-022",
+        "generic_name": "Prednisolone acetate",
+        "brand_said": "Prednisolone acetate",
+        "form": "Other",
+        "strength": "0.5%",
+        "eye": "BE",
+        "dose": "1 drop"
+      }
+    ],
+    "procedures": [],
+    "investigations": [],
+    "glasses": [],
+    "advice": [],
+    "follow_up": [],
+    "terms": []
+  },
+  "kbRefs": {
+    "history.systemic.0": {
+      "id": "DIS-149",
+      "name": "Thyroid eye disease",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H06.2 / E05.0",
+        "Category": "Orbit",
+        "Usual Management": "Lubricants, selenium, steroids, orbital decompression"
+      }
+    },
+    "history.ocular.1": {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H04.1",
+        "Category": "Ocular Surface",
+        "Usual Management": "Lubricants, warm compress, cyclosporine, punctal plugs"
+      }
+    },
+    "history.ocular.2": {
+      "id": "DIS-017",
+      "name": "Primary open-angle glaucoma",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H40.1",
+        "Category": "Glaucoma",
+        "Usual Management": "PG analogue / beta-blocker drops, SLT, trabeculectomy"
+      }
+    },
+    "history.ocular.3": {
+      "id": "DIS-018",
+      "name": "Primary angle-closure glaucoma",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H40.2",
+        "Category": "Glaucoma",
+        "Usual Management": "YAG PI, drops, lens extraction, trabeculectomy"
+      }
+    },
+    "examination.0": {
+      "id": "TST-013",
+      "name": "Intraocular pressure",
+      "category": "test",
+      "verified": "resolved",
+      "reference": {
+        "Abbreviation": "IOP",
+        "Normal / Reference Value": "10–21 mmHg"
+      }
+    },
+    "examination.1": {
+      "id": "TST-013",
+      "name": "Intraocular pressure",
+      "category": "test",
+      "verified": "resolved",
+      "reference": {
+        "Abbreviation": "IOP",
+        "Normal / Reference Value": "10–21 mmHg"
+      }
+    },
+    "clinical_findings.0": {
+      "id": "SGN-055",
+      "name": "Meibomian gland plugging",
+      "category": "sign",
+      "verified": "llm",
+      "reference": {}
+    },
+    "clinical_findings.1": {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H04.1",
+        "Category": "Ocular Surface",
+        "Usual Management": "Lubricants, warm compress, cyclosporine, punctal plugs"
+      }
+    },
+    "clinical_findings.2": {
+      "id": "DIS-017",
+      "name": "Primary open-angle glaucoma",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H40.1",
+        "Category": "Glaucoma",
+        "Usual Management": "PG analogue / beta-blocker drops, SLT, trabeculectomy"
+      }
+    },
+    "clinical_findings.3": {
+      "id": "DIS-018",
+      "name": "Primary angle-closure glaucoma",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H40.2",
+        "Category": "Glaucoma",
+        "Usual Management": "YAG PI, drops, lens extraction, trabeculectomy"
+      }
+    },
+    "diagnosis.0": {
+      "id": "DIS-149",
+      "name": "Thyroid eye disease",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H06.2 / E05.0",
+        "Category": "Orbit",
+        "Usual Management": "Lubricants, selenium, steroids, orbital decompression"
+      }
+    },
+    "diagnosis.2": {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H04.1",
+        "Category": "Ocular Surface",
+        "Usual Management": "Lubricants, warm compress, cyclosporine, punctal plugs"
+      }
+    },
+    "diagnosis.3": {
+      "id": "DIS-017",
+      "name": "Primary open-angle glaucoma",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H40.1",
+        "Category": "Glaucoma",
+        "Usual Management": "PG analogue / beta-blocker drops, SLT, trabeculectomy"
+      }
+    },
+    "diagnosis.4": {
+      "id": "DIS-018",
+      "name": "Primary angle-closure glaucoma",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H40.2",
+        "Category": "Glaucoma",
+        "Usual Management": "YAG PI, drops, lens extraction, trabeculectomy"
+      }
+    },
+    "medications.0": {
+      "id": "MED-022",
+      "name": "Prednisolone acetate",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "Corticosteroid (strong)",
+        "Common Strength": "1%",
+        "Typical Prescription Usage": "1 drop QID / 2-hourly then taper weekly; SHAKE WELL",
+        "Key Cautions / Side Effects": "Raised IOP, cataract, infection risk – monitor IOP",
+        "Example Brands (India, indicative)": "Pred Forte"
+      }
+    },
+    "medications.1": {
+      "id": "MED-022",
+      "name": "Prednisolone acetate",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "Corticosteroid (strong)",
+        "Common Strength": "1%",
+        "Typical Prescription Usage": "1 drop QID / 2-hourly then taper weekly; SHAKE WELL",
+        "Key Cautions / Side Effects": "Raised IOP, cataract, infection risk – monitor IOP",
+        "Example Brands (India, indicative)": "Pred Forte"
+      }
+    },
+    "medications.2": {
+      "id": "MED-022",
+      "name": "Prednisolone acetate",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "Corticosteroid (strong)",
+        "Common Strength": "1%",
+        "Typical Prescription Usage": "1 drop QID / 2-hourly then taper weekly; SHAKE WELL",
+        "Key Cautions / Side Effects": "Raised IOP, cataract, infection risk – monitor IOP",
+        "Example Brands (India, indicative)": "Pred Forte"
+      }
+    }
+  },
+  "warnings": [
+    "⚠ The model's answer was cut short (the model started repeating itself); some items may be missing — check against the transcript.",
+    "\"Meibomian gland plugging\" (diagnosis) is not in the knowledge base — verify spelling.",
+    "Prednisolone acetate: frequency, duration not stated in the conversation."
+  ],
+  "detectedTerms": [
+    {
+      "id": "SGN-055",
+      "name": "Meibomian gland plugging",
+      "category": "sign",
+      "heardAs": "maibomian gland plugging",
+      "score": 0.91
+    },
+    {
+      "id": "DIS-149",
+      "name": "Thyroid eye disease",
+      "category": "disease",
+      "heardAs": "thiyali dui",
+      "score": 0.81
+    },
+    {
+      "id": "MED-086",
+      "name": "Viscoelastic (OVD)",
+      "category": "medicine",
+      "heardAs": "bayaskat",
+      "score": 0.79
+    },
+    {
+      "id": "ABR-075",
+      "name": "With IOL / with natural lens / without lens",
+      "category": "abbreviation",
+      "heardAs": "baiti b",
+      "score": 0.77
+    },
+    {
+      "id": "DIS-045",
+      "name": "Dry eye disease",
+      "category": "disease",
+      "heardAs": "d bai",
+      "score": 0.75
+    },
+    {
+      "id": "DIS-017",
+      "name": "Primary open-angle glaucoma",
+      "category": "disease",
+      "heardAs": "your pressure",
+      "score": 0.68
+    },
+    {
+      "id": "DIS-018",
+      "name": "Primary angle-closure glaucoma",
+      "category": "disease",
+      "heardAs": "your pressure",
+      "score": 0.68
+    },
+    {
+      "id": "DIS-053",
+      "name": "Bacterial keratitis / corneal ulcer",
+      "category": "disease",
+      "heardAs": "chokhe meye",
+      "score": 0.68
+    },
+    {
+      "id": "DIS-054",
+      "name": "Fungal keratitis",
+      "category": "disease",
+      "heardAs": "chokhe meye",
+      "score": 0.68
+    }
+  ],
+  "llm": {
+    "model": "qwen/qwen3-vl-4b",
+    "ms": 45760
+  },
+  "asr": {
+    "language": "bn",
+    "model": "ARTPARK-IISc/whisper-medium-vaani-bengali",
+    "backend": "indic",
+    "ms": 324374
+  },
+  "markdown": "# Prescription draft\n_Auto-generated from the consultation audio/transcript. Must be reviewed and signed by the treating ophthalmologist._\n\n**Patient:** Ashan Bhusun · male\n\n## C/o\n- —\n\n## History\n- k/c/o Thyroid eye disease × chronic — none stated `DIS-149`\n- H/o Meibomian gland plugging BE ⚠︎`not in KB`\n- H/o Dry eye disease BE `DIS-045`\n- H/o Primary open-angle glaucoma BE `DIS-017`\n- H/o Primary angle-closure glaucoma BE `DIS-018`\n\n## O/E\n- Intraocular pressure BE : normal `TST-013`\n- Intraocular pressure BE : normal `TST-013`\n- Meibomian gland plugging BE `SGN-055`\n- Dry eye disease BE `DIS-045`\n- Primary open-angle glaucoma BE `DIS-017`\n- Primary angle-closure glaucoma BE `DIS-018`\n\n## Diagnosis\n- Thyroid eye disease (chronic) BE [ICD-10 H06.2 / E05.0] `DIS-149`\n- Meibomian gland plugging (chronic) BE ⚠︎`not in KB`\n- Dry eye disease (chronic) BE [ICD-10 H04.1] `DIS-045`\n- Primary open-angle glaucoma (chronic) BE [ICD-10 H40.1] `DIS-017`\n- Primary angle-closure glaucoma (chronic) BE [ICD-10 H40.2] `DIS-018`\n\n## Rx\n1. Other Prednisolone acetate 0.5% (Prednisolone acetate) — 1 drop once daily BE × 1 month [pre-op] `MED-022`  \n   _Apply before bed at night_\n   <sub>KB typical usage: 1 drop QID / 2-hourly then taper weekly; SHAKE WELL</sub>\n2. Other Prednisolone acetate 0.5% (Prednisolone acetate) — 1 drop once daily BE × 1 month [pre-op] `MED-022`  \n   _Apply before bed at night_\n   <sub>KB typical usage: 1 drop QID / 2-hourly then taper weekly; SHAKE WELL</sub>\n3. Other Prednisolone acetate 0.5% (Prednisolone acetate) — 1 drop BE `MED-022`\n   <sub>KB typical usage: 1 drop QID / 2-hourly then taper weekly; SHAKE WELL</sub>\n\n## Advice\n- —\n\n## Review\n- —\n\n## Check before signing\n- ⚠ The model's answer was cut short (the model started repeating itself); some items may be missing — check against the transcript.\n- \"Meibomian gland plugging\" (diagnosis) is not in the knowledge base — verify spelling.\n- Prednisolone acetate: frequency, duration not stated in the conversation.\n\n## Terminology detected\n| Heard | Term | KB id | Category |\n|---|---|---|---|\n\n<sub>LLM: qwen/qwen3-vl-4b · 45.8 s · ASR: indic 324.4 s</sub>"
+}
