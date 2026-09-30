@@ -6,6 +6,7 @@ test/.last-request.json
 
 # macOS
 .DS_Store
+evaluation
 # patient data: doctor-approved visits and exported training sets stay local
 data/approved/
 data/training/
