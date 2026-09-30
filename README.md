@@ -1,6 +1,6 @@
 # AI Speech → Ophthalmology Prescription (local)
 
-Doctor–patient conversation audio (and/or transcript) → recognised ophthalmic terminology → structured prescription draft, grounded in the **Ophthalmology Vocabulary** workbook. Everything runs on your Mac; no cloud calls.
+Doctor–patient conversation audio (and/or transcript) → recognised ophthalmic terminology → structured prescription draft, grounded in the **Ophthalmology Vocabulary** workbook. Local mode runs on your Mac without cloud calls; optional AWS production deployment is documented in [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ```
 audio ──► ASR (Whisper large-v3 / Indic models) ──► transcript (+ English translation, token confidence, duration)
