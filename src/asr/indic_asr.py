@@ -14,7 +14,7 @@ Install once:
   python3 -m pip install onnxruntime onnx torchaudio   # no version pin; onnxruntime-gpu does not exist on macOS
 
 Input must be 16 kHz mono 16-bit WAV (index.ts converts with ffmpeg).
-Prints one JSON line: {"text": ..., "model": ..., "device": ...}
+Prints one JSON line: {"text": ..., "model": ..., "device": ..., "confidence"?: mean token prob, "low_conf_ratio"?: ...}
 """
 import argparse, json, os, sys, wave
 
@@ -57,7 +57,7 @@ def run_whisper(model_id, audio, lang, device):
     processor = WhisperProcessor.from_pretrained(model_id)
     model = WhisperForConditionalGeneration.from_pretrained(model_id, dtype=dtype).to(device).eval()
     step = 16000 * 30  # Whisper's native 30 s window
-    parts = []
+    parts, probs = [], []
     for i in range(0, len(audio), step):
         chunk = audio[i : i + step]
         if len(chunk) < 1600:  # <0.1 s
@@ -67,9 +67,24 @@ def run_whisper(model_id, audio, lang, device):
             # No no_repeat_ngram_size here: Bengali is split into byte-level tokens, so a 4-token
             # n-gram ban is only 1-2 letters and forced broken UTF-8 (the "�", "¨", "¯" seen in
             # prescription 5). Loops are removed after decoding instead.
-            ids = model.generate(feats, language=lang, task="transcribe", num_beams=1, max_new_tokens=440)
+            out = model.generate(feats, language=lang, task="transcribe", num_beams=1, max_new_tokens=440,
+                                 return_dict_in_generate=True, output_scores=True)
+        ids = out.sequences if hasattr(out, "sequences") else out  # some transformers versions return a tensor
+        # Token probabilities for the accuracy check (stage 1). Best effort: never fail the transcript over it.
+        try:
+            lp = model.compute_transition_scores(out.sequences, out.scores, normalize_logits=True)[0]
+            probs.extend(float(x) for x in lp.float().exp().cpu().tolist())
+        except Exception as e:  # noqa: BLE001
+            print(f"[indic] no token scores: {e}", file=sys.stderr)
         parts.append(collapse_repeats(processor.batch_decode(ids, skip_special_tokens=True)[0].strip()))
-    return " ".join(p for p in parts if p)
+    return " ".join(p for p in parts if p), probs
+
+
+def summarise(probs, low=0.5):
+    if not probs:
+        return {}
+    low = float(os.environ.get("ASR_LOW_CONF", low))
+    return {"confidence": round(sum(probs) / len(probs), 3), "low_conf_ratio": round(sum(p < low for p in probs) / len(probs), 3)}
 
 
 def collapse_repeats(text):
@@ -170,8 +185,10 @@ def main():
     try:
         audio = load_wav(a.audio)
         device = pick_device()
+        conf = {}
         if engine == "whisper":
-            text = run_whisper(a.model, audio, a.lang, device)
+            text, probs = run_whisper(a.model, audio, a.lang, device)
+            conf = summarise(probs)
         else:
             use_plain_file_cache()
             device = "cpu (onnxruntime)"
@@ -190,7 +207,7 @@ def main():
             msg = f"{a.model} is gated: open its Hugging Face page, accept the terms, then run `hf auth login`. ({msg[:200]})"
         print(json.dumps({"error": msg}))
         hard_exit(3)
-    print(json.dumps({"text": text, "model": a.model, "device": device, "engine": engine}, ensure_ascii=False))
+    print(json.dumps({"text": text, "model": a.model, "device": device, "engine": engine, **conf}, ensure_ascii=False))
     hard_exit(0)
 
 

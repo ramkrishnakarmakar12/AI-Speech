@@ -3,204 +3,629 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>OPD Speech → Rx</title>
-<link rel="icon" href="data:," />
+<title>OPD Rx Assistant</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M2 16s5-9 14-9 14 9 14 9-5 9-14 9S2 16 2 16z' fill='%231d6fd6'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23fff'/%3E%3C/svg%3E" />
 <style>
-  :root { --bg:#f6f7f9; --card:#fff; --ink:#1b1f24; --mute:#667085; --line:#e4e7ec; --acc:#1d6fd6; --warn:#b54708; --warnbg:#fffaeb; --ok:#067647; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#111418; --card:#1a1e24; --ink:#e7e9ec; --mute:#98a2b3; --line:#2b3139; --acc:#5aa2ff; --warn:#fdb022; --warnbg:#2a2213; --ok:#47cd89; } }
-  * { box-sizing: border-box; }
-  body { margin:0; font: 14px/1.5 system-ui, -apple-system, Segoe UI, sans-serif; background:var(--bg); color:var(--ink); }
-  header { padding:14px 20px; border-bottom:1px solid var(--line); display:flex; gap:16px; align-items:baseline; flex-wrap:wrap; }
-  header h1 { font-size:17px; margin:0; }
-  header small { color:var(--mute); }
-  main { display:grid; grid-template-columns: minmax(320px, 420px) 1fr; gap:16px; padding:16px; }
-  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
-  label { display:block; font-weight:600; margin:12px 0 6px; }
-  textarea { width:100%; min-height:260px; font: 13px/1.45 ui-monospace, Menlo, monospace; padding:10px; border:1px solid var(--line); border-radius:8px; background:transparent; color:inherit; }
-  input[type=file] { width:100%; }
-  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
-  button { font:inherit; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:inherit; cursor:pointer; }
-  button.primary { background:var(--acc); border-color:var(--acc); color:#fff; font-weight:600; }
-  button:disabled { opacity:.5; cursor:wait; }
-  .rec { color:#d92d20; }
-  #status { color:var(--mute); margin-top:10px; min-height:20px; }
-  h2 { font-size:15px; margin:18px 0 6px; border-bottom:1px solid var(--line); padding-bottom:4px; }
-  h2:first-child { margin-top:0; }
-  ul { margin:4px 0; padding-left:20px; }
-  table { border-collapse:collapse; width:100%; font-size:13px; }
-  th, td { text-align:left; border-bottom:1px solid var(--line); padding:5px 6px; vertical-align:top; }
-  th { color:var(--mute); font-weight:600; }
-  .id { font: 11px ui-monospace, Menlo, monospace; color:var(--acc); margin-left:6px; }
-  .nokb { font-size:11px; color:var(--warn); margin-left:6px; }
-  .ref { color:var(--mute); font-size:12px; }
-  .warn { background:var(--warnbg); color:var(--warn); border-radius:8px; padding:8px 12px; }
-  .chips span { display:inline-block; border:1px solid var(--line); border-radius:999px; padding:2px 8px; margin:2px; font-size:12px; }
+  :root { --bg:#f4f6f9; --card:#fff; --ink:#101828; --ink2:#344054; --mute:#667085; --line:#e4e7ec; --soft:#f9fafb;
+          --acc:#1d6fd6; --acc2:#175cd3; --accbg:#eff4ff; --warn:#b54708; --warnbg:#fffaeb; --ok:#067647; --okbg:#ecfdf3; --bad:#b42318; --badbg:#fef3f2;
+          --r:12px; --shadow:0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08); }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0c111d; --card:#161b26; --ink:#f5f5f6; --ink2:#cecfd2; --mute:#94969c; --line:#2a2f3a; --soft:#1b2130;
+          --acc:#5aa2ff; --acc2:#84b9ff; --accbg:#16233d; --warn:#fdb022; --warnbg:#2a2213; --ok:#47cd89; --okbg:#0f2a1c; --bad:#f97066; --badbg:#2d1414; --shadow:none; } }
+  * { box-sizing:border-box; }
+  html, body { margin:0; }
+  body { font:14px/1.5 Inter, system-ui, -apple-system, "Segoe UI", "Noto Sans Bengali", "Noto Sans Devanagari", sans-serif; background:var(--bg); color:var(--ink); }
+  button, input, select, textarea { font:inherit; color:inherit; }
+  a { color:var(--acc); text-decoration:none; } a:hover { text-decoration:underline; }
+
+  /* top bar */
+  .topbar { position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:14px; padding:10px 20px; background:var(--card); border-bottom:1px solid var(--line); }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:700; font-size:16px; }
+  .brand svg { width:28px; height:28px; }
+  .env { font-size:11px; font-weight:700; letter-spacing:.04em; padding:2px 8px; border-radius:999px; }
+  .env.local { background:var(--accbg); color:var(--acc); } .env.production { background:var(--okbg); color:var(--ok); }
+  .topbar .grow { flex:1; }
+  .topbar .meta { color:var(--mute); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40vw; }
+  .iconbtn { border:1px solid var(--line); background:var(--card); border-radius:8px; padding:6px 10px; cursor:pointer; font-size:13px; }
+  .iconbtn:hover { background:var(--soft); }
+
+  main { display:grid; grid-template-columns:minmax(360px, 460px) 1fr; gap:18px; padding:18px 20px 40px; max-width:1500px; margin:0 auto; }
+  @media (max-width:1000px) { main { grid-template-columns:1fr; } .topbar .meta { display:none; } }
+  .col { display:flex; flex-direction:column; gap:18px; min-width:0; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); }
+  .card > .hd { display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--line); }
+  .card > .hd h2 { margin:0; font-size:15px; }
+  .card > .hd .step { width:24px; height:24px; border-radius:50%; background:var(--accbg); color:var(--acc); display:grid; place-items:center; font-weight:700; font-size:12px; flex:none; }
+  .card > .hd .sub { color:var(--mute); font-size:12px; margin-left:auto; }
+  .card > .bd { padding:16px; }
+  label.lb { display:block; font-weight:600; font-size:13px; margin:14px 0 6px; color:var(--ink2); }
+  label.lb:first-child { margin-top:0; }
+  .muted { color:var(--mute); } .small { font-size:12px; }
+
+  /* recorder */
+  .rec { display:flex; align-items:center; gap:14px; padding:14px; border:1px solid var(--line); border-radius:10px; background:var(--soft); }
+  .recbtn { width:56px; height:56px; border-radius:50%; border:none; background:#d92d20; color:#fff; cursor:pointer; display:grid; place-items:center; flex:none; box-shadow:0 0 0 4px rgba(217,45,32,.15); }
+  .recbtn svg { width:22px; height:22px; }
+  .recbtn.on { animation:pulse 1.4s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(217,45,32,.45)} 100%{box-shadow:0 0 0 14px rgba(217,45,32,0)} }
+  .recinfo { flex:1; min-width:0; }
+  .timer { font:600 20px/1 ui-monospace, Menlo, monospace; }
+  .meter { height:6px; border-radius:3px; background:var(--line); overflow:hidden; margin-top:8px; }
+  .meter i { display:block; height:100%; width:0; background:linear-gradient(90deg, var(--ok), var(--warn)); transition:width .08s; }
+  .drop { margin-top:10px; border:1.5px dashed var(--line); border-radius:10px; padding:14px; text-align:center; color:var(--mute); cursor:pointer; }
+  .drop.over, .drop:hover { border-color:var(--acc); background:var(--accbg); color:var(--acc); }
+  .drop b { color:var(--ink2); }
+  audio { width:100%; margin-top:10px; }
+  .filechip { display:none; align-items:center; gap:8px; margin-top:10px; font-size:13px; }
+  .filechip.show { display:flex; } .filechip .x { margin-left:auto; }
+
+  .seg { display:grid; grid-template-columns:repeat(4, 1fr); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .seg button { border:none; background:var(--card); padding:8px 6px; cursor:pointer; border-right:1px solid var(--line); font-size:13px; }
+  .seg button:last-child { border-right:none; }
+  .seg button.on { background:var(--acc); color:#fff; font-weight:600; }
+  .hint { font-size:12px; color:var(--mute); margin-top:6px; }
+
+  textarea { width:100%; min-height:200px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--card); font:13px/1.5 ui-monospace, Menlo, "Noto Sans Bengali", "Noto Sans Devanagari", monospace; resize:vertical; }
+  textarea:focus, input:focus, select:focus { outline:2px solid var(--accbg); border-color:var(--acc); }
+  details.fold { margin-top:12px; border:1px solid var(--line); border-radius:10px; }
+  details.fold > summary { cursor:pointer; padding:9px 12px; font-size:13px; color:var(--ink2); list-style:none; }
+  details.fold > summary::before { content:"▸ "; color:var(--mute); } details.fold[open] > summary::before { content:"▾ "; }
+  details.fold > div { padding:0 12px 12px; }
+  details.fold textarea { min-height:100px; }
+
+  .actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .btn { border:1px solid var(--line); background:var(--card); border-radius:9px; padding:9px 14px; cursor:pointer; font-weight:500; display:inline-flex; align-items:center; gap:6px; }
+  .btn:hover { background:var(--soft); }
+  .btn.primary { background:var(--acc); border-color:var(--acc); color:#fff; font-weight:600; }
+  .btn.primary:hover { background:var(--acc2); }
+  .btn.ok { background:var(--ok); border-color:var(--ok); color:#fff; }
+  .btn:disabled { opacity:.5; cursor:not-allowed; }
+  .btn.block { width:100%; justify-content:center; padding:11px; }
+
+  .progress { display:none; margin-top:12px; padding:10px 12px; border-radius:10px; background:var(--accbg); color:var(--acc); font-size:13px; align-items:center; gap:10px; }
+  .progress.show { display:flex; }
+  .spin { width:16px; height:16px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:sp .8s linear infinite; flex:none; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+  .msg { margin-top:10px; font-size:13px; min-height:18px; }
+  .msg.err { color:var(--bad); }
+
+  /* quality panel */
+  .stage { border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-top:10px; }
+  .stage:first-child { margin-top:0; }
+  .stage h3 { font-size:13px; margin:0 0 6px; }
+  .tier { display:inline-block; border-radius:999px; padding:1px 10px; font-weight:700; font-size:11px; letter-spacing:.03em; }
+  .tier.high { background:var(--okbg); color:var(--ok); } .tier.medium { background:var(--warnbg); color:var(--warn); }
+  .tier.low { background:var(--badbg); color:var(--bad); } .tier.unusable { background:var(--bad); color:#fff; }
+  .bar { height:6px; border-radius:3px; background:var(--line); overflow:hidden; width:70px; display:inline-block; vertical-align:middle; }
+  .bar i { display:block; height:100%; background:var(--acc); }
+  table.t { border-collapse:collapse; width:100%; font-size:12.5px; }
+  table.t th, table.t td { text-align:left; border-bottom:1px solid var(--line); padding:5px 6px; vertical-align:top; }
+  table.t th { color:var(--mute); font-weight:600; }
+  .chips span { display:inline-block; border:1px solid var(--line); border-radius:999px; padding:1px 8px; margin:2px; font-size:12px; background:var(--card); }
   .chips b { color:var(--acc); font-weight:600; }
-  .muted { color:var(--mute); }
-  details { margin-top:14px; }
-  pre { white-space:pre-wrap; font-size:12px; }
+  .chips span.unsure { border-color:var(--warn); background:var(--warnbg); }
+  .chips span.neg { border-color:var(--bad); background:var(--badbg); text-decoration:line-through; }
+  .chips .cat { color:var(--mute); font-size:11px; margin-right:4px; }
+  .warnbox { background:var(--warnbg); color:var(--warn); border-radius:10px; padding:10px 12px; font-size:13px; }
+  .warnbox ul { margin:4px 0; padding-left:18px; }
+  .okbox { background:var(--okbg); color:var(--ok); border-radius:10px; padding:10px 12px; font-size:13px; }
+
+  /* prescription */
+  .rxbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; padding:12px 16px; border-bottom:1px solid var(--line); }
+  .rxbar .grow { flex:1; }
+  .menu { position:relative; }
+  .menu .list { display:none; position:absolute; right:0; top:calc(100% + 6px); background:var(--card); border:1px solid var(--line); border-radius:10px; box-shadow:0 8px 24px rgba(16,24,40,.12); min-width:210px; padding:6px; z-index:10; }
+  .menu.open .list { display:block; }
+  .menu .list button { display:block; width:100%; text-align:left; border:none; background:none; padding:8px 10px; border-radius:7px; cursor:pointer; }
+  .menu .list button:hover { background:var(--soft); }
+  .menu .list small { color:var(--mute); display:block; }
+  .empty { padding:60px 24px; text-align:center; color:var(--mute); }
+  .empty svg { width:56px; height:56px; opacity:.5; }
+  .paper-wrap { padding:20px; background:var(--soft); border-radius:0 0 var(--r) var(--r); }
+  .sheet { background:#fff; color:#101828; max-width:820px; margin:0 auto; padding:34px 40px 30px; border-radius:6px; box-shadow:0 2px 10px rgba(16,24,40,.12); font-size:13.5px; }
+  .sheet.editing { outline:2px dashed var(--acc); outline-offset:4px; }
+  .sheet .lh { display:flex; justify-content:space-between; gap:20px; border-bottom:2px solid #1d6fd6; padding-bottom:12px; }
+  .sheet .clinic { font-size:20px; font-weight:700; color:#1d6fd6; }
+  .sheet .lh .r { text-align:right; }
+  .sheet .lh .dr { font-weight:700; font-size:15px; }
+  .sheet .lh .s { color:#475467; font-size:12px; }
+  .sheet .pt { display:grid; grid-template-columns:1fr auto; gap:6px 20px; padding:10px 0; border-bottom:1px solid #e4e7ec; font-size:13px; }
+  .sheet .pt b { color:#344054; }
+  .sheet h4 { font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:#1d6fd6; margin:14px 0 4px; }
+  .sheet ul { margin:2px 0; padding-left:18px; } .sheet li { margin:1px 0; }
+  .sheet .rxsym { font:700 26px/1 Georgia, serif; color:#1d6fd6; margin:12px 0 4px; }
+  .sheet table { width:100%; border-collapse:collapse; font-size:13px; margin-top:4px; }
+  .sheet th { text-align:left; font-size:11px; color:#667085; font-weight:600; border-bottom:1px solid #d0d5dd; padding:5px 6px; }
+  .sheet td { border-bottom:1px solid #eaecf0; padding:6px; vertical-align:top; }
+  .sheet .med { font-weight:600; } .sheet .inst { color:#475467; font-size:12px; }
+  .sheet .foot { display:flex; justify-content:space-between; align-items:flex-end; margin-top:36px; gap:20px; }
+  .sheet .sign { text-align:center; min-width:200px; border-top:1px solid #98a2b3; padding-top:4px; font-size:12px; color:#475467; }
+  .sheet .disc { font-size:10.5px; color:#98a2b3; max-width:380px; }
+  .sheet .none { color:#98a2b3; }
+  .kb { font:10.5px ui-monospace, Menlo, monospace; color:#1d6fd6; background:#eff4ff; border-radius:4px; padding:0 4px; margin-left:5px; }
+  .kb.no { color:#b54708; background:#fffaeb; }
+  .kbref { color:#667085; font-size:11.5px; }
+  .hide-kb .screen-only { display:none !important; }
+  .belowsheet { padding:0 20px 20px; background:var(--soft); border-radius:0 0 var(--r) var(--r); }
+  .belowsheet .inner { max-width:820px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
+
+  /* modal + toast */
+  .modal { position:fixed; inset:0; background:rgba(16,24,40,.5); display:none; align-items:center; justify-content:center; z-index:50; padding:16px; }
+  .modal.show { display:flex; }
+  .modal .box { background:var(--card); border-radius:14px; width:min(520px, 100%); padding:20px; box-shadow:0 20px 40px rgba(0,0,0,.25); }
+  .modal h3 { margin:0 0 4px; } .modal input { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--card); }
+  .modal .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+  .modal .grid .full { grid-column:1/-1; }
+  .modal .grid label { font-size:12px; color:var(--mute); display:block; margin-bottom:4px; }
+  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:#101828; color:#fff; padding:10px 16px; border-radius:10px; opacity:0; transition:.2s; z-index:60; font-size:13px; pointer-events:none; }
+  .toast.show { opacity:1; transform:translateX(-50%); }
+  footer { text-align:center; color:var(--mute); font-size:12px; padding:0 20px 30px; }
+
+  @media print {
+    @page { size:A4; margin:12mm; }
+    body { background:#fff !important; }
+    body * { visibility:hidden !important; }
+    #rxSheet, #rxSheet * { visibility:visible !important; }
+    #rxSheet { position:absolute; left:0; top:0; width:100%; max-width:none; box-shadow:none; padding:0; margin:0; outline:none !important; }
+    #rxSheet .screen-only { display:none !important; }
+  }
 </style>
 </head>
 <body>
-<header>
-  <h1>OPD conversation → Prescription draft</h1>
-  <small id="cfg">loading…</small>
-</header>
+<div class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M2 16s5-9 14-9 14 9 14 9-5 9-14 9S2 16 2 16z" fill="#1d6fd6"/><circle cx="16" cy="16" r="5.5" fill="#fff"/><circle cx="16" cy="16" r="2.6" fill="#1d6fd6"/></svg>
+    OPD Rx Assistant
+  </div>
+  <span class="env local" id="envBadge">LOCAL</span>
+  <span class="meta" id="cfg">loading…</span>
+  <span class="grow"></span>
+  <a class="iconbtn" href="/general" title="Transcription accuracy lab">Accuracy lab</a>
+  <button class="iconbtn" id="settingsBtn" title="Clinic & doctor details for the prescription header">⚙ Clinic details</button>
+</div>
+
 <main>
-  <section class="card">
-    <label>1. Conversation audio (optional if you paste a transcript)</label>
-    <input type="file" id="audio" accept="audio/*,video/*" />
-    <label for="lang">Spoken language</label>
-    <select id="lang" style="font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:inherit">
-      <option value="auto">Auto-detect</option>
-      <option value="en">English</option>
-      <option value="hi">Hindi (हिन्दी)</option>
-      <option value="bn">Bengali (বাংলা)</option>
-    </select>
-    <div class="row">
-      <button id="recBtn">● Record</button>
-      <button id="trBtn">Transcribe only</button>
-    </div>
-    <audio id="player" controls style="width:100%;margin-top:8px;display:none"></audio>
+  <div class="col">
+    <!-- 1. audio -->
+    <section class="card">
+      <div class="hd"><span class="step">1</span><h2>Consultation audio</h2><span class="sub">record live or upload</span></div>
+      <div class="bd">
+        <div class="rec">
+          <button class="recbtn" id="recBtn" title="Start / stop recording" aria-label="Record">
+            <svg viewBox="0 0 24 24" id="recIcon"><circle cx="12" cy="12" r="7" fill="currentColor"/></svg>
+          </button>
+          <div class="recinfo">
+            <div class="timer" id="timer">00:00</div>
+            <div class="small muted" id="recState">Tap to record the doctor–patient conversation</div>
+            <div class="meter"><i id="level"></i></div>
+          </div>
+        </div>
+        <label class="drop" id="drop" for="audio"><b>Upload a recording</b> or drag it here<br><span class="small">m4a · mp3 · wav · webm · ogg · mp4</span></label>
+        <input type="file" id="audio" accept="audio/*,video/*,.m4a" hidden />
+        <div class="filechip" id="fileChip"><span>🎧</span><span id="fileName"></span><button class="iconbtn x" id="clearAudio" title="Remove audio">✕</button></div>
+        <audio id="player" controls style="display:none"></audio>
 
-    <label>2. Transcript (optional — if given, it is used instead of ASR)</label>
-    <textarea id="transcript" placeholder="Doctor: ...&#10;Patient: ..."></textarea>
-    <label>English translation <span class="muted" style="font-weight:400">(filled automatically for Hindi/Bengali audio)</span></label>
-    <textarea id="english" style="min-height:110px" placeholder="optional"></textarea>
-    <div class="row">
-      <button id="matchBtn">Detect terms (instant, no LLM)</button>
-      <button id="goBtn" class="primary">Generate prescription</button>
-    </div>
-    <div id="status"></div>
-    <div id="chips" class="chips"></div>
-  </section>
+        <label class="lb">Spoken language</label>
+        <div class="seg" id="langSeg">
+          <button data-v="bn">বাংলা</button><button data-v="hi">हिन्दी</button><button data-v="en">English</button><button data-v="auto">Auto</button>
+        </div>
+        <div class="hint">Pick the language — auto-detect often mistakes Bengali for Hindi or Punjabi.</div>
 
-  <section class="card" id="out"><p class="muted">The prescription draft will appear here.</p></section>
+        <div class="actions">
+          <button class="btn" id="trBtn">Transcribe only</button>
+          <button class="btn primary" id="goBtn1" style="flex:1;justify-content:center">Generate prescription</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. transcript -->
+    <section class="card">
+      <div class="hd"><span class="step">2</span><h2>Transcript</h2><span class="sub">edit before generating if needed</span></div>
+      <div class="bd">
+        <textarea id="transcript" placeholder="Filled automatically from the audio — or paste a transcript here (Doctor: … / Patient: …)"></textarea>
+        <details class="fold" id="engFold"><summary>English machine translation <span class="muted small">(Hindi/Bengali audio)</span></summary>
+          <div><textarea id="english" placeholder="optional"></textarea><div class="hint">Not shown to the model for Bengali unless LLM_USE_TRANSLATION=on — it changed days and times in testing.</div></div></details>
+        <details class="fold"><summary>Reference script <span class="muted small">(testing only — measures real accuracy)</span></summary>
+          <div><textarea id="reference" placeholder="Paste the script that was read out for this recording"></textarea></div></details>
+        <div class="actions">
+          <button class="btn" id="matchBtn" title="Accuracy → keywords → eye terms, no LLM">Check quality &amp; terms</button>
+          <button class="btn primary" id="goBtn" style="flex:1;justify-content:center">Generate prescription</button>
+        </div>
+        <div class="progress" id="progress"><span class="spin"></span><span id="progressText">Working…</span></div>
+        <div class="msg" id="status"></div>
+      </div>
+    </section>
+
+    <!-- quality -->
+    <section class="card" id="qualityCard" style="display:none">
+      <div class="hd"><span class="step">✓</span><h2>Quality &amp; eye terms</h2><span class="sub" id="qualitySub"></span></div>
+      <div class="bd" id="analysis"></div>
+    </section>
+  </div>
+
+  <!-- 3. prescription -->
+  <div class="col">
+    <section class="card" id="rxCard">
+      <div class="rxbar">
+        <span class="step" style="width:24px;height:24px;border-radius:50%;background:var(--accbg);color:var(--acc);display:grid;place-items:center;font-weight:700;font-size:12px">3</span>
+        <h2 style="margin:0;font-size:15px">Prescription</h2>
+        <span class="grow"></span>
+        <label class="small muted" style="display:flex;align-items:center;gap:5px"><input type="checkbox" id="showKb" checked /> KB codes</label>
+        <button class="btn" id="editBtn" disabled>✎ Edit text</button>
+        <button class="btn" id="printBtn" disabled>🖨 Print</button>
+        <div class="menu" id="dlMenu">
+          <button class="btn primary" id="dlBtn" disabled>⬇ Download ▾</button>
+          <div class="list">
+            <button data-dl="pdf">PDF <small>print-quality, keeps Bengali/Hindi script</small></button>
+            <button data-dl="doc">Word document <small>.doc, editable</small></button>
+            <button data-dl="md">Markdown <small>.md</small></button>
+            <button data-dl="json">JSON <small>structured data with KB ids</small></button>
+          </div>
+        </div>
+      </div>
+      <div id="rxOut">
+        <div class="empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3h6l1 2h3v16H5V5h3z"/><path d="M9 11h6M9 15h4"/></svg>
+          <p><b>No prescription yet</b><br>Record or upload the consultation, pick the language and press <b>Generate prescription</b>.</p>
+        </div>
+      </div>
+    </section>
+  </div>
 </main>
+<footer>AI-assisted draft. Every prescription must be reviewed, corrected and signed by the treating ophthalmologist.</footer>
+
+<div class="modal" id="settings"><div class="box">
+  <h3>Clinic &amp; doctor details</h3>
+  <div class="small muted">Printed on the prescription header. Saved in this browser.</div>
+  <div class="grid">
+    <div class="full"><label>Clinic / hospital name</label><input id="s_clinic" placeholder="e.g. City Eye Care Centre" /></div>
+    <div class="full"><label>Address</label><input id="s_addr" /></div>
+    <div><label>Phone</label><input id="s_phone" /></div>
+    <div><label>Doctor name</label><input id="s_doctor" placeholder="Dr. …" /></div>
+    <div><label>Qualification</label><input id="s_qual" placeholder="MS (Ophth)" /></div>
+    <div><label>Registration no.</label><input id="s_reg" /></div>
+  </div>
+  <div class="actions" style="justify-content:flex-end"><button class="btn" id="s_cancel">Cancel</button><button class="btn primary" id="s_save">Save</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
 
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-let recorded = null, mediaRec = null;
+const store = { get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+function toast(t) { const el = $("toast"); el.textContent = t; el.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove("show"), 2600); }
 
-fetch("/api/config").then(r => r.json()).then(c => {
-  $("cfg").textContent = `ASR: ${c.asr} · LLM: ${c.llm.provider} / ${c.llm.model} · KB: ${c.kbTerms} terms`;
-}).catch(() => $("cfg").textContent = "server config unavailable");
+let recorded = null, mediaRec = null, lastAsr = null, current = null, lang = store.get("rx.lang", "bn");
+const asrFor = (text) => (lastAsr && lastAsr.text === text ? JSON.stringify(lastAsr.signals) : "");
+const KW = { eye_side:"Eye side", eye:"Eye/vision", number:"Numbers", measurement:"Measurements", time_unit:"Durations", time_of_day:"Time of day", frequency:"Frequency", dosage_form:"Dosage form", symptom:"Lay symptoms", negation:"Negation", affirmation:"Yes/OK", speaker:"Speakers", follow_up:"Follow-up" };
+const LANGS = { bn: "Bengali", hi: "Hindi", en: "English", auto: "Auto" };
 
-function busy(on, msg = "") {
-  for (const b of document.querySelectorAll("button")) if (b.id !== "recBtn") b.disabled = on;
-  $("status").textContent = msg;
+/* ---------- config ---------- */
+fetch("/api/config").then((r) => r.json()).then((c) => {
+  const env = c.modelEnv || "local";
+  $("envBadge").textContent = env === "production" ? "PRODUCTION" : "LOCAL";
+  $("envBadge").className = "env " + env;
+  const asr = c.asr === "indic" && c.asrModels ? `IndicConformer (bn/hi) + Whisper (en)` : c.asr;
+  $("cfg").textContent = `Speech: ${asr} · LLM: ${c.llm.model} · ${c.kbTerms} eye terms · ${c.approved ?? 0} approved examples`;
+  $("cfg").title = $("cfg").textContent;
+}).catch(() => ($("cfg").textContent = "server config unavailable"));
+
+/* ---------- language ---------- */
+function setLang(v) { lang = v; store.set("rx.lang", v); for (const b of $("langSeg").children) b.classList.toggle("on", b.dataset.v === v); }
+for (const b of $("langSeg").children) b.onclick = () => setLang(b.dataset.v);
+setLang(lang);
+
+/* ---------- audio: upload / drag & drop ---------- */
+function setAudio(blob, name) {
+  recorded = blob;
+  $("player").src = URL.createObjectURL(blob); $("player").style.display = "block";
+  $("fileName").textContent = name; $("fileChip").classList.add("show");
 }
-function audioBlob() {
-  if (recorded) return [recorded, "recording.webm"];
-  const f = $("audio").files[0];
-  return f ? [f, f.name] : null;
-}
-$("audio").onchange = () => { recorded = null; const f = $("audio").files[0]; if (f) { $("player").src = URL.createObjectURL(f); $("player").style.display = "block"; } };
+function audioBlob() { return recorded ? [recorded, $("fileName").textContent || "recording.webm"] : null; }
+$("audio").onchange = () => { const f = $("audio").files[0]; if (f) setAudio(f, f.name); };
+$("clearAudio").onclick = () => { recorded = null; $("audio").value = ""; $("player").style.display = "none"; $("fileChip").classList.remove("show"); };
+const drop = $("drop");
+["dragenter", "dragover"].forEach((e) => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach((e) => drop.addEventListener(e, (ev) => { ev.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", (ev) => { const f = ev.dataTransfer.files[0]; if (f) setAudio(f, f.name); });
 
+/* ---------- live recording with timer + level meter ---------- */
+let recT0 = 0, recTick = null, audioCtx = null, rafId = 0;
+const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 $("recBtn").onclick = async () => {
   if (mediaRec) { mediaRec.stop(); return; }
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+  catch (e) { return toast("Microphone not available: " + e.message); }
   const chunks = [];
-  mediaRec = new MediaRecorder(stream);
-  mediaRec.ondataavailable = (e) => chunks.push(e.data);
+  const mime = ["audio/webm;codecs=opus", "audio/mp4", "audio/webm"].find((m) => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || "";
+  mediaRec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+  mediaRec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
   mediaRec.onstop = () => {
-    recorded = new Blob(chunks, { type: mediaRec.mimeType });
-    stream.getTracks().forEach(t => t.stop());
-    $("player").src = URL.createObjectURL(recorded); $("player").style.display = "block";
-    $("recBtn").textContent = "● Record"; $("recBtn").classList.remove("rec"); mediaRec = null;
+    const type = mediaRec.mimeType || "audio/webm";
+    const ext = type.includes("mp4") ? "m4a" : "webm";
+    setAudio(new Blob(chunks, { type }), `recording-${new Date().toISOString().slice(11, 19).replace(/:/g, "")}.${ext}`);
+    stream.getTracks().forEach((t) => t.stop());
+    clearInterval(recTick); cancelAnimationFrame(rafId); audioCtx && audioCtx.close(); audioCtx = null;
+    $("level").style.width = "0"; $("recBtn").classList.remove("on");
+    $("recIcon").innerHTML = '<circle cx="12" cy="12" r="7" fill="currentColor"/>';
+    $("recState").textContent = `Recorded ${$("timer").textContent} — ready to transcribe`;
+    mediaRec = null;
   };
-  mediaRec.start();
-  $("recBtn").textContent = "■ Stop"; $("recBtn").classList.add("rec");
+  mediaRec.start(1000);
+  recT0 = Date.now(); $("timer").textContent = "00:00";
+  recTick = setInterval(() => ($("timer").textContent = fmt((Date.now() - recT0) / 1000)), 250);
+  $("recBtn").classList.add("on"); $("recIcon").innerHTML = '<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>';
+  $("recState").textContent = "Recording… tap to stop";
+  try {
+    audioCtx = new AudioContext(); const an = audioCtx.createAnalyser(); an.fftSize = 512;
+    audioCtx.createMediaStreamSource(stream).connect(an);
+    const buf = new Uint8Array(an.fftSize);
+    const loop = () => { an.getByteTimeDomainData(buf); let peak = 0; for (const v of buf) peak = Math.max(peak, Math.abs(v - 128)); $("level").style.width = Math.min(100, peak * 1.4) + "%"; rafId = requestAnimationFrame(loop); };
+    loop();
+  } catch {}
 };
 
+/* ---------- busy / progress ---------- */
+function busy(on, text = "") {
+  for (const id of ["trBtn", "goBtn", "goBtn1", "matchBtn"]) $(id).disabled = on;
+  $("progress").classList.toggle("show", on); $("progressText").textContent = text;
+  if (on) { $("status").textContent = ""; $("status").className = "msg"; }
+}
+function status(t, err) { $("status").textContent = t; $("status").className = "msg" + (err ? " err" : ""); }
+
+/* ---------- quality panel ---------- */
+function qualityHtml(q, policy) {
+  const head = q.source === "measured"
+    ? `measured ${q.measured.metric} ${Math.round((q.measured.metric === "WER" ? q.measured.wer : q.measured.cer) * 100)}% → ${Math.round(q.score * 100)}% <span class="muted">(estimate ${Math.round(q.estimated * 100)}%)</span>`
+    : `estimated ${Math.round(q.score * 100)}%`;
+  let h = `<div class="stage"><h3>1 · Transcription accuracy</h3><span class="tier ${q.tier}">${q.tier.toUpperCase()}</span> ${head} <span class="muted small">· ${esc(q.language)} · ${q.words} words</span>`;
+  h += `<table class="t" style="margin-top:6px">` + q.signals.filter((s) => s.score !== null).map((s) => `<tr><td>${esc(s.name.replace(/_/g, " "))}</td><td style="white-space:nowrap"><span class="bar"><i style="width:${Math.round(s.score * 100)}%"></i></span> ${s.score.toFixed(2)}</td><td class="muted">${esc(s.note)}</td></tr>`).join("") + `</table>`;
+  if (q.issues.length) h += `<div class="warnbox" style="margin-top:8px"><ul>${q.issues.map((i) => `<li>${esc(i)}</li>`).join("")}</ul></div>`;
+  if (policy) h += `<div class="small muted" style="margin-top:6px">Term matching: ${esc(policy.description)}</div>`;
+  return h + `</div>`;
+}
+function keywordsHtml(k) {
+  let h = `<div class="stage"><h3>2 · General keywords <span class="muted small" style="font-weight:400">${k.totalHits} hits · ${k.perHundredWords}/100 words</span></h3><div class="chips">`;
+  h += Object.entries(k.byCategory).map(([cat, keys]) => `<div><span class="cat">${esc(KW[cat] || cat)}</span>` + keys.map((key) => { const x = k.hits.find((y) => y.category === cat && y.key === key); return `<span title="heard: ${esc(x.heardAs.join(", "))}">${esc(key)} ×${x.count}</span>`; }).join("") + `</div>`).join("") || '<span class="muted">none</span>';
+  return h + `</div></div>`;
+}
+function domainHtml(d) {
+  if (!d) return "";
+  let h = `<div class="stage"><h3>3 · Eye-clinic phrases decoded</h3>`;
+  const lex = d.lexicon || [];
+  h += lex.length ? `<div class="chips">` + lex.map((l) => `<span class="${l.negated ? "neg" : ""}" title="${esc(l.hint || "")}${l.negated ? " · denied" : ""}">«${esc(l.heard)}» → ${l.id ? `<b>${esc(l.id)}</b> ${esc(l.name || "")}` : esc(l.hint || "")}</span>`).join("") + `</div>` : `<span class="muted small">No lay phrases found.</span>`;
+  if (d.negated && d.negated.length) h += `<div class="small" style="margin-top:6px"><b>Denied:</b> ${d.negated.map(esc).join(" · ")}</div>`;
+  if (d.blocked && d.blocked.length) h += `<div class="small muted" style="margin-top:4px">Suppressed false matches: ${d.blocked.map(esc).join(", ")}</div>`;
+  if (d.translation && !d.translation.used && d.translation.reason) h += `<div class="small muted" style="margin-top:4px">Machine translation not used: ${esc(d.translation.reason)}</div>`;
+  if (d.removed && d.removed.length) h += `<div class="warnbox" style="margin-top:8px"><b>Removed after generation</b><ul>${d.removed.map((r) => `<li>${esc(r)}</li>`).join("")}</ul></div>`;
+  if (d.notes && d.notes.length) h += `<div class="small muted" style="margin-top:6px">${d.notes.map(esc).join(" · ")}</div>`;
+  if (d.examples && d.examples.length) h += `<div class="small muted" style="margin-top:4px">Used ${d.examples.length} approved clinic example(s) as guidance.</div>`;
+  return h + `</div>`;
+}
+function termsHtml(terms) {
+  return `<div class="stage"><h3>4 · Knowledge-base terms</h3><div class="chips">` + (terms.length ? terms.map((x) => `<span class="${x.uncertain ? "unsure" : ""}" title="${esc(x.category)} · heard “${esc(x.heardAs)}” · ${x.score.toFixed(2)}${x.uncertain ? " · speech model unsure here" : ""}"><b>${esc(x.id)}</b> ${esc(x.name)}${x.uncertain ? " ⚠" : ""}</span>`).join("") : '<span class="muted">No terms detected</span>') + `</div></div>`;
+}
+function showAnalysis(a) {
+  $("qualityCard").style.display = "block";
+  $("qualitySub").innerHTML = `<span class="tier ${a.quality.tier}">${a.quality.tier.toUpperCase()}</span>`;
+  $("analysis").innerHTML = qualityHtml(a.quality, a.policy) + keywordsHtml(a.keywords) + domainHtml(a.domain) + termsHtml(a.detectedTerms);
+}
+
+/* ---------- actions ---------- */
 $("trBtn").onclick = async () => {
-  const a = audioBlob(); if (!a) return alert("Choose or record audio first");
-  const fd = new FormData(); fd.append("audio", a[0], a[1]); fd.append("language", $("lang").value);
-  busy(true, "Transcribing…");
+  const a = audioBlob(); if (!a) return toast("Record or upload audio first");
+  const fd = new FormData(); fd.append("audio", a[0], a[1]); fd.append("language", lang); fd.append("reference", $("reference").value);
+  busy(true, "Transcribing… (first run loads the speech model)");
   try {
-    const r = await fetch("/api/transcribe", { method: "POST", body: fd }).then(r => r.json());
+    const r = await fetch("/api/transcribe", { method: "POST", body: fd }).then((r) => r.json());
     if (r.error) throw new Error(r.error);
-    $("transcript").value = r.text;
-    $("english").value = r.english || "";
-    if (r.language && [...$("lang").options].some(o => o.value === r.language)) $("lang").value = r.language;
-    busy(false, `Transcribed (${r.language || "?"}) with ${r.backend} in ${(r.ms/1000).toFixed(1)} s — edit if needed, then Generate.`);
-  } catch (e) { busy(false, "✘ " + e.message); }
+    $("transcript").value = r.text; $("english").value = r.english || "";
+    if (r.english) $("engFold").open = false;
+    lastAsr = { text: r.text, signals: r.signals };
+    if (r.language && LANGS[r.language] && lang === "auto") setLang(r.language);
+    showAnalysis(r.analysis);
+    busy(false); status(`Transcribed (${LANGS[r.language] || r.language || "?"}) in ${(r.ms / 1000).toFixed(1)} s — accuracy ${r.analysis.quality.tier}. Review, then generate.`);
+  } catch (e) { busy(false); status("✘ " + e.message, true); }
 };
 
 $("matchBtn").onclick = async () => {
-  const fd = new FormData(); fd.append("transcript", $("transcript").value + "\n" + $("english").value);
-  const m = await fetch("/api/match", { method: "POST", body: fd }).then(r => r.json());
-  $("chips").innerHTML = m.length ? m.map(x => `<span title="${esc(x.category)} · heard “${esc(x.heardAs)}” · ${x.score.toFixed(2)}"><b>${esc(x.id)}</b> ${esc(x.name)}</span>`).join("") : '<span class="muted">No terms detected</span>';
+  if (!$("transcript").value.trim()) return toast("Transcribe or paste a transcript first");
+  const fd = new FormData();
+  fd.append("transcript", $("transcript").value); fd.append("english", $("english").value);
+  fd.append("language", lang); fd.append("reference", $("reference").value); fd.append("asr", asrFor($("transcript").value));
+  busy(true, "Checking…");
+  try {
+    const r = await fetch("/api/analyze", { method: "POST", body: fd }).then((r) => r.json());
+    if (r.error) throw new Error(r.error);
+    showAnalysis(r); busy(false); status("Quality check done.");
+  } catch (e) { busy(false); status("✘ " + e.message, true); }
 };
 
-$("goBtn").onclick = async () => {
+$("goBtn").onclick = $("goBtn1").onclick = () => generate(false);
+async function generate(force) {
   const fd = new FormData();
-  const a = audioBlob(); if (a) fd.append("audio", a[0], a[1]);
-  fd.append("transcript", $("transcript").value);
-  fd.append("english", $("english").value);
-  fd.append("language", $("lang").value);
-  if (!a && !$("transcript").value.trim()) return alert("Provide audio or a transcript");
-  busy(true, a && !$("transcript").value.trim() ? "Transcribing and extracting… (first run loads the models)" : "Extracting with the LLM…");
+  const a = audioBlob();
+  const hasText = !!$("transcript").value.trim();
+  if (!a && !hasText) return toast("Record/upload audio or paste a transcript");
+  if (a && !hasText) fd.append("audio", a[0], a[1]);
+  fd.append("transcript", $("transcript").value); fd.append("english", $("english").value);
+  fd.append("language", lang); fd.append("reference", $("reference").value); fd.append("asr", asrFor($("transcript").value));
+  if (force) fd.append("force", "true");
+  busy(true, !hasText ? "Transcribing and writing the prescription… (a few minutes on the first run)" : "Writing the prescription with the LLM…");
   const t0 = performance.now();
   try {
-    const r = await fetch("/api/process", { method: "POST", body: fd }).then(r => r.json());
+    const r = await fetch("/api/process", { method: "POST", body: fd }).then((r) => r.json());
     if (r.error) throw new Error(r.error);
-    if (!$("transcript").value.trim()) { $("transcript").value = r.transcript; $("english").value = r.english || ""; }
-    render(r);
-    busy(false, `Done in ${((performance.now()-t0)/1000).toFixed(1)} s`);
-  } catch (e) { busy(false, "✘ " + e.message); }
+    if (!hasText) { $("transcript").value = r.transcript; $("english").value = r.english || ""; lastAsr = null; }
+    showAnalysis(r);
+    current = r; renderRx();
+    busy(false);
+    status(r.llm.skipped ? `Transcript rated ${r.quality.tier} — no prescription generated.` : `Prescription drafted in ${((performance.now() - t0) / 1000).toFixed(0)} s. Review before signing.`);
+  } catch (e) { busy(false); status("✘ " + e.message, true); }
+}
+
+/* ---------- prescription rendering ---------- */
+function clinic() { return store.get("rx.clinic", {}); }
+function renderRx() {
+  const r = current;
+  const out = $("rxOut");
+  for (const id of ["editBtn", "printBtn", "dlBtn"]) $(id).disabled = !r || !!r.llm.skipped;
+  if (!r) return;
+  if (r.llm.skipped) {
+    out.innerHTML = `<div class="bd"><div class="warnbox"><b>No prescription generated.</b><ul>${r.warnings.map((w) => `<li>${esc(w)}</li>`).join("")}</ul></div><div class="actions"><button class="btn" id="forceBtn">Generate anyway</button></div></div>`;
+    $("forceBtn").onclick = () => generate(true);
+    return;
+  }
+  const p = r.prescription, refs = r.kbRefs || {}, c = clinic();
+  const tag = (k) => refs[k] ? `<span class="kb screen-only" title="${esc(refs[k].name)} (${refs[k].verified})">${esc(refs[k].id)}</span>` : `<span class="kb no screen-only">not in KB</span>`;
+  const j = (...xs) => xs.filter((x) => x && String(x).trim()).join(" ");
+  const list = (items) => items.length ? `<ul>${items.map((i) => `<li>${i}</li>`).join("")}</ul>` : `<div class="none">—</div>`;
+  const today = new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  let h = `<div class="paper-wrap"><div class="sheet" id="rxSheet">`;
+  h += `<div class="lh"><div><div class="clinic">${esc(c.clinic || "Eye Clinic")}</div><div class="s">${esc(c.addr || "")}</div><div class="s">${c.phone ? "☎ " + esc(c.phone) : ""}</div></div>
+        <div class="r"><div class="dr">${esc(c.doctor || "Dr. ____________")}</div><div class="s">${esc(c.qual || "")}</div><div class="s">${c.reg ? "Reg. No. " + esc(c.reg) : ""}</div></div></div>`;
+  h += `<div class="pt"><div><b>Patient:</b> ${esc(p.patient.name || "________________")} &nbsp; <b>Age:</b> ${esc(p.patient.age || "____")} &nbsp; <b>Sex:</b> ${esc(p.patient.sex || "____")}</div><div><b>Date:</b> ${today}</div></div>`;
+  h += `<h4>Chief complaints</h4>` + list(p.chief_complaints.map((x, i) => esc(j(x.complaint, x.eye && `(${x.eye})`, x.duration && "× " + x.duration, x.character && `— ${x.character}`)) + tag("chief_complaints." + i)));
+  const hist = [
+    ...p.history.systemic.map((x, i) => esc(j("k/c/o", x.condition, x.duration && "× " + x.duration, x.treatment && "— " + x.treatment)) + tag("history.systemic." + i)),
+    ...p.history.ocular.map((x, i) => esc(j("H/o", x.item, x.eye && `(${x.eye})`)) + tag("history.ocular." + i)),
+    ...(p.history.current_medications.length ? ["Current medications: " + esc(p.history.current_medications.join(", "))] : []),
+    ...(p.history.allergies.length ? ["Allergies: " + esc(p.history.allergies.join(", "))] : []),
+  ];
+  if (hist.length) h += `<h4>History</h4>` + list(hist);
+  const oe = [
+    ...p.examination.map((x, i) => esc(j(x.test, x.eye && `(${x.eye})`, x.result && ": " + x.result)) + tag("examination." + i)),
+    ...p.clinical_findings.map((x, i) => esc(j(x.finding, x.eye && `(${x.eye})`)) + tag("clinical_findings." + i)),
+  ];
+  h += `<h4>On examination</h4>` + list(oe);
+  h += `<h4>Diagnosis</h4>` + list(p.diagnosis.map((d, i) => {
+    const icd = refs["diagnosis." + i]?.reference?.["ICD-10 (indicative)"];
+    return `<b>${esc(d.condition)}</b> ${esc(j(d.eye && `(${d.eye})`, d.grade_or_notes && `— ${d.grade_or_notes}`, d.certainty === "provisional" && "(provisional)"))}${icd ? ` <span class="kbref">ICD-10 ${esc(icd)}</span>` : ""}` + tag("diagnosis." + i);
+  }));
+  h += `<div class="rxsym">℞</div>`;
+  h += p.medications.length ? `<table><tr><th>#</th><th>Medicine</th><th>Dose</th><th>Frequency</th><th>Eye</th><th>Duration</th></tr>` + p.medications.map((m, i) => {
+    const ref = refs["medications." + i]?.reference || {};
+    return `<tr><td>${i + 1}</td><td><span class="med">${esc(j(m.form, m.generic_name, m.strength))}</span>${m.brand_said && m.brand_said !== m.generic_name ? ` <span class="inst">(${esc(m.brand_said)})</span>` : ""}${tag("medications." + i)}${m.phase ? ` <span class="inst">[${esc(m.phase)}]</span>` : ""}
+      ${m.instructions ? `<div class="inst">${esc(m.instructions)}</div>` : ""}${ref["Typical Prescription Usage"] ? `<div class="kbref screen-only">KB typical: ${esc(ref["Typical Prescription Usage"])}</div>` : ""}</td>
+      <td>${esc(m.dose)}</td><td>${esc(m.frequency)}</td><td>${esc(m.eye)}</td><td>${esc(m.duration)}</td></tr>`;
+  }).join("") + `</table>` : `<div class="none">No medicines prescribed.</div>`;
+  if (p.glasses.length) h += `<h4>Glasses</h4><table><tr><th>Eye</th><th>Sph</th><th>Cyl</th><th>Axis</th><th>Add</th><th>Notes</th></tr>` + p.glasses.map((g) => `<tr><td>${esc(g.eye)}</td><td>${esc(g.sph)}</td><td>${esc(g.cyl)}</td><td>${esc(g.axis)}</td><td>${esc(g.add)}</td><td>${esc(g.notes)}</td></tr>`).join("") + `</table>`;
+  if (p.procedures.length) h += `<h4>Procedure advised</h4>` + list(p.procedures.map((x, i) => esc(j(x.procedure, x.eye && `(${x.eye})`, x.notes && "— " + x.notes)) + tag("procedures." + i)));
+  if (p.investigations.length) h += `<h4>Investigations</h4>` + list(p.investigations.map((x, i) => esc(j(x.test, x.eye && `(${x.eye})`, x.purpose && "— " + x.purpose)) + tag("investigations." + i)));
+  h += `<h4>Advice</h4>` + list(p.advice.map((a) => esc(a.text)));
+  h += `<h4>Review</h4>` + list(p.follow_up.map((f) => esc(j(f.when, f.purpose && "— " + f.purpose))));
+  h += `<div class="foot"><div class="disc">AI-assisted draft generated from the consultation audio. Reviewed and approved by the treating ophthalmologist.</div><div class="sign">${esc(c.doctor || "Doctor's signature")}</div></div>`;
+  h += `</div></div>`;
+
+  // below the sheet (screen only)
+  h += `<div class="belowsheet"><div class="inner">`;
+  if (r.warnings.length) h += `<div class="warnbox"><b>Check before signing</b><ul>${r.warnings.map((w) => `<li>${esc(w)}</li>`).join("")}</ul></div>`;
+  else h += `<div class="okbox">No automatic warnings — still review every line against the recording.</div>`;
+  h += `<div class="actions" style="margin-top:0"><button class="btn ok" id="approveBtn">✓ Approve &amp; save as clinic example</button><button class="btn" id="copyMd">Copy as text</button></div>`;
+  h += `<details class="fold"><summary>Terminology detected (${p.terms.length})</summary><div><table class="t"><tr><th>Heard</th><th>Term</th><th>KB id</th><th>Category</th></tr>` + p.terms.map((t) => `<tr><td>${esc(t.heard)}</td><td>${esc(t.canonical)}</td><td>${esc(t.kb_id || "—")}</td><td>${esc(t.category)}</td></tr>`).join("") + `</table></div></details>`;
+  h += `<details class="fold"><summary>Edit structured data (JSON)</summary><div><textarea id="jsonEdit" style="min-height:260px">${esc(JSON.stringify(p, null, 2))}</textarea><div class="actions"><button class="btn" id="applyJson">Apply changes</button></div></div></details>`;
+  h += `<div class="small muted">${r.language ? `Language: ${esc(LANGS[r.language] || r.language)} · ` : ""}LLM ${esc(r.llm.model)} · ${(r.llm.ms / 1000).toFixed(1)} s${r.asr ? ` · Speech ${esc(r.asr.model || r.asr.backend)} ${(r.asr.ms / 1000).toFixed(1)} s` : ""}</div>`;
+  h += `</div></div>`;
+  out.innerHTML = h;
+  out.classList.toggle("hide-kb", !$("showKb").checked);
+  $("editBtn").textContent = "✎ Edit text";
+  $("approveBtn").onclick = approve;
+  $("copyMd").onclick = () => navigator.clipboard.writeText(sheetText()).then(() => toast("Copied"));
+  $("applyJson").onclick = () => {
+    try { current.prescription = JSON.parse($("jsonEdit").value); renderRx(); toast("Prescription updated"); }
+    catch (e) { toast("Invalid JSON: " + e.message); }
+  };
+}
+$("showKb").onchange = () => $("rxOut").classList.toggle("hide-kb", !$("showKb").checked);
+$("editBtn").onclick = () => {
+  const s = $("rxSheet"); if (!s) return;
+  const on = s.getAttribute("contenteditable") !== "true";
+  s.setAttribute("contenteditable", on ? "true" : "false"); s.classList.toggle("editing", on);
+  $("editBtn").textContent = on ? "✓ Done editing" : "✎ Edit text";
+  if (on) toast("Click any text on the prescription to edit it");
 };
 
-function render(r) {
-  const p = r.prescription, refs = r.kbRefs;
-  const tag = (k) => refs[k] ? `<span class="id" title="${esc(refs[k].name)} (${refs[k].verified})">${esc(refs[k].id)}</span>` : `<span class="nokb">not in KB</span>`;
-  const j = (...xs) => xs.filter(x => x && String(x).trim()).join(" ");
-  const list = (items) => items.length ? `<ul>${items.map(i => `<li>${i}</li>`).join("")}</ul>` : `<p class="muted">—</p>`;
-  let h = "";
-  const pt = [p.patient.name, p.patient.age, p.patient.sex].filter(Boolean).join(" · ");
-  h += `<h2>Patient</h2><p>${esc(pt || "—")}</p>`;
-  h += `<h2>C/o</h2>` + list(p.chief_complaints.map((c, i) => esc(j(c.complaint, c.eye, c.duration && "× " + c.duration, c.character && `(${c.character})`)) + tag("chief_complaints." + i)));
-  h += `<h2>History</h2>` + list([
-    ...p.history.systemic.map((x, i) => esc(j("k/c/o", x.condition, x.duration && "× " + x.duration, x.treatment && "— " + x.treatment)) + tag("history.systemic." + i)),
-    ...p.history.ocular.map((x, i) => esc(j("H/o", x.item, x.eye)) + tag("history.ocular." + i)),
-    ...(p.history.current_medications.length ? ["Current meds: " + esc(p.history.current_medications.join(", "))] : []),
-    ...(p.history.allergies.length ? ["Allergies: " + esc(p.history.allergies.join(", "))] : []),
-  ]);
-  h += `<h2>O/E</h2>` + list([
-    ...p.examination.map((x, i) => esc(j(x.test, x.eye, x.result && ": " + x.result)) + tag("examination." + i)),
-    ...p.clinical_findings.map((x, i) => esc(j(x.finding, x.eye)) + tag("clinical_findings." + i)),
-  ]);
-  h += `<h2>Diagnosis</h2>` + list(p.diagnosis.map((d, i) => {
-    const icd = refs["diagnosis." + i]?.reference?.["ICD-10 (indicative)"];
-    return esc(j(d.condition, d.grade_or_notes && `(${d.grade_or_notes})`, d.eye, d.certainty === "provisional" && "— provisional", icd && `[ICD-10 ${icd}]`)) + tag("diagnosis." + i);
-  }));
-  h += `<h2>Rx</h2>`;
-  h += p.medications.length ? `<table><tr><th>#</th><th>Medicine</th><th>Dose</th><th>Freq</th><th>Eye</th><th>Duration</th></tr>` + p.medications.map((m, i) => {
-    const ref = refs["medications." + i]?.reference || {};
-    return `<tr><td>${i+1}</td><td><b>${esc(j(m.form, m.generic_name, m.strength))}</b>${m.brand_said ? ` <span class="muted">(${esc(m.brand_said)})</span>` : ""}${tag("medications." + i)}${m.phase ? ` <span class="muted">[${esc(m.phase)}]</span>` : ""}
-      ${m.instructions ? `<div class="ref">${esc(m.instructions)}</div>` : ""}${ref["Typical Prescription Usage"] ? `<div class="ref">KB typical: ${esc(ref["Typical Prescription Usage"])}</div>` : ""}</td>
-      <td>${esc(m.dose)}</td><td>${esc(m.frequency)}</td><td>${esc(m.eye)}</td><td>${esc(m.duration)}</td></tr>`;
-  }).join("") + `</table>` : `<p class="muted">—</p>`;
-  if (p.procedures.length) h += `<h2>Procedure advised</h2>` + list(p.procedures.map((x, i) => esc(j(x.procedure, x.eye, x.notes && "— " + x.notes)) + tag("procedures." + i)));
-  if (p.investigations.length) h += `<h2>Investigations</h2>` + list(p.investigations.map((x, i) => esc(j(x.test, x.eye, x.purpose && "— " + x.purpose)) + tag("investigations." + i)));
-  if (p.glasses.length) h += `<h2>Glasses</h2><table><tr><th>Eye</th><th>Sph</th><th>Cyl</th><th>Axis</th><th>Add</th><th>Notes</th></tr>` + p.glasses.map(g => `<tr><td>${esc(g.eye)}</td><td>${esc(g.sph)}</td><td>${esc(g.cyl)}</td><td>${esc(g.axis)}</td><td>${esc(g.add)}</td><td>${esc(g.notes)}</td></tr>`).join("") + `</table>`;
-  h += `<h2>Advice</h2>` + list(p.advice.map(a => esc(a.text)));
-  h += `<h2>Review</h2>` + list(p.follow_up.map(f => esc(j(f.when, f.purpose && "— " + f.purpose))));
-  if (r.warnings.length) h += `<h2>Check before signing</h2><div class="warn">${list(r.warnings.map(esc))}</div>`;
-  h += `<h2>Terminology detected</h2><table><tr><th>Heard</th><th>Term</th><th>KB id</th><th>Category</th></tr>` + p.terms.map(t => `<tr><td>${esc(t.heard)}</td><td>${esc(t.canonical)}</td><td class="id">${esc(t.kb_id || "—")}</td><td>${esc(t.category)}</td></tr>`).join("") + `</table>`;
-  h += `<p class="muted" style="margin-top:12px">${r.language ? `Language: ${esc(r.language)} · ` : ""}LLM ${esc(r.llm.model)} · ${(r.llm.ms/1000).toFixed(1)} s${r.asr ? ` · ASR ${esc(r.asr.backend)} ${(r.asr.ms/1000).toFixed(1)} s` : ""}</p>`;
-  h += `<div class="row"><button onclick="navigator.clipboard.writeText(window.__md)">Copy as Markdown</button><button onclick="dl()">Download JSON</button></div>`;
-  h += `<details><summary>Raw JSON</summary><pre>${esc(JSON.stringify(r.prescription, null, 2))}</pre></details>`;
-  window.__md = r.markdown; window.__json = r;
-  $("out").innerHTML = h;
+/* ---------- downloads ---------- */
+function fileBase() {
+  const n = (current?.prescription?.patient?.name || "patient").replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "");
+  return `Prescription-${n || "patient"}-${new Date().toISOString().slice(0, 10)}`;
 }
-function dl() {
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(window.__json, null, 2)], { type: "application/json" }));
-  a.download = "prescription.json"; a.click();
+function save(name, blob) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+function sheetClone() {
+  const s = $("rxSheet").cloneNode(true);
+  s.removeAttribute("contenteditable"); s.classList.remove("editing");
+  s.querySelectorAll(".screen-only").forEach((e) => e.remove());
+  return s;
 }
+function sheetText() {
+  const s = sheetClone();
+  s.querySelectorAll("h4").forEach((h) => (h.textContent = "\n" + h.textContent.toUpperCase()));
+  s.querySelectorAll("li").forEach((li) => (li.textContent = "• " + li.textContent));
+  s.querySelectorAll("tr").forEach((tr) => (tr.textContent = [...tr.children].map((c) => c.textContent.trim()).join(" | ")));
+  document.body.appendChild(s); s.style.position = "absolute"; s.style.left = "-9999px";
+  const t = s.innerText.replace(/\n{3,}/g, "\n\n").trim(); s.remove(); return t;
+}
+function toMarkdown() {
+  const s = sheetClone();
+  const lines = [];
+  const walk = (el) => {
+    for (const n of el.children) {
+      if (n.tagName === "H4") lines.push("", "## " + n.textContent.trim());
+      else if (n.tagName === "UL") n.querySelectorAll("li").forEach((li) => lines.push("- " + li.textContent.trim().replace(/\s+/g, " ")));
+      else if (n.tagName === "TABLE") { const rows = [...n.querySelectorAll("tr")].map((tr) => "| " + [...tr.children].map((c) => c.textContent.trim().replace(/\s+/g, " ").replace(/\|/g, "/")).join(" | ") + " |"); if (rows.length) { lines.push(rows[0], "|" + " --- |".repeat(n.rows[0].cells.length), ...rows.slice(1)); } }
+      else if (n.classList.contains("lh")) lines.push("# " + n.querySelector(".clinic").textContent.trim(), n.innerText.replace(n.querySelector(".clinic").textContent, "").trim().split("\n").filter(Boolean).join(" · "));
+      else if (n.classList.contains("rxsym")) lines.push("", "## ℞ Medicines");
+      else if (n.classList.contains("foot")) lines.push("", "---", n.innerText.trim().split("\n").filter(Boolean).join("  \n"));
+      else if (n.children.length && !["DIV"].includes(n.tagName)) walk(n);
+      else lines.push(n.innerText.trim());
+    }
+  };
+  walk(s);
+  return lines.join("\n").replace(/\n{3,}/g, "\n\n").trim() + "\n";
+}
+function toWord() {
+  const css = `body{font-family:Calibri,'Noto Sans Bengali','Noto Sans Devanagari',Arial,sans-serif;font-size:11pt;color:#101828}
+    .lh{border-bottom:2px solid #1d6fd6;padding-bottom:8px}.clinic{font-size:18pt;font-weight:bold;color:#1d6fd6}.s{color:#475467;font-size:9pt}
+    .dr{font-weight:bold}.pt{border-bottom:1px solid #e4e7ec;padding:6px 0}h4{font-size:9pt;letter-spacing:1px;text-transform:uppercase;color:#1d6fd6;margin:12px 0 2px}
+    table{border-collapse:collapse;width:100%}th{text-align:left;font-size:8pt;color:#667085;border-bottom:1px solid #d0d5dd;padding:4px}
+    td{border-bottom:1px solid #eaecf0;padding:4px;vertical-align:top}.rxsym{font:bold 20pt Georgia;color:#1d6fd6;margin-top:10px}
+    .med{font-weight:bold}.inst,.kbref{color:#475467;font-size:9pt}.sign{margin-top:30px;border-top:1px solid #98a2b3;width:200px;text-align:center;font-size:9pt}
+    .disc{font-size:8pt;color:#98a2b3}.none{color:#98a2b3}`;
+  return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>${esc(fileBase())}</title><style>${css}</style></head><body>${sheetClone().outerHTML}</body></html>`;
+}
+function download(kind) {
+  if (!current || current.llm.skipped) return;
+  if (kind === "pdf" || kind === "print") {
+    const old = document.title; document.title = fileBase();
+    if (kind === "pdf") toast("Choose “Save as PDF” as the printer");
+    setTimeout(() => { window.print(); document.title = old; }, kind === "pdf" ? 400 : 0);
+  } else if (kind === "doc") save(fileBase() + ".doc", new Blob(["﻿", toWord()], { type: "application/msword" }));
+  else if (kind === "md") save(fileBase() + ".md", new Blob([toMarkdown()], { type: "text/markdown;charset=utf-8" }));
+  else if (kind === "json") save(fileBase() + ".json", new Blob([JSON.stringify(current, null, 2)], { type: "application/json" }));
+}
+$("printBtn").onclick = () => download("print");
+$("dlBtn").onclick = (e) => { e.stopPropagation(); $("dlMenu").classList.toggle("open"); };
+document.addEventListener("click", () => $("dlMenu").classList.remove("open"));
+for (const b of document.querySelectorAll("[data-dl]")) b.onclick = () => { $("dlMenu").classList.remove("open"); download(b.dataset.dl); };
+
+/* ---------- approve ---------- */
+async function approve() {
+  if (!current) return;
+  try {
+    const r = await fetch("/api/approve", { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ transcript: current.transcript || $("transcript").value, english: $("english").value, language: current.language || lang, prescription: current.prescription, doctor: clinic().doctor }) }).then((r) => r.json());
+    if (r.error) throw new Error(r.error);
+    $("approveBtn").textContent = "✓ Saved"; $("approveBtn").disabled = true;
+    toast(`Saved — ${r.approved} approved example(s) now guide future drafts`);
+  } catch (e) { toast("✘ " + e.message); }
+}
+
+/* ---------- clinic settings ---------- */
+const S = ["clinic", "addr", "phone", "doctor", "qual", "reg"];
+$("settingsBtn").onclick = () => { const c = clinic(); S.forEach((k) => ($("s_" + k).value = c[k] || "")); $("settings").classList.add("show"); };
+$("s_cancel").onclick = () => $("settings").classList.remove("show");
+$("settings").onclick = (e) => { if (e.target === $("settings")) $("settings").classList.remove("show"); };
+$("s_save").onclick = () => { const c = {}; S.forEach((k) => (c[k] = $("s_" + k).value.trim())); store.set("rx.clinic", c); $("settings").classList.remove("show"); if (current) renderRx(); toast("Clinic details saved"); };
 </script>
 </body>
 </html>

@@ -3,3 +3,11 @@ output/
 models/
 .env
 test/.last-request.json
+
+# macOS
+.DS_Store
+# patient data: doctor-approved visits and exported training sets stay local
+data/approved/
+data/training/
+# local test runs
+evaluation/general/20*/

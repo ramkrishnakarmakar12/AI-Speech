@@ -294,7 +294,7 @@ let lastLogged: string | null = null;
  */
 export async function resolveModel(): Promise<string> {
   const want = config.llm.model.trim();
-  if (config.llm.provider === "ollama") return want;
+  if (config.llm.provider === "ollama" || config.llm.provider === "bedrock") return want;
   if (want && want !== "auto") return want;
   const models = (await lmStudioModels()).filter((m) => !/embed/i.test(m.id) && m.type !== "embeddings");
   const loaded = models.filter((m) => m.state === "loaded");
@@ -391,13 +391,106 @@ async function openaiChat(messages: ChatMessage[], schema: object): Promise<Chat
   return { text, json, truncated, ms: Date.now() - t0, model: data?.model ?? model, usage: { prompt: data?.usage?.prompt_tokens, completion: data?.usage?.completion_tokens } };
 }
 
+// ---------------- Amazon Bedrock (production) ----------------
+const BEDROCK_PKG = "@aws-sdk/client-bedrock-runtime";
+let bedrockClient: any = null;
+async function bedrockSdk(): Promise<any> {
+  try {
+    return await import(BEDROCK_PKG as string);
+  } catch {
+    throw new Error(`LLM_PROVIDER=bedrock needs the AWS SDK. Run:  npm install ${BEDROCK_PKG}`);
+  }
+}
+
+/** Pull the model text out of an InvokeModel response, whatever shape the imported model returns. */
+function invokeText(d: any): string {
+  return (
+    d?.choices?.[0]?.message?.content ??
+    d?.choices?.[0]?.text ??
+    d?.generation ??
+    d?.outputs?.[0]?.text ??
+    d?.completion ??
+    d?.output?.message?.content?.[0]?.text ??
+    ""
+  );
+}
+
+/**
+ * LLM_PROVIDER=bedrock. Credentials come from the normal AWS chain (instance/task role, AWS_PROFILE,
+ * or AWS_ACCESS_KEY_ID/SECRET). LLM_MODEL = the Bedrock model id / inference profile, or the imported model ARN.
+ *   BEDROCK_API=converse (default) — models Bedrock serves itself. The prescription schema is sent as a
+ *     forced tool, so the answer comes back as schema-shaped JSON; falls back to a plain JSON prompt
+ *     when the model does not support tool use.
+ *   BEDROCK_API=invoke — Custom Model Import (e.g. Qwen3-4B-Instruct-2507); OpenAI-style messages body.
+ */
+async function bedrockChat(messages: ChatMessage[], schema: object): Promise<ChatResult> {
+  const t0 = Date.now();
+  const sdk = await bedrockSdk();
+  bedrockClient ??= new sdk.BedrockRuntimeClient({ region: config.llm.bedrock.region });
+  const modelId = config.llm.model;
+  const explain = (e: any) =>
+    new Error(
+      e?.name === "AccessDeniedException"
+        ? `Bedrock denied access to ${modelId}: enable the model in the Bedrock console (Model access) and allow bedrock:InvokeModel for this role. (${e.message})`
+        : e?.name === "ResourceNotFoundException" || e?.name === "ValidationException"
+          ? `Bedrock rejected model "${modelId}" in ${config.llm.bedrock.region}: ${e.message}`
+          : `Bedrock call failed: ${e?.message ?? e}`,
+    );
+
+  if (config.llm.bedrock.api === "invoke") {
+    const body = { messages, max_tokens: config.llm.maxTokens, temperature: config.llm.temperature };
+    const out = await bedrockClient
+      .send(new sdk.InvokeModelCommand({ modelId, contentType: "application/json", accept: "application/json", body: JSON.stringify(body) }))
+      .catch((e: any) => {
+        throw explain(e);
+      });
+    const d = JSON.parse(new TextDecoder().decode(out.body));
+    const text = String(invokeText(d));
+    const { json, truncated } = finish(text, isLooping(text) ? "the model started repeating itself" : undefined);
+    return { text, json, truncated, ms: Date.now() - t0, model: modelId, usage: { prompt: d?.usage?.prompt_tokens, completion: d?.usage?.completion_tokens } };
+  }
+
+  const system = messages.filter((m) => m.role === "system").map((m) => ({ text: m.content }));
+  const msgs = messages.filter((m) => m.role !== "system").map((m) => ({ role: m.role, content: [{ text: m.content }] }));
+  const base = { modelId, system, messages: msgs, inferenceConfig: { maxTokens: config.llm.maxTokens, temperature: config.llm.temperature } };
+  let out: any;
+  let viaTool = true;
+  try {
+    out = await bedrockClient.send(
+      new sdk.ConverseCommand({
+        ...base,
+        toolConfig: {
+          tools: [{ toolSpec: { name: "prescription", description: "Return the structured result.", inputSchema: { json: schema } } }],
+          toolChoice: { tool: { name: "prescription" } },
+        },
+      }),
+    );
+  } catch (e: any) {
+    if (e?.name !== "ValidationException") throw explain(e);
+    viaTool = false; // model without (forced) tool use → plain JSON prompt
+    const last = msgs[msgs.length - 1];
+    last.content = [{ text: `${last.content[0].text}\n\nReturn ONLY a JSON object that matches this JSON Schema:\n${JSON.stringify(schema)}` }];
+    out = await bedrockClient.send(new sdk.ConverseCommand(base)).catch((e2: any) => {
+      throw explain(e2);
+    });
+  }
+  const content: any[] = out?.output?.message?.content ?? [];
+  const tool = viaTool ? content.find((c) => c.toolUse)?.toolUse?.input : undefined;
+  const text = tool ? JSON.stringify(tool) : content.map((c) => c.text ?? "").join("");
+  const stopped = out?.stopReason === "max_tokens" ? "the answer hit LLM_MAX_TOKENS" : isLooping(text) ? "the model started repeating itself" : undefined;
+  const { json, truncated } = tool && !stopped ? { json: tool, truncated: undefined } : finish(text, stopped);
+  return { text, json, truncated, ms: Date.now() - t0, model: modelId, usage: { prompt: out?.usage?.inputTokens, completion: out?.usage?.outputTokens } };
+}
+
 export function chatJson(messages: ChatMessage[], schema: object): Promise<ChatResult> {
+  if (config.llm.provider === "bedrock") return bedrockChat(messages, schema);
   return config.llm.provider === "ollama" ? ollamaChat(messages, schema) : openaiChat(messages, schema);
 }
 
 /** List models on the configured server (for `npm run check`). */
 export async function listModels(): Promise<string[]> {
   const base = llmBaseUrl();
+  if (config.llm.provider === "bedrock") return [`${config.llm.model} (Bedrock, ${config.llm.bedrock.region}, ${config.llm.bedrock.api})`];
   if (config.llm.provider === "ollama") {
     const r = await fetch(`${base}/api/tags`);
     const d: any = await r.json();

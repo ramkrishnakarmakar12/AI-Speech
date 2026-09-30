@@ -12,6 +12,7 @@
  * If that language is Hindi/Bengali, pass 2 runs Whisper's built-in translate task to get an English
  * version. The LLM gets both texts; the term matcher uses the English text plus a romanised original.
  */
+import { AsyncLocalStorage } from "node:async_hooks";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -30,12 +31,75 @@ export interface Transcript {
   /** model that produced the transcript (Indic backend) */
   model?: string;
   ms: number;
+  /** audio length in seconds (stage 1: speech-rate check) */
+  durationSec?: number | null;
+  /** mean token probability of the transcript pass, 0..1 (Whisper backends; null if not reported) */
+  confidence?: number | null;
+  /** share of tokens below ASR_LOW_CONF */
+  lowConfidenceRatio?: number | null;
+  /** per-word probability (whisper.cpp only) — used to flag medical terms heard in unsure audio */
+  words?: { w: string; p: number }[];
 }
+
+/** What a backend returns before timing/backend are added */
+interface RawTranscript {
+  text: string;
+  english?: string;
+  language?: string | null;
+  model?: string;
+  durationSec?: number | null;
+  confidence?: number | null;
+  lowConfidenceRatio?: number | null;
+  words?: { w: string; p: number }[];
+}
+
+/** 16-bit mono 16 kHz WAV → seconds */
+const wavSeconds = (wav: string) => Math.max(0, (fs.statSync(wav).size - 44) / 32000);
+
+function summarise(probs: number[]) {
+  if (!probs.length) return { confidence: null, lowConfidenceRatio: null };
+  const mean = probs.reduce((a, b) => a + b, 0) / probs.length;
+  const low = probs.filter((p) => p < config.quality.lowConfP).length / probs.length;
+  return { confidence: +mean.toFixed(3), lowConfidenceRatio: +low.toFixed(3) };
+}
+
+/**
+ * whisper.cpp --output-json-full: per-token probabilities. Tokens starting with a space begin a new word;
+ * a word's probability is its weakest token. Special tokens ([_BEG_], [_TT_…], <|…|>) are skipped.
+ */
+function parseWhisperJson(file: string) {
+  try {
+    const j = JSON.parse(fs.readFileSync(file, "utf8"));
+    const probs: number[] = [];
+    const words: { w: string; p: number }[] = [];
+    for (const seg of j.transcription ?? []) {
+      for (const t of seg.tokens ?? []) {
+        const txt = String(t.text ?? "");
+        if (/^\s*(\[_|<\|)/.test(txt) || typeof t.p !== "number") continue;
+        probs.push(t.p);
+        if (/^\s/.test(txt) || !words.length) words.push({ w: txt.trim(), p: t.p });
+        else {
+          const last = words[words.length - 1];
+          last.w += txt;
+          last.p = Math.min(last.p, t.p);
+        }
+      }
+    }
+    return { ...summarise(probs), words: words.filter((w) => w.w && !w.w.includes("\uFFFD")).map((w) => ({ w: w.w, p: +w.p.toFixed(3) })) };
+  } catch {
+    return null;
+  }
+}
+
+/** Some whisper.cpp builds lack -ojf; remember that and stop asking for it */
+let whisperJsonSupported = true;
 
 export interface TranscribeOptions {
   /** "" / "auto" = detect; "en" | "hi" | "bn" (or English/Hindi/Bengali) */
   language?: string;
   backend?: AsrBackend;
+  /** false = skip Whisper's English translation pass (general transcription mode) */
+  translate?: boolean;
 }
 
 const LANG: Record<string, { name: string; code: string }> = {
@@ -74,23 +138,39 @@ function vocabulary(maxChars: number): string {
   return `Ophthalmology OPD consultation between doctor and patient. Terms: ${words}.`;
 }
 
-const needsTranslation = (lang: string) => config.asr.translate !== "off" && !!lang && lang !== "en";
+// transcribe({ translate: false }) switches the Whisper English pass off for that call only
+const noTranslation = new AsyncLocalStorage<boolean>();
+const needsTranslation = (lang: string) => !noTranslation.getStore() && config.asr.translate !== "off" && !!lang && lang !== "en";
 
 // ---------------- whisper.cpp CLI ----------------
-async function whisperCliPass(wav: string, lang: string, translate: boolean): Promise<{ text: string; detected: string }> {
+async function whisperCliPass(
+  wav: string,
+  lang: string,
+  translate: boolean,
+): Promise<{ text: string; detected: string; confidence?: number | null; lowConfidenceRatio?: number | null; words?: { w: string; p: number }[] }> {
   const base = wav.replace(/\.wav$/, "") + (translate ? "-en" : "");
-  const args = ["-m", config.asr.whisperModel, "-f", wav, "-l", lang || "auto", "-nt", "-otxt", "-of", base];
+  const wantJson = whisperJsonSupported && !translate; // confidence only matters for the transcript pass
+  const args = ["-m", config.asr.whisperModel, "-f", wav, "-l", lang || "auto", "-nt", "-otxt", ...(wantJson ? ["-ojf"] : []), "-of", base];
   if (config.asr.whisperThreads) args.push("-t", String(config.asr.whisperThreads));
   if (translate) args.push("-tr");
   // English vocabulary prompt helps drug names; for native Hindi/Bengali script it can push output
   // toward English, so it is only used for English/translate passes unless WHISPER_PROMPT_NATIVE=true.
   if (translate || lang === "en" || config.asr.whisperPromptNative) args.push("--prompt", vocabulary(config.asr.whisperPromptChars));
   try {
-    const { stderr, stdout } = await run(config.asr.whisperCli, args);
+    const { stderr, stdout } = await run(config.asr.whisperCli, args).catch((e: Error) => {
+      if (wantJson && /unknown argument|unrecognized|invalid option|-ojf/i.test(e.message)) {
+        whisperJsonSupported = false; // older whisper.cpp: retry without per-token output
+        return null;
+      }
+      throw e;
+    }) ?? { stderr: "", stdout: "" };
+    if (wantJson && !whisperJsonSupported) return whisperCliPass(wav, lang, translate);
     const detected = (stderr + stdout).match(/auto-detected language:\s*([a-z]{2,3})/i)?.[1] ?? lang;
-    return { text: fs.readFileSync(base + ".txt", "utf8").trim(), detected };
+    const conf = wantJson ? parseWhisperJson(base + ".json") : null;
+    return { text: fs.readFileSync(base + ".txt", "utf8").trim(), detected, ...(conf ?? {}) };
   } finally {
     fs.rmSync(base + ".txt", { force: true });
+    fs.rmSync(base + ".json", { force: true });
   }
 }
 
@@ -105,13 +185,29 @@ async function whisperCli(audio: string, language: string) {
     const first = await whisperCliPass(wav, language, false);
     const lang = langCode(first.detected);
     const english = needsTranslation(lang) ? (await whisperCliPass(wav, lang, true)).text : undefined;
-    return { text: first.text, english, language: lang };
+    const { text, detected: _d, ...conf } = first;
+    return { text, english, language: lang, durationSec: +wavSeconds(wav).toFixed(1), ...conf };
   } finally {
     fs.rmSync(wav, { force: true });
   }
 }
 
 // ---------------- HTTP backends ----------------
+/** verbose_json segments carry avg_logprob; turn them into a length-weighted mean probability */
+function segmentConfidence(d: any): { confidence: number | null; lowConfidenceRatio: number | null } {
+  const segs = Array.isArray(d?.segments) ? d.segments.filter((x: any) => typeof x.avg_logprob === "number") : [];
+  if (!segs.length) return { confidence: null, lowConfidenceRatio: null };
+  let w = 0, sum = 0, low = 0;
+  for (const x of segs) {
+    const len = Math.max(1, String(x.text ?? "").length);
+    const p = Math.exp(x.avg_logprob);
+    w += len;
+    sum += p * len;
+    if (p < config.quality.lowConfP) low += len;
+  }
+  return { confidence: +(sum / w).toFixed(3), lowConfidenceRatio: +(low / w).toFixed(3) };
+}
+
 async function multipart(url: string, audio: string, fields: Record<string, string>, headers: Record<string, string> = {}) {
   const form = new FormData();
   form.append("file", new Blob([fs.readFileSync(audio)]), path.basename(audio));
@@ -138,7 +234,7 @@ async function whisperServer(audio: string, language: string) {
     const t = await multipart(url, audio, { ...common, language: lang, translate: "true", prompt: vocabulary(config.asr.whisperPromptChars) });
     english = String(t.text ?? "").trim();
   }
-  return { text: String(d.text ?? "").trim(), english, language: lang || null };
+  return { text: String(d.text ?? "").trim(), english, language: lang || null, durationSec: typeof d.duration === "number" ? d.duration : null, ...segmentConfidence(d) };
 }
 
 async function openaiCompat(audio: string, language: string) {
@@ -160,7 +256,7 @@ async function openaiCompat(audio: string, language: string) {
       /* server has no /audio/translations – the LLM will work from the original text */
     }
   }
-  return { text: String(d.text ?? "").trim(), english, language: lang || null };
+  return { text: String(d.text ?? "").trim(), english, language: lang || null, durationSec: typeof d.duration === "number" ? d.duration : null, ...segmentConfidence(d) };
 }
 
 // ---------------- Indic models (Hugging Face, via Python) ----------------
@@ -179,6 +275,7 @@ async function detectLanguage(wav: string): Promise<string> {
  */
 async function indic(audio: string, language: string) {
   const wav = await toWav16k(audio);
+  const durationSec = +wavSeconds(wav).toFixed(1);
   try {
     let lang = language;
     if (!lang) {
@@ -190,8 +287,8 @@ async function indic(audio: string, language: string) {
     if (!model) {
       // English (or a language without an Indic model configured) → plain Whisper
       if (!whisperAvailable()) throw new Error(`No Indic model configured for "${lang}" and the Whisper model is missing.`);
-      const r = await whisperCliPass(wav, lang, false);
-      return { text: r.text, english: undefined, language: lang };
+      const { text, detected: _d, ...conf } = await whisperCliPass(wav, lang, false);
+      return { text, english: undefined, language: lang, durationSec, ...conf };
     }
     const args = [path.join(ROOT, "src/asr/indic_asr.py"), "--audio", wav, "--lang", lang, "--model", model, "--decoding", config.asr.indicDecoding];
     const { stdout } = await run(config.asr.python, args).catch((e: Error) => {
@@ -204,9 +301,63 @@ async function indic(audio: string, language: string) {
     const r = JSON.parse(line);
     if (r.error) throw new Error(r.error);
     const english = needsTranslation(lang) && whisperAvailable() ? (await whisperCliPass(wav, lang, true)).text : undefined;
-    return { text: String(r.text), english, language: lang, model: r.model as string };
+    return {
+      text: String(r.text),
+      english,
+      language: lang,
+      model: r.model as string,
+      durationSec,
+      // Vaani (Whisper fine-tunes) report token probabilities; IndicConformer does not
+      confidence: typeof r.confidence === "number" ? r.confidence : null,
+      lowConfidenceRatio: typeof r.low_conf_ratio === "number" ? r.low_conf_ratio : null,
+    };
   } finally {
     fs.rmSync(wav, { force: true });
+  }
+}
+
+// ---------------- Remote (production) speech model ----------------
+/**
+ * ASR_BACKEND=remote — the deployed model (deploy/asr-lambda: IndicConformer + Whisper on AWS Lambda,
+ * or anything that honours the same contract):
+ *   POST ASR_REMOTE_URL   Authorization: Bearer ASR_REMOTE_TOKEN
+ *   { "audio_b64": "...", "filename": "visit.m4a", "language": "bn" | "hi" | "en" | "" }
+ *   → { "text": "...", "language": "bn", "model": "...", "duration_sec": 118.2, "english"?: "..." }
+ * Lambda Function URLs cap the request at 6 MB — m4a/mp3 of a normal consultation fits; long WAVs do not.
+ */
+async function remoteAsr(audio: string, language: string): Promise<RawTranscript> {
+  if (!config.asr.remoteUrl) throw new Error("ASR_BACKEND=remote needs ASR_REMOTE_URL (or PROD_ASR_REMOTE_URL with MODEL_ENV=production) in .env");
+  const bytes = fs.readFileSync(audio);
+  if (bytes.length > 5.5 * 1024 * 1024)
+    throw new Error(`Audio is ${(bytes.length / 1048576).toFixed(1)} MB; the remote speech endpoint accepts up to ~5.5 MB. Upload m4a/mp3 instead of WAV, or shorten the recording.`);
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), config.asr.remoteTimeoutMs);
+  try {
+    const r = await fetch(config.asr.remoteUrl, {
+      method: "POST",
+      headers: { "content-type": "application/json", ...(config.asr.remoteToken ? { authorization: `Bearer ${config.asr.remoteToken}` } : {}) },
+      body: JSON.stringify({ audio_b64: bytes.toString("base64"), filename: path.basename(audio), language }),
+      signal: ctrl.signal,
+    }).catch((e: any) => {
+      throw new Error(e?.name === "AbortError" ? `Remote speech model timed out after ${config.asr.remoteTimeoutMs / 1000}s` : `Cannot reach the remote speech model at ${config.asr.remoteUrl}: ${e?.cause?.code ?? e?.message}`);
+    });
+    const body = await r.text();
+    let d: any;
+    try {
+      d = JSON.parse(body);
+    } catch {
+      throw new Error(`Remote speech model returned ${r.status}: ${body.slice(0, 300)}`);
+    }
+    if (!r.ok || d.error) throw new Error(`Remote speech model error (${r.status}): ${d.error ?? body.slice(0, 300)}`);
+    return {
+      text: String(d.text ?? "").trim(),
+      english: d.english ? String(d.english) : undefined,
+      language: langCode(d.language ?? language) || null,
+      model: d.model,
+      durationSec: typeof d.duration_sec === "number" ? d.duration_sec : null,
+    } as RawTranscript;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -230,12 +381,17 @@ async function qwen3(audio: string, language: string) {
 }
 
 export async function transcribe(audioPath: string, opts: TranscribeOptions = {}): Promise<Transcript> {
+  if (opts.translate === false) return noTranslation.run(true, () => transcribeInner(audioPath, opts));
+  return transcribeInner(audioPath, opts);
+}
+
+async function transcribeInner(audioPath: string, opts: TranscribeOptions): Promise<Transcript> {
   if (!fs.existsSync(audioPath)) throw new Error(`Audio file not found: ${audioPath}`);
   const backend = opts.backend ?? config.asr.backend;
   const raw = opts.language ?? config.asr.language;
   const language = !raw || raw.toLowerCase() === "auto" ? "" : langCode(raw);
   const t0 = Date.now();
-  let r: { text: string; english?: string; language?: string | null; model?: string };
+  let r: RawTranscript;
   switch (backend) {
     case "whisper-cli":
       r = await whisperCli(audioPath, language);
@@ -251,6 +407,9 @@ export async function transcribe(audioPath: string, opts: TranscribeOptions = {}
       break;
     case "qwen3-mlx":
       r = await qwen3(audioPath, language);
+      break;
+    case "remote":
+      r = await remoteAsr(audioPath, language);
       break;
     case "none":
       throw new Error("ASR_BACKEND=none — provide a transcript instead of audio");

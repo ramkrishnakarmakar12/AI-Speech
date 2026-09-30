@@ -22,6 +22,17 @@ Rules:
    "motiyabind"/"chhani" → cataract, "chokh chulkay"/"khujli" → Itching).
 7. Only the doctor's statements create diagnoses, medications, procedures and advice. The patient's statements create complaints and history.
 8. "terms": list every ophthalmic term you recognised with the exact words heard.
+9. NEGATED items (listed below the candidates) were explicitly denied ("সুগার প্রেশার নেই", "asthma nahi hai", "no vomiting"):
+   never record them as complaints, history or findings.
+10. প্রেশার / प्रेशर / "pressure" on its own in a patient's history = blood pressure (Hypertension), not eye pressure or glaucoma.
+    Only চোখের প্রেশার / आंख का प्रेशर / "eye pressure" or a measured IOP value means intraocular pressure.
+11. A thyroid problem on thyroxine is systemic history (hypothyroidism) — never "Thyroid eye disease" unless the doctor diagnoses it.
+12. A medication must be named by the doctor in the conversation. Never add a drug the doctor did not say, even if it is
+    typical for the diagnosis. Keep dose, frequency, duration and eye exactly as said; form "Gel" only when a gel is prescribed.
+13. The doctor's questions are not findings: a symptom counts only if the patient confirms it.
+14. patient.name only when the patient states it; greetings (আসুন বসুন, নমস্কার, नमस्ते) and the doctor's name are not the patient.
+    phase: "pre-op"/"post-op" only when surgery is discussed, otherwise "".
+15. Write each item once. Do not repeat rows.
 Return JSON only.`;
 
 const DETAIL_KEYS: Record<string, string[]> = {
@@ -54,6 +65,10 @@ export function buildUserPrompt(opts: {
   indexCategories: string[];
   scenarios: Scenario[];
   modelHint?: string;
+  /** stage-1 warning for low-accuracy transcripts (omitted for high/medium, so those prompts are unchanged) */
+  qualityNote?: string;
+  /** eye-domain notes: lay phrases decoded, denied conditions, approved clinic examples */
+  domainNotes?: string[];
 }): string {
   const { transcript, candidates, kb, indexCategories, scenarios } = opts;
   const candIds = new Set(candidates.map((c) => c.term.id));
@@ -75,6 +90,9 @@ export function buildUserPrompt(opts: {
     for (const s of scenarios)
       parts.push(`Diagnosis: ${s.diagnosis}\nExam: ${s.exam}\nPlan/Rx: ${s.plan}\nAdvice: ${s.advice}`);
   }
+
+  if (opts.qualityNote) parts.push("\n## " + opts.qualityNote);
+  for (const note of opts.domainNotes ?? []) if (note.trim()) parts.push("\n## " + note.trim());
 
   const lang = opts.language ? LANG_NAMES[opts.language] ?? opts.language : "";
   parts.push(`\n## CONVERSATION TRANSCRIPT${lang ? ` (spoken language: ${lang})` : ""}\n` + transcript.trim());
