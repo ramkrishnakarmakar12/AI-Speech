@@ -65,6 +65,26 @@ jobs:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      # Only runs when the AWS login above fails: prints what GitHub presented to AWS, so it can be
+      # compared with the role's trust policy. (These claims are not secret; the token itself is not printed.)
+      - name: Show GitHub OIDC identity (AWS login failed)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken('sts.amazonaws.com');
+            const c = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString());
+            const arn = process.env.ROLE_ARN || '';
+            core.summary.addHeading('AWS login failed: compare these with the role trust policy', 3)
+              .addTable([
+                [{data: 'Field', header: true}, {data: 'Value GitHub sent', header: true}],
+                ['sub', c.sub], ['aud', String(c.aud)], ['iss', c.iss],
+                ['role ARN account', (arn.split(':')[4] || '(secret AWS_DEPLOY_ROLE_ARN is empty or not visible to this job)')],
+              ]).write();
+            core.error(`Trust policy must allow sub = "${c.sub}" and aud = "sts.amazonaws.com"`);
+        env:
+          ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+
       - name: Initialize Terraform
         run: >-
           terraform -chdir=deploy/terraform init
