@@ -210,6 +210,8 @@ jobs:
         env:
           HOST_PORT: ${{ vars.APP_HOST_PORT || '5055' }}
           CERTBOT_EMAIL: ${{ vars.CERTBOT_EMAIL }}
+          SITE_USERNAME: ${{ vars.SITE_USERNAME }}
+          SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
         run: |
           TF="terraform -chdir=deploy/terraform output -raw"
           INSTANCE_ID="$($TF instance_id)"
@@ -219,9 +221,17 @@ jobs:
           # existing server (LEF) -> its nginx; dedicated server -> Caddy
           if [[ "$($TF proxy)" == "nginx" ]]; then SCRIPT=deploy/app/remote-deploy-nginx.sh; else SCRIPT=deploy/app/remote-deploy.sh; fi
           ALLOWED_CIDRS="$(jq -r 'join(" ")' <<<"$TF_VAR_allowed_cidr_blocks")"
-          PRELUDE="$(printf 'export AWS_REGION=%q ECR_REGISTRY=%q APP_IMAGE=%q PARAMETER_NAME=%q SITE_DOMAIN=%q ALLOWED_CIDRS=%q HOST_PORT=%q CERTBOT_EMAIL=%q\n' \
+          # Site login: only a hash goes to the server (and into SSM command history), never the password
+          BASIC_AUTH=""
+          if [[ -n "$SITE_USERNAME" && -n "$SITE_PASSWORD" ]]; then
+            BASIC_AUTH="$SITE_USERNAME:$(openssl passwd -apr1 "$SITE_PASSWORD")"
+          elif [[ " $ALLOWED_CIDRS " == *" 0.0.0.0/0 "* ]]; then
+            echo "::error::ALLOWED_CIDR_BLOCKS allows everyone (0.0.0.0/0) but SITE_USERNAME / SITE_PASSWORD are not set - refusing to publish the app without a login."
+            exit 1
+          fi
+          PRELUDE="$(printf 'export AWS_REGION=%q ECR_REGISTRY=%q APP_IMAGE=%q PARAMETER_NAME=%q SITE_DOMAIN=%q ALLOWED_CIDRS=%q HOST_PORT=%q CERTBOT_EMAIL=%q BASIC_AUTH=%q\n' \
             "$AWS_REGION" "${APP_REPOSITORY%/*}" "$APP_REPOSITORY:$IMAGE_TAG" "$($TF app_env_parameter_name)" "$SITE_DOMAIN" \
-            "$ALLOWED_CIDRS" "$HOST_PORT" "$CERTBOT_EMAIL")"
+            "$ALLOWED_CIDRS" "$HOST_PORT" "$CERTBOT_EMAIL" "$BASIC_AUTH")"
           # SSM runs commands with /bin/sh (dash on Ubuntu, which has no `pipefail`), so the script is sent
           # base64-encoded and executed with bash explicitly.
           PAYLOAD="$(printf '%s\n%s' "$PRELUDE" "$(cat "$SCRIPT")" | base64 -w0)"
