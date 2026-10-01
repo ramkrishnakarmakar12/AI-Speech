@@ -103,11 +103,11 @@ export const config = {
     think: env("LLM_THINK", "false"),
     timeoutMs: num("LLM_TIMEOUT_MS", 600_000),
     /** Hard cap on generated tokens; a full prescription is ~800–1500. Stops runaway/looping models. */
-    maxTokens: num("LLM_MAX_TOKENS", 3000),
+    maxTokens: num("LLM_MAX_TOKENS", 6000), // evidence quotes make answers longer
     /** How many KB candidates (full detail) to give the LLM */
     maxCandidates: num("MAX_CANDIDATES", 60),
     /** Number of similar "Conversation Scenarios" rows shown to the LLM as a style example (0 = off) */
-    scenarioExamples: num("SCENARIO_EXAMPLES", 1),
+    scenarioExamples: num("SCENARIO_EXAMPLES", 0), // KB style examples leaked their advice into other patients; off by default
     /** Also give the LLM a compact name index of these categories so it can pick terms the matcher missed */
     indexCategories: env("LLM_INDEX_CATEGORIES", "medicine,disease,procedure,test")
       .split(",")
@@ -120,6 +120,8 @@ export const config = {
     useTranslation: env("LLM_USE_TRANSLATION", "auto") as "auto" | "on" | "off",
     /** how many doctor-approved prescriptions to show the LLM as examples (0 = off) */
     fewShot: num("FEW_SHOT_EXAMPLES", 1),
+    /** second LLM pass that lists clinically relevant things said but missing from the draft (shown as warnings) */
+    coverageCheck: !/^(off|false|0|no)$/i.test(env("COVERAGE_CHECK", "on")),
     // LLM_PROVIDER=bedrock
     bedrock: {
       region: env("AWS_REGION", "ap-south-1"),

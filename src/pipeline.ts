@@ -17,7 +17,8 @@ import { prescriptionSchema, type Prescription } from "./llm/schema.js";
 import { transcribe, type Transcript } from "./asr/index.js";
 import { scanLexicon, type LexHit } from "./domain/lexicon.js";
 import { findNegations, insideNegation, type NegatedSpan } from "./domain/negation.js";
-import { postProcess, translationForLlm } from "./domain/postprocess.js";
+import { postProcess, supported, translationForLlm } from "./domain/postprocess.js";
+import { numbersNote } from "./domain/numbers.js";
 import { examplesSection, pickExamples } from "./domain/examples.js";
 
 export interface KbRef {
@@ -342,7 +343,7 @@ function removeSpans(text: string, spans: NegatedSpan[]): string {
 }
 
 /** Prompt notes from the domain layer: decoded lay phrases, denied conditions, approved clinic examples. */
-function domainNotes(a: Analysis, language: string | null | undefined): { notes: string[]; examples: string[] } {
+function domainNotes(a: Analysis, language: string | null | undefined, transcript = ""): { notes: string[]; examples: string[] } {
   const notes: string[] = [];
   const hints = a.domain.lexicon.filter((l) => !l.negated && (l.hint || l.id));
   if (hints.length) {
@@ -355,6 +356,8 @@ function domainNotes(a: Analysis, language: string | null | undefined): { notes:
           .join("\n"),
     );
   }
+  const nums = numbersNote(transcript);
+  if (nums) notes.push(nums);
   if (a.domain.negated.length) notes.push("NEGATED (explicitly denied — do NOT record these as present)\n" + a.domain.negated.map((n) => `- ${n}`).join("\n"));
   const exs = pickExamples(language, a.matches.map((m) => m.term.id));
   if (exs.length) notes.push(examplesSection(exs));
@@ -369,6 +372,56 @@ function qualityWarnings(a: Analysis): string[] {
     out.push(`⚠ Transcript accuracy is ${q.tier.toUpperCase()} (${head}). ${q.issues.join(" ")} Every item below needs checking against the recording.`);
   else if (q.issues.length) out.push(`Transcript accuracy ${q.tier} (${head}): ${q.issues.join(" ")}`);
   return out;
+}
+
+const COVERAGE_SYSTEM = `You check an ophthalmology prescription draft against the doctor–patient conversation it was made from.
+List clinically relevant things that were SAID in the conversation but are MISSING from the draft: complaints, history
+(systemic illness and its duration, current medicines, allergy status, previous eye surgery, glasses), examination values
+per eye, diagnoses, medicines (including ones that start later, e.g. before surgery), drop instructions, procedures,
+investigations, advice, follow-up. Ignore small talk, cost discussion and the patient's own guesses.
+Do not list anything already in the draft (even if worded differently). For each item quote the exact transcript words.
+Return at most 12 items, most important first. Return JSON only.`;
+
+const coverageSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["missed"],
+  properties: {
+    missed: {
+      type: "array",
+      maxItems: 12,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["section", "item", "evidence"],
+        properties: {
+          section: { type: "string", enum: ["complaint", "history", "examination", "diagnosis", "medication", "procedure", "investigation", "advice", "follow-up"] },
+          item: { type: "string", description: "what is missing, in English" },
+          evidence: { type: "string", description: "exact words from the transcript" },
+        },
+      },
+    },
+  },
+};
+
+/** Second LLM pass: things said but missing from the draft. Shown to the doctor as warnings, never merged silently. */
+async function coverageCheck(transcript: string, english: string | undefined, p: Prescription): Promise<string[]> {
+  if (!config.llm.coverageCheck) return [];
+  const draft = JSON.stringify(p, (k, v) => (k === "evidence" || k === "kb_id" || k === "terms" || k === "patient_words" || v === "" || (Array.isArray(v) && !v.length) ? undefined : v));
+  const res = await chatJson(
+    [
+      { role: "system", content: COVERAGE_SYSTEM },
+      { role: "user", content: `## CONVERSATION TRANSCRIPT\n${transcript.trim()}${english ? `\n\n## MACHINE ENGLISH TRANSLATION\n${english.trim()}` : ""}\n\n## DRAFT PRESCRIPTION (JSON)\n${draft}` },
+    ],
+    coverageSchema,
+  );
+  const j = res.json as any;
+  const rows: any[] = Array.isArray(j?.missed) ? j.missed : [];
+  const heard = transcript + "\n" + (english ?? "");
+  return rows
+    .filter((m) => m?.item && supported(m.evidence, heard)) // only items that really are in the conversation
+    .slice(0, 12)
+    .map((m) => `Possibly missed (${m.section}): ${m.item} — «${String(m.evidence).trim()}»`);
 }
 
 export async function extractFromTranscript(transcript: string, opts: ExtractOptions = {}, kb = loadKb()): Promise<ExtractionResult> {
@@ -396,13 +449,14 @@ export async function extractFromTranscript(transcript: string, opts: ExtractOpt
   const matchText = [transcript, englishForLlm ?? ""].join("\n");
   const candidates = selectCandidates(matches, Math.round(config.llm.maxCandidates * policy.candidateFactor), policy.candidateMin);
   const scenarios = config.llm.scenarioExamples > 0 ? pickScenarios(matches, kb, config.llm.scenarioExamples) : [];
+  void scenarios; // no longer sent to the model (see prompt.ts)
   const qualityNote = policy.cautionLlm
     ? `TRANSCRIPT QUALITY: ${quality.tier} (accuracy ≈ ${Math.round(quality.score * 100)}%). ${quality.issues.join(" ")} ` +
       "Expect many speech-recognition errors: rely on CANDIDATES and the English translation, correct a misheard term only when a KB term clearly fits, and leave a field empty rather than guess."
     : undefined;
-  const dn = domainNotes(analysis, opts.language ?? quality.language);
+  const dn = domainNotes(analysis, opts.language ?? quality.language, transcript);
   domain.examples = dn.examples;
-  const user = buildUserPrompt({ transcript, english: englishForLlm, language: opts.language, candidates, kb, indexCategories: config.llm.indexCategories, scenarios, qualityNote, domainNotes: dn.notes });
+  const user = buildUserPrompt({ transcript, english: englishForLlm, language: opts.language, candidates, kb, indexCategories: [], scenarios: [], qualityNote, domainNotes: dn.notes });
 
   const res = await chatJson(
     [
@@ -425,6 +479,10 @@ export async function extractFromTranscript(transcript: string, opts: ExtractOpt
   domain.notes = post.notes;
   const { kbRefs, warnings } = ground(prescription, kb, d._positiveText ?? matchText);
   for (const r of post.removed) warnings.push(`Removed: ${r}.`);
+  for (const f of post.flags) warnings.push(`Check: ${f}.`);
+  // Second pass: what was said but is not in the draft? (LEF evaluation: allergy, ECG, glare, referral … dropped)
+  const missed = await coverageCheck(transcript, englishForLlm, prescription).catch((e) => [`Coverage check skipped: ${e?.message ?? e}`]);
+  warnings.push(...missed);
   if (domain.translation.reason && opts.english?.trim()) warnings.push(`Machine English translation not used: ${domain.translation.reason}.`);
   if (res.truncated) warnings.unshift(`⚠ The model's answer was cut short (${res.truncated}); some items may be missing — check against the transcript.`);
 
