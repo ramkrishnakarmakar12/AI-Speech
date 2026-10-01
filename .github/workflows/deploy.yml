@@ -222,6 +222,12 @@ jobs:
           # existing server (LEF) -> its nginx; dedicated server -> Caddy
           if [[ "$($TF proxy)" == "nginx" ]]; then SCRIPT=deploy/app/remote-deploy-nginx.sh; else SCRIPT=deploy/app/remote-deploy.sh; fi
           ALLOWED_CIDRS="$(jq -r 'join(" ")' <<<"$TF_VAR_allowed_cidr_blocks")"
+          for c in $ALLOWED_CIDRS; do
+            if [[ "$c" == 0.0.0.0/* && "$c" != "0.0.0.0/0" ]]; then
+              echo "::error::ALLOWED_CIDR_BLOCKS contains $c, which matches nobody. Use [\"0.0.0.0/0\"] to allow everyone."
+              exit 1
+            fi
+          done
           # Site login: only a hash goes to the server (and into SSM command history), never the password
           BASIC_AUTH=""
           if [[ -n "$SITE_USERNAME" && -n "$SITE_PASSWORD" ]]; then
