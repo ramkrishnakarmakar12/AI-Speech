@@ -100,13 +100,23 @@ resource "aws_kms_alias" "app_env" {
 
 resource "aws_security_group" "app" {
   name        = "ai-speech-${var.environment}-app"
-  description = "Web application HTTP access"
+  description = "Web application HTTPS access"
   vpc_id      = data.aws_vpc.default.id
 
+  # Port 80 must be reachable by Let's Encrypt to issue the HTTPS certificate. Caddy answers only the
+  # certificate challenge there and redirects everything else to HTTPS, which stays restricted below.
   ingress {
-    description = "App HTTP"
+    description = "HTTP - Let's Encrypt challenge and redirect to HTTPS"
     from_port   = 80
     to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "App HTTPS"
+    from_port   = 443
+    to_port     = 443
     protocol    = "tcp"
     cidr_blocks = var.allowed_cidr_blocks
   }
@@ -188,7 +198,7 @@ resource "aws_instance" "app" {
   user_data = <<-USERDATA
     #!/bin/bash
     set -euxo pipefail
-    dnf install -y docker awscli
+    dnf install -y docker
     systemctl enable --now docker
     systemctl enable --now amazon-ssm-agent
     mkdir -p /opt/ai-speech/approved /opt/ai-speech/output
@@ -201,14 +211,42 @@ resource "aws_instance" "app" {
   }
 
   metadata_options {
-    http_endpoint = "enabled"
-    http_tokens   = "required"
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 2 # the app container needs IMDS for the instance role (Bedrock)
+  }
+
+  # A new AL2023 AMI is published every few weeks; without this every deploy after that would
+  # replace the server and wipe the approved prescriptions stored on its disk.
+  lifecycle {
+    ignore_changes = [ami, user_data]
   }
 
   tags = {
     Name        = "ai-speech-${var.environment}"
     Environment = var.environment
   }
+}
+
+# Fixed public address: survives stop/start and instance replacement, and gives the HTTPS hostname
+resource "aws_eip" "app" {
+  domain = "vpc"
+
+  tags = {
+    Name        = "ai-speech-${var.environment}"
+    Environment = var.environment
+  }
+}
+
+resource "aws_eip_association" "app" {
+  instance_id   = aws_instance.app.id
+  allocation_id = aws_eip.app.id
+}
+
+locals {
+  # The browser only allows the microphone (live recording) on HTTPS. Without a domain of your own,
+  # <elastic-ip-with-dashes>.sslip.io resolves to the Elastic IP, so Caddy can get a free certificate.
+  site_domain = trimspace(var.domain) != "" ? trimspace(var.domain) : "${replace(aws_eip.app.public_ip, ".", "-")}.sslip.io"
 }
 
 resource "random_password" "asr_token" {

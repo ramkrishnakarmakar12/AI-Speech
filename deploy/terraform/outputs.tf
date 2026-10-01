@@ -3,7 +3,15 @@ output "instance_id" {
 }
 
 output "app_url" {
-  value = "http://${aws_instance.app.public_ip}"
+  value = "https://${local.site_domain}"
+}
+
+output "site_domain" {
+  value = local.site_domain
+}
+
+output "public_ip" {
+  value = aws_eip.app.public_ip
 }
 
 output "app_repository_url" {

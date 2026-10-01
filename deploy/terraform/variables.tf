@@ -14,7 +14,7 @@ variable "environment" {
 
 variable "allowed_cidr_blocks" {
   type        = list(string)
-  description = "IPv4 ranges allowed to reach the app over HTTP; use clinic/VPN IPs where possible."
+  description = "IPv4 ranges allowed to open the app over HTTPS; use clinic/VPN IPs where possible."
 
   validation {
     condition     = length(var.allowed_cidr_blocks) > 0 && alltrue([for cidr in var.allowed_cidr_blocks : can(cidrnetmask(cidr))])
@@ -39,4 +39,10 @@ variable "llm_model" {
 
 variable "lambda_image_tag" {
   type = string
+}
+
+variable "domain" {
+  type        = string
+  default     = ""
+  description = "Hostname for HTTPS (an A record pointing at the Elastic IP). Empty = <elastic-ip>.sslip.io."
 }

@@ -1,5 +1,6 @@
 name: Test and deploy
 
+# Only main is deployed (to prod). Other branches are not built or deployed by this workflow.
 on:
   push:
     branches: [main]
@@ -30,6 +31,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m py_compile deploy/asr-lambda/app.py deploy/asr-lambda/download_models.py src/asr/indic_asr.py
+      - run: bash -n deploy/app/remote-deploy.sh
       - run: terraform fmt -check -recursive deploy/terraform
       - run: terraform -chdir=deploy/terraform init -backend=false
       - run: terraform -chdir=deploy/terraform validate
@@ -49,20 +51,18 @@ jobs:
       TF_VAR_environment: prod
       TF_VAR_allowed_cidr_blocks: ${{ vars.ALLOWED_CIDR_BLOCKS }}
       TF_VAR_llm_model: ${{ vars.LLM_MODEL }}
-      TF_VAR_lambda_image_tag: ${{ github.run_id }}-${{ github.run_attempt }}
+      TF_VAR_domain: ${{ vars.DOMAIN }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.10.5
+          terraform_wrapper: false
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
+
       - name: Initialize Terraform
         run: >-
           terraform -chdir=deploy/terraform init
@@ -71,40 +71,97 @@ jobs:
           -backend-config="region=${{ env.AWS_REGION }}"
           -backend-config="encrypt=true"
           -backend-config="use_lockfile=true"
+
       - name: Create ECR repositories
+        env:
+          TF_VAR_lambda_image_tag: not-used-by-this-step
         run: >-
-          terraform -chdir=deploy/terraform apply -auto-approve
+          terraform -chdir=deploy/terraform apply -auto-approve -input=false
           -target=aws_ecr_repository.app
           -target=aws_ecr_repository.asr
+
       - name: Log in to ECR
         run: |
           APP_REPOSITORY="$(terraform -chdir=deploy/terraform output -raw app_repository_url)"
-          ECR_REGISTRY="${APP_REPOSITORY%/*}"
           aws ecr get-login-password --region "$AWS_REGION" |
-            docker login --username AWS --password-stdin "$ECR_REGISTRY"
+            docker login --username AWS --password-stdin "${APP_REPOSITORY%/*}"
+
       - name: Build and push app image
         run: |
           APP_REPOSITORY="$(terraform -chdir=deploy/terraform output -raw app_repository_url)"
           docker build --file deploy/app/Dockerfile --tag "$APP_REPOSITORY:$IMAGE_TAG" .
           docker push "$APP_REPOSITORY:$IMAGE_TAG"
+
+      # The speech image (~7 GB, models baked in) is tagged by a hash of the files that go into it,
+      # so it is rebuilt only when one of them changes. Otherwise the existing image is reused.
+      - name: Check whether the Lambda image needs a rebuild
+        id: asr
+        run: |
+          HASH="$(git ls-files -s deploy/asr-lambda src/asr/indic_asr.py .dockerignore | sha256sum | cut -c1-16)"
+          TAG="asr-$HASH"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          REPO_NAME="$(terraform -chdir=deploy/terraform output -raw asr_repository_url)"
+          REPO_NAME="${REPO_NAME#*/}"
+          if aws ecr describe-images --repository-name "$REPO_NAME" --image-ids imageTag="$TAG" >/dev/null 2>&1; then
+            echo "build=false" >> "$GITHUB_OUTPUT"
+            echo "Lambda image $TAG already exists - skipping the rebuild" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            echo "Lambda image $TAG not found - building it" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Free runner disk space for the Lambda image
+        if: steps.asr.outputs.build == 'true'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          docker system prune -af
+          df -h /
+
       - name: Build and push Lambda image
+        if: steps.asr.outputs.build == 'true'
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          ASR_TAG: ${{ steps.asr.outputs.tag }}
         run: |
           ASR_REPOSITORY="$(terraform -chdir=deploy/terraform output -raw asr_repository_url)"
           docker buildx create --use
           docker buildx build \
             --platform linux/amd64 \
+            --provenance=false --sbom=false \
             --secret id=hf_token,env=HF_TOKEN \
             --file deploy/asr-lambda/Dockerfile \
-            --tag "$ASR_REPOSITORY:$IMAGE_TAG" \
+            --tag "$ASR_REPOSITORY:$ASR_TAG" \
             --push .
+
       - name: Apply infrastructure
-        run: terraform -chdir=deploy/terraform apply -auto-approve
+        env:
+          TF_VAR_lambda_image_tag: ${{ steps.asr.outputs.tag }}
+        run: terraform -chdir=deploy/terraform apply -auto-approve -input=false
+
+      # With your own domain, Let's Encrypt can only issue the HTTPS certificate once the domain's
+      # DNS points at the Elastic IP. Stop here with clear instructions instead of failing later.
+      - name: Check the domain points at the Elastic IP
+        if: vars.DOMAIN != ''
+        run: |
+          DOMAIN="$(terraform -chdir=deploy/terraform output -raw site_domain)"
+          IP="$(terraform -chdir=deploy/terraform output -raw public_ip)"
+          A="$(dig +short A "$DOMAIN" @1.1.1.1 | grep -E '^[0-9.]+$' | sort | tr '\n' ' ' | xargs || true)"
+          AAAA="$(dig +short AAAA "$DOMAIN" @1.1.1.1 | grep ':' | tr '\n' ' ' | xargs || true)"
+          if [[ "$A" != "$IP" || -n "$AAAA" ]]; then
+            {
+              echo "### DNS for $DOMAIN is not ready"
+              echo "In your domain's DNS settings, set **exactly one A record**: \`$DOMAIN -> $IP\` (and no AAAA record)."
+              echo "Currently: A = \`${A:-none}\`, AAAA = \`${AAAA:-none}\`. Re-run this workflow once it has propagated."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::Point $DOMAIN (A record) at $IP and remove any AAAA record, then re-run. Now: A='${A:-none}' AAAA='${AAAA:-none}'"
+            exit 1
+          fi
+          echo "$DOMAIN -> $IP OK"
+
       - name: Wait for EC2 Systems Manager
         run: |
           INSTANCE_ID="$(terraform -chdir=deploy/terraform output -raw instance_id)"
-          for attempt in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             STATUS="$(aws ssm describe-instance-information \
               --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
               --query 'InstanceInformationList[0].PingStatus' --output text)"
@@ -115,26 +172,33 @@ jobs:
           done
           echo "EC2 instance did not register as online in Systems Manager" >&2
           exit 1
+
       - name: Deploy app through Systems Manager
         run: |
-          INSTANCE_ID="$(terraform -chdir=deploy/terraform output -raw instance_id)"
-          APP_REPOSITORY="$(terraform -chdir=deploy/terraform output -raw app_repository_url)"
-          PARAMETER_NAME="$(terraform -chdir=deploy/terraform output -raw app_env_parameter_name)"
-          ECR_REGISTRY="${APP_REPOSITORY%/*}"
-          REMOTE_SCRIPT="set -eu; while [ ! -f /var/lib/cloud/instance/boot-finished ]; do sleep 5; done; systemctl is-active --quiet docker; mkdir -p /opt/ai-speech/approved /opt/ai-speech/output; aws ecr get-login-password --region '$AWS_REGION' | docker login --username AWS --password-stdin '$ECR_REGISTRY'; aws ssm get-parameter --name '$PARAMETER_NAME' --with-decryption --query Parameter.Value --output text > /opt/ai-speech/.env; chmod 600 /opt/ai-speech/.env; docker pull '$APP_REPOSITORY:$IMAGE_TAG'; docker rm -f ai-speech-web || true; docker run -d --name ai-speech-web --restart unless-stopped -p 80:5055 --env-file /opt/ai-speech/.env -v /opt/ai-speech/approved:/app/data/approved -v /opt/ai-speech/output:/app/output '$APP_REPOSITORY:$IMAGE_TAG'; for attempt in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30; do curl -fsS http://127.0.0.1/api/config >/dev/null && exit 0; sleep 5; done; docker logs ai-speech-web; exit 1"
+          TF="terraform -chdir=deploy/terraform output -raw"
+          INSTANCE_ID="$($TF instance_id)"
+          APP_REPOSITORY="$($TF app_repository_url)"
+          SITE_DOMAIN="$($TF site_domain)"
+          APP_URL="$($TF app_url)"
+          PRELUDE="$(printf 'export AWS_REGION=%q ECR_REGISTRY=%q APP_IMAGE=%q PARAMETER_NAME=%q SITE_DOMAIN=%q\n' \
+            "$AWS_REGION" "${APP_REPOSITORY%/*}" "$APP_REPOSITORY:$IMAGE_TAG" "$($TF app_env_parameter_name)" "$SITE_DOMAIN")"
           COMMAND_ID="$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \
             --document-name AWS-RunShellScript \
-            --parameters "$(jq -cn --arg command "$REMOTE_SCRIPT" '{commands: [$command]}')" \
+            --comment "ai-speech $IMAGE_TAG" \
+            --timeout-seconds 600 \
+            --parameters "$(jq -n --arg pre "$PRELUDE" --rawfile script deploy/app/remote-deploy.sh \
+              '{commands: [$pre + "\n" + $script], executionTimeout: ["900"]}')" \
             --query 'Command.CommandId' --output text)"
-          for attempt in $(seq 1 120); do
+          for _ in $(seq 1 180); do
             STATUS="$(aws ssm get-command-invocation \
               --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" \
               --query 'Status' --output text 2>/dev/null || true)"
             case "$STATUS" in
               Success) break ;;
               Failed|TimedOut|Cancelled|Cancelling)
-                aws ssm get-command-invocation --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID"
+                aws ssm get-command-invocation --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" \
+                  --query '[StandardOutputContent, StandardErrorContent]' --output text
                 exit 1
                 ;;
             esac
@@ -146,4 +210,4 @@ jobs:
           fi
           aws ssm get-command-invocation --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" \
             --query 'StandardOutputContent' --output text
-          echo "App deployed to $(terraform -chdir=deploy/terraform output -raw app_url)" >> "$GITHUB_STEP_SUMMARY"
+          echo "App deployed to $APP_URL" >> "$GITHUB_STEP_SUMMARY"
