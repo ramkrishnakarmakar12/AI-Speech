@@ -1,0 +1,737 @@
+{
+  "transcript": "Good morning, Mr. Sharma. Please take a seat. What primary symptoms bring you to the eye clinic today? Good morning, doctor. Over the past month, I have noticed progressive metamorphosis in my blood pressure in my left eye, along with persistent asthenopia and photophobia. Yesterday evening, I saw a transient photopsia and my eyes are floating back.\nGiven the sudden onset of photopsia and vitreous floaters, we must evaluate for posterior vitreous detachment or a peripheral retinal tear. First, we will check the visual acuity, then perform dynamic retinoscopy and Goldman Appalachian tonometry to measure your intracular pressure and screen.\nUnder slit-lamp bio-microscopy, your anterior segment, including the cornea and iridocorneal angle, is unremarkable.\nEpithelium atrophy, drusen deposition, and mild localized macular edema. Is it age-related macular degeneration, doctor, or diabetic rectaloscopy? It is dry age-related muscular degeneration. Spectral domain optical coherence tomography shows disruption of the ellipsoid zone.\nIn addition, there is a short window diffraction without microneumatism or cotton wool spots. What is the prognosis and what they suggest?\nTherapies are available. Since there is no activate neovascular membrane, anti-VEGF intraviral injection, B-Rani-Bilumab are not indicated. We will initiate oral antioxidant, R-Cyte-H2 supplement to deter disease progression and give you an amstrad for home organ. If white conversion occurs, another dynamic therapy will be considered.\nUnder slit-lamp bio-microscopy, drusen deposition, and mild localized macular edema. Is it age-related macular degeneration, drusen deposition, and mild localized macular degeneration, B-Rani-Bilumab are not indicated. We will initiate oral antioxidant, R-Cyte-H2 supplement to deter disease progression and give you an amstrad for home organ. If white conversion occurs, another dynamic therapy will be considered.",
+  "language": "en",
+  "prescription": {
+    "patient": {
+      "name": "Mr. Sharma",
+      "age": "",
+      "sex": ""
+    },
+    "chief_complaints": [
+      {
+        "complaint": "progressive metamorphosis in blood pressure in left eye",
+        "kb_id": "",
+        "eye": "LE",
+        "duration": "past month",
+        "character": "persistent asthenopia and photophobia",
+        "patient_words": "progressive metamorphosis in my blood pressure in my left eye, along with persistent asthenopia and photophobia"
+      },
+      {
+        "complaint": "transient photopsia",
+        "kb_id": "",
+        "eye": "LE",
+        "duration": "yesterday evening",
+        "character": "floating back",
+        "patient_words": "transient photopsia and my eyes are floating back"
+      },
+      {
+        "complaint": "vitreous floaters",
+        "kb_id": "SYM-018",
+        "eye": "LE",
+        "duration": "present",
+        "character": "persistent",
+        "patient_words": "vitreous floaters"
+      }
+    ],
+    "history": {
+      "systemic": [
+        {
+          "condition": "asthenopia",
+          "kb_id": "DIS-145",
+          "duration": "present",
+          "treatment": "none mentioned"
+        },
+        {
+          "condition": "photophobia",
+          "kb_id": "",
+          "duration": "present",
+          "treatment": "none mentioned"
+        }
+      ],
+      "ocular": [
+        {
+          "item": "drusen deposition",
+          "kb_id": "",
+          "eye": "LE"
+        },
+        {
+          "item": "mild localized macular edema",
+          "kb_id": "",
+          "eye": "LE"
+        },
+        {
+          "item": "epithelium atrophy",
+          "kb_id": "",
+          "eye": "LE"
+        },
+        {
+          "item": "short window diffraction",
+          "kb_id": "",
+          "eye": "LE"
+        },
+        {
+          "item": "no cotton wool spots",
+          "kb_id": "",
+          "eye": "LE"
+        }
+      ],
+      "current_medications": [],
+      "allergies": []
+    },
+    "examination": [
+      {
+        "test": "visual acuity",
+        "kb_id": "ABR-011",
+        "eye": "LE",
+        "result": "not specified"
+      },
+      {
+        "test": "dynamic retinoscopy",
+        "kb_id": "TST-009",
+        "eye": "LE",
+        "result": "not specified"
+      },
+      {
+        "test": "Goldman Appalachian tonometry",
+        "kb_id": "TST-018",
+        "eye": "LE",
+        "result": "not specified"
+      },
+      {
+        "test": "slit-lamp bio-microscopy",
+        "kb_id": "TST-018",
+        "eye": "LE",
+        "result": "anterior segment unremarkable"
+      },
+      {
+        "test": "spectral domain optical coherence tomography",
+        "kb_id": "TST-029",
+        "eye": "LE",
+        "result": "disruption of ellipsoid zone"
+      }
+    ],
+    "clinical_findings": [
+      {
+        "finding": "drusen deposition",
+        "kb_id": "SGN-048",
+        "eye": "LE"
+      },
+      {
+        "finding": "mild localized macular edema",
+        "kb_id": "SGN-049",
+        "eye": "LE"
+      },
+      {
+        "finding": "epithelium atrophy",
+        "kb_id": "",
+        "eye": "LE"
+      },
+      {
+        "finding": "short window diffraction",
+        "kb_id": "",
+        "eye": "LE"
+      },
+      {
+        "finding": "no cotton wool spots",
+        "kb_id": "SGN-043",
+        "eye": "LE"
+      }
+    ],
+    "diagnosis": [
+      {
+        "condition": "dry age-related macular degeneration",
+        "kb_id": "ABR-033",
+        "eye": "LE",
+        "grade_or_notes": "no active neovascular membrane",
+        "certainty": "confirmed"
+      }
+    ],
+    "medications": [
+      {
+        "kb_id": "MED-106",
+        "generic_name": "AREDS2 formula",
+        "brand_said": "R-Cyte-H2",
+        "form": "Other",
+        "strength": "",
+        "eye": "LE",
+        "dose": "",
+        "frequency": "",
+        "duration": "",
+        "phase": "pre-op",
+        "instructions": "to deter disease progression"
+      },
+      {
+        "kb_id": "MED-095",
+        "generic_name": "Dexamethasone intravitreal implant",
+        "brand_said": "amstrad",
+        "form": "Other",
+        "strength": "",
+        "eye": "LE",
+        "dose": "",
+        "frequency": "",
+        "duration": "",
+        "phase": "pre-op",
+        "instructions": "for home organ"
+      }
+    ],
+    "procedures": [],
+    "investigations": [
+      {
+        "test": "optical coherence tomography",
+        "kb_id": "TST-029",
+        "eye": "LE",
+        "purpose": "to evaluate macular structure"
+      }
+    ],
+    "glasses": [
+      {
+        "eye": "LE",
+        "sph": "",
+        "cyl": "",
+        "axis": "",
+        "add": "",
+        "notes": "none"
+      }
+    ],
+    "advice": [
+      {
+        "text": "If white conversion occurs, another dynamic therapy will be considered",
+        "kb_id": ""
+      }
+    ],
+    "follow_up": [
+      {
+        "when": "not specified",
+        "purpose": "monitoring disease progression"
+      }
+    ],
+    "terms": [
+      {
+        "heard": "progressive metamorphosis in my blood pressure in my left eye",
+        "kb_id": "",
+        "canonical": "progressive metamorphosis in blood pressure in left eye",
+        "category": "complaint"
+      },
+      {
+        "heard": "persistent asthenopia",
+        "kb_id": "DIS-145",
+        "canonical": "Computer vision syndrome",
+        "category": "complaint"
+      },
+      {
+        "heard": "photophobia",
+        "kb_id": "SYM-015",
+        "canonical": "Photophobia",
+        "category": "complaint"
+      },
+      {
+        "heard": "transient photopsia",
+        "kb_id": "",
+        "canonical": "photopsia",
+        "category": "complaint"
+      },
+      {
+        "heard": "vitreous floaters",
+        "kb_id": "SYM-018",
+        "canonical": "Floaters",
+        "category": "complaint"
+      },
+      {
+        "heard": "drusen deposition",
+        "kb_id": "SGN-048",
+        "canonical": "Drusen",
+        "category": "finding"
+      },
+      {
+        "heard": "epithelium atrophy",
+        "kb_id": "",
+        "canonical": "epithelium atrophy",
+        "category": "finding"
+      },
+      {
+        "heard": "short window diffraction",
+        "kb_id": "",
+        "canonical": "short window diffraction",
+        "category": "finding"
+      },
+      {
+        "heard": "no cotton wool spots",
+        "kb_id": "SGN-043",
+        "canonical": "Cotton-wool spots",
+        "category": "finding"
+      },
+      {
+        "heard": "dry age-related macular degeneration",
+        "kb_id": "ABR-033",
+        "canonical": "Age-related macular degeneration",
+        "category": "diagnosis"
+      },
+      {
+        "heard": "spectral domain optical coherence tomography",
+        "kb_id": "TST-029",
+        "canonical": "Optical coherence tomography",
+        "category": "test"
+      },
+      {
+        "heard": "dynamic retinoscopy",
+        "kb_id": "TST-009",
+        "canonical": "Refraction",
+        "category": "test"
+      },
+      {
+        "heard": "Goldman Appalachian tonometry",
+        "kb_id": "TST-018",
+        "canonical": "Slit-lamp biomicroscopy",
+        "category": "test"
+      },
+      {
+        "heard": "slit-lamp bio-microscopy",
+        "kb_id": "TST-018",
+        "canonical": "Slit-lamp biomicroscopy",
+        "category": "test"
+      },
+      {
+        "heard": "anti-VEGF",
+        "kb_id": "PRC-050",
+        "canonical": "Intravitreal injection",
+        "category": "procedure"
+      },
+      {
+        "heard": "B-Rani-Bilumab",
+        "kb_id": "MED-089",
+        "canonical": "Ranibizumab",
+        "category": "medication"
+      },
+      {
+        "heard": "R-Cyte-H2",
+        "kb_id": "MED-106",
+        "canonical": "AREDS2 formula (lutein, zeaxanthin, vit C, vit E, zinc, copper)",
+        "category": "medication"
+      },
+      {
+        "heard": "amstrad",
+        "kb_id": "MED-095",
+        "canonical": "Dexamethasone intravitreal implant",
+        "category": "medication"
+      }
+    ]
+  },
+  "kbRefs": {
+    "chief_complaints.2": {
+      "id": "SYM-018",
+      "name": "Floaters",
+      "category": "symptom",
+      "verified": "llm",
+      "reference": {}
+    },
+    "history.systemic.0": {
+      "id": "DIS-145",
+      "name": "Computer vision syndrome",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H53.1",
+        "Category": "Refractive Error",
+        "Usual Management": "20-20-20 rule, lubricants, correct glasses, anti-reflective coating"
+      }
+    },
+    "examination.0": {
+      "id": "ABR-011",
+      "name": "Right eye / left eye / both eyes (Latin)",
+      "category": "abbreviation",
+      "verified": "llm",
+      "reference": {}
+    },
+    "examination.1": {
+      "id": "TST-009",
+      "name": "Refraction",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "Ref, Retinoscopy (Ret), Subjective refraction (SR)",
+        "Normal / Reference Value": "Emmetropia (plano)"
+      }
+    },
+    "examination.2": {
+      "id": "TST-018",
+      "name": "Slit-lamp biomicroscopy",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "SLE, SLB"
+      }
+    },
+    "examination.3": {
+      "id": "TST-018",
+      "name": "Slit-lamp biomicroscopy",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "SLE, SLB"
+      }
+    },
+    "examination.4": {
+      "id": "TST-029",
+      "name": "Optical coherence tomography",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "OCT",
+        "Normal / Reference Value": "CMT ~250 µm (device-dependent)"
+      }
+    },
+    "clinical_findings.0": {
+      "id": "SGN-048",
+      "name": "Drusen",
+      "category": "sign",
+      "verified": "llm",
+      "reference": {}
+    },
+    "clinical_findings.1": {
+      "id": "SGN-049",
+      "name": "Macular oedema",
+      "category": "sign",
+      "verified": "resolved",
+      "reference": {}
+    },
+    "clinical_findings.4": {
+      "id": "SGN-043",
+      "name": "Cotton-wool spots",
+      "category": "sign",
+      "verified": "llm",
+      "reference": {}
+    },
+    "diagnosis.0": {
+      "id": "ABR-033",
+      "name": "Age-related macular degeneration",
+      "category": "abbreviation",
+      "verified": "llm",
+      "reference": {}
+    },
+    "medications.0": {
+      "id": "MED-106",
+      "name": "AREDS2 formula (lutein, zeaxanthin, vit C, vit E, zinc, copper)",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "Antioxidant supplement",
+        "Common Strength": "As per AREDS2",
+        "Typical Prescription Usage": "1 tablet daily",
+        "Key Cautions / Side Effects": "Zinc GI upset",
+        "Example Brands (India, indicative)": "Ocuvite"
+      }
+    },
+    "medications.1": {
+      "id": "MED-095",
+      "name": "Dexamethasone intravitreal implant",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "Corticosteroid (sustained-release)",
+        "Common Strength": "0.7 mg",
+        "Typical Prescription Usage": "Every 3–6 months",
+        "Key Cautions / Side Effects": "IOP rise, cataract",
+        "Example Brands (India, indicative)": "Ozurdex"
+      }
+    },
+    "investigations.0": {
+      "id": "TST-029",
+      "name": "Optical coherence tomography",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "OCT",
+        "Normal / Reference Value": "CMT ~250 µm (device-dependent)"
+      }
+    }
+  },
+  "warnings": [
+    "AREDS2 formula: frequency, duration not stated in the conversation.",
+    "Dexamethasone intravitreal implant: frequency, duration not stated in the conversation."
+  ],
+  "detectedTerms": [
+    {
+      "id": "SGN-048",
+      "name": "Drusen",
+      "category": "sign",
+      "heardAs": "drusen",
+      "score": 1
+    },
+    {
+      "id": "ABR-033",
+      "name": "Age-related macular degeneration",
+      "category": "abbreviation",
+      "heardAs": "age related macular degeneration",
+      "score": 1
+    },
+    {
+      "id": "ANT-024",
+      "name": "Vitreous",
+      "category": "anatomy",
+      "heardAs": "vitreous",
+      "score": 1
+    },
+    {
+      "id": "DIS-119",
+      "name": "Posterior vitreous detachment",
+      "category": "disease",
+      "heardAs": "posterior vitreous detachment",
+      "score": 1
+    },
+    {
+      "id": "DIS-120",
+      "name": "Vitreous floaters",
+      "category": "disease",
+      "heardAs": "vitreous floaters",
+      "score": 1
+    },
+    {
+      "id": "SYM-015",
+      "name": "Photophobia",
+      "category": "symptom",
+      "heardAs": "photophobia",
+      "score": 1
+    },
+    {
+      "id": "SYM-018",
+      "name": "Floaters",
+      "category": "symptom",
+      "heardAs": "floaters",
+      "score": 1
+    },
+    {
+      "id": "TST-029",
+      "name": "Optical coherence tomography",
+      "category": "test",
+      "heardAs": "optical coherence tomography",
+      "score": 1
+    },
+    {
+      "id": "TST-068",
+      "name": "Blood pressure",
+      "category": "test",
+      "heardAs": "blood pressure",
+      "score": 1
+    },
+    {
+      "id": "SGN-043",
+      "name": "Cotton-wool spots",
+      "category": "sign",
+      "heardAs": "cotton wool spots",
+      "score": 1
+    },
+    {
+      "id": "OPT-002",
+      "name": "Left eye",
+      "category": "optical",
+      "heardAs": "left eye",
+      "score": 1
+    },
+    {
+      "id": "OPT-007",
+      "name": "Addition",
+      "category": "optical",
+      "heardAs": "addition",
+      "score": 1
+    },
+    {
+      "id": "ABR-012",
+      "name": "Visual acuity",
+      "category": "abbreviation",
+      "heardAs": "visual acuity",
+      "score": 1
+    },
+    {
+      "id": "ABR-036",
+      "name": "Posterior vitreous detachment",
+      "category": "abbreviation",
+      "heardAs": "posterior vitreous detachment",
+      "score": 1
+    },
+    {
+      "id": "ANT-001",
+      "name": "Cornea",
+      "category": "anatomy",
+      "heardAs": "cornea",
+      "score": 1
+    },
+    {
+      "id": "DIS-073",
+      "name": "Blepharitis",
+      "category": "disease",
+      "heardAs": "anterior",
+      "score": 0.95
+    },
+    {
+      "id": "DIS-099",
+      "name": "Scleritis",
+      "category": "disease",
+      "heardAs": "anterior",
+      "score": 0.95
+    },
+    {
+      "id": "DIS-107",
+      "name": "Retinal tear / hole",
+      "category": "disease",
+      "heardAs": "retinal tear",
+      "score": 0.95
+    },
+    {
+      "id": "DIS-145",
+      "name": "Computer vision syndrome",
+      "category": "disease",
+      "heardAs": "asthenopia",
+      "score": 0.95
+    },
+    {
+      "id": "TST-001",
+      "name": "Visual acuity (distance)",
+      "category": "test",
+      "heardAs": "visual acuity",
+      "score": 0.95
+    },
+    {
+      "id": "TST-009",
+      "name": "Refraction",
+      "category": "test",
+      "heardAs": "retinoscopy",
+      "score": 0.95
+    },
+    {
+      "id": "TST-018",
+      "name": "Slit-lamp biomicroscopy",
+      "category": "test",
+      "heardAs": "slit lamp bio microscopy",
+      "score": 0.95
+    },
+    {
+      "id": "PRC-050",
+      "name": "Intravitreal injection",
+      "category": "procedure",
+      "heardAs": "anti vegf",
+      "score": 0.95
+    },
+    {
+      "id": "ABR-011",
+      "name": "Right eye / left eye / both eyes (Latin)",
+      "category": "abbreviation",
+      "heardAs": "left eye",
+      "score": 0.95
+    },
+    {
+      "id": "ABR-027",
+      "name": "Posterior / anterior chamber intraocular lens",
+      "category": "abbreviation",
+      "heardAs": "posterior",
+      "score": 0.95
+    },
+    {
+      "id": "ABR-061",
+      "name": "Tablet / capsule / injection",
+      "category": "abbreviation",
+      "heardAs": "injection",
+      "score": 0.95
+    },
+    {
+      "id": "ANT-013",
+      "name": "Angle (iridocorneal)",
+      "category": "anatomy",
+      "heardAs": "angle",
+      "score": 0.95
+    },
+    {
+      "id": "ANT-021",
+      "name": "Lens capsule (anterior / posterior)",
+      "category": "anatomy",
+      "heardAs": "posterior",
+      "score": 0.95
+    },
+    {
+      "id": "TST-013",
+      "name": "Intraocular pressure",
+      "category": "test",
+      "heardAs": "intracular pressure",
+      "score": 0.9
+    },
+    {
+      "id": "ABR-017",
+      "name": "Intraocular pressure",
+      "category": "abbreviation",
+      "heardAs": "intracular pressure",
+      "score": 0.9
+    },
+    {
+      "id": "SGN-049",
+      "name": "Macular oedema",
+      "category": "sign",
+      "heardAs": "macular edema",
+      "score": 0.88
+    },
+    {
+      "id": "ABR-078",
+      "name": "Intravitreal injection",
+      "category": "abbreviation",
+      "heardAs": "intraviral injection",
+      "score": 0.86
+    },
+    {
+      "id": "DIS-104",
+      "name": "Dry age-related macular degeneration",
+      "category": "disease",
+      "heardAs": "edema is it age related macular degeneration doctor or diabetic rectaloscopy it is dry age",
+      "score": 0.85
+    },
+    {
+      "id": "TST-015",
+      "name": "Goldmann applanation tonometry",
+      "category": "test",
+      "heardAs": "goldman appalachian tonometry",
+      "score": 0.85
+    },
+    {
+      "id": "OPT-020",
+      "name": "Progressive addition lenses",
+      "category": "optical",
+      "heardAs": "progressive",
+      "score": 0.83
+    },
+    {
+      "id": "MED-089",
+      "name": "Ranibizumab",
+      "category": "medicine",
+      "heardAs": "rani bilumab",
+      "score": 0.81
+    },
+    {
+      "id": "DIS-105",
+      "name": "Wet age-related macular degeneration",
+      "category": "disease",
+      "heardAs": "epithelium atrophy drusen deposition and mild localized macular edema is it age related macular degeneration",
+      "score": 0.78
+    },
+    {
+      "id": "TST-005",
+      "name": "Near visual acuity",
+      "category": "test",
+      "heardAs": "the visual acuity",
+      "score": 0.77
+    },
+    {
+      "id": "SYM-042",
+      "name": "Blood in white of eye",
+      "category": "symptom",
+      "heardAs": "have noticed progressive metamorphosis in my blood pressure in my left eye",
+      "score": 0.73
+    }
+  ],
+  "llm": {
+    "model": "qwen/qwen3-vl-4b",
+    "ms": 79588
+  },
+  "asr": {
+    "language": "en",
+    "backend": "whisper-cli",
+    "ms": 32105
+  },
+  "markdown": "# Prescription draft\n_Auto-generated from the consultation audio/transcript. Must be reviewed and signed by the treating ophthalmologist._\n\n**Patient:** Mr. Sharma\n\n## C/o\n- progressive metamorphosis in blood pressure in left eye LE × past month (persistent asthenopia and photophobia) ⚠︎`not in KB`\n- transient photopsia LE × yesterday evening (floating back) ⚠︎`not in KB`\n- vitreous floaters LE × present (persistent) `SYM-018`\n\n## History\n- k/c/o asthenopia × present — none mentioned `DIS-145`\n- k/c/o photophobia × present — none mentioned ⚠︎`not in KB`\n- H/o drusen deposition LE ⚠︎`not in KB`\n- H/o mild localized macular edema LE ⚠︎`not in KB`\n- H/o epithelium atrophy LE ⚠︎`not in KB`\n- H/o short window diffraction LE ⚠︎`not in KB`\n- H/o no cotton wool spots LE ⚠︎`not in KB`\n\n## O/E\n- visual acuity LE : not specified `ABR-011`\n- dynamic retinoscopy LE : not specified `TST-009`\n- Goldman Appalachian tonometry LE : not specified `TST-018`\n- slit-lamp bio-microscopy LE : anterior segment unremarkable `TST-018`\n- spectral domain optical coherence tomography LE : disruption of ellipsoid zone `TST-029`\n- drusen deposition LE `SGN-048`\n- mild localized macular edema LE `SGN-049`\n- epithelium atrophy LE ⚠︎`not in KB`\n- short window diffraction LE ⚠︎`not in KB`\n- no cotton wool spots LE `SGN-043`\n\n## Diagnosis\n- dry age-related macular degeneration (no active neovascular membrane) LE `ABR-033`\n\n## Rx\n1. Other AREDS2 formula (R-Cyte-H2) — LE [pre-op] `MED-106`  \n   _to deter disease progression_\n   <sub>KB typical usage: 1 tablet daily</sub>\n2. Other Dexamethasone intravitreal implant (amstrad) — LE [pre-op] `MED-095`  \n   _for home organ_\n   <sub>KB typical usage: Every 3–6 months</sub>\n\n## Investigations\n- optical coherence tomography LE — to evaluate macular structure `TST-029`\n\n## Glasses\n| Eye | Sph | Cyl | Axis | Add | Notes |\n|---|---|---|---|---|---|\n| LE | — | — | — | — | none |\n\n## Advice\n- If white conversion occurs, another dynamic therapy will be considered\n\n## Review\n- not specified — monitoring disease progression\n\n## Check before signing\n- AREDS2 formula: frequency, duration not stated in the conversation.\n- Dexamethasone intravitreal implant: frequency, duration not stated in the conversation.\n\n## Terminology detected\n| Heard | Term | KB id | Category |\n|---|---|---|---|\n| progressive metamorphosis in my blood pressure in my left eye | progressive metamorphosis in blood pressure in left eye | — | complaint |\n| persistent asthenopia | Computer vision syndrome | DIS-145 | complaint |\n| photophobia | Photophobia | SYM-015 | complaint |\n| transient photopsia | photopsia | — | complaint |\n| vitreous floaters | Floaters | SYM-018 | complaint |\n| drusen deposition | Drusen | SGN-048 | finding |\n| epithelium atrophy | epithelium atrophy | — | finding |\n| short window diffraction | short window diffraction | — | finding |\n| no cotton wool spots | Cotton-wool spots | SGN-043 | finding |\n| dry age-related macular degeneration | Age-related macular degeneration | ABR-033 | diagnosis |\n| spectral domain optical coherence tomography | Optical coherence tomography | TST-029 | test |\n| dynamic retinoscopy | Refraction | TST-009 | test |\n| Goldman Appalachian tonometry | Slit-lamp biomicroscopy | TST-018 | test |\n| anti-VEGF | Intravitreal injection | PRC-050 | procedure |\n| B-Rani-Bilumab | Ranibizumab | MED-089 | medication |\n| R-Cyte-H2 | AREDS2 formula (lutein, zeaxanthin, vit C, vit E, zinc, copper) | MED-106 | medication |\n| amstrad | Dexamethasone intravitreal implant | MED-095 | medication |\n\n<sub>LLM: qwen/qwen3-vl-4b · 79.6 s · ASR: whisper-cli 32.1 s</sub>"
+}

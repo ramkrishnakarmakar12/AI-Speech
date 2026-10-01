@@ -1,0 +1,672 @@
+{
+  "transcript": "Doctor, good morning. Please have a seat. What is your name and age? Patient, good morning, doctor. My name is Sunil Das. I am 58 years old. Doctor, tell me, what problem are you facing? Patient. Doctor, for the last three months my left eye feels heavy and sometimes I see rainbow-colored rings around lights at night. Doctor, any headache or vomiting with it?\nPatient, mild headache in the evening but no vomiting. Doctor, do you have diabetes, blood pressure or asthma? Patient, I have blood pressure for five years. I take amlodipine, no sugar, asthma nahi hai. Doctor, does anyone in your family have glaucoma? Patient, yes, my mother had glaucoma. Doctor, okay, your vision is six-ninths in the right eye and six-twelfths in the left eye.\nPatient, is it serious, doctor? Doctor, it can be controlled with drops. Start latanoprost 0.005% eyedrops.\nOne drop at bedtime in the left eye every day. Also, timolol 0.5% eyedrops. One drop twice a day in the left eye. Doctor, for the dryness, use carboxymethyl cellulose eyedrops four times a day in both eyes for one month. Doctor, we will do a visual field test, HFA 24-2, and an OCTR-NFL scan before your next visit.\nCheck the inner corner of the eye for two minutes. Keep a five-minute gap between two different eyedrops. These drops are lifelong. Do not stop them on your own. Doctor, come back after one month to check the pressure. Your children should also get their eyes checked for glaucoma. Patient, thank you, doctor.",
+  "language": "en",
+  "prescription": {
+    "patient": {
+      "name": "Sunil Das",
+      "age": "58",
+      "sex": "male"
+    },
+    "chief_complaints": [
+      {
+        "complaint": "left eye feels heavy",
+        "kb_id": "SYM-002",
+        "eye": "LE",
+        "duration": "3 months",
+        "character": "sudden loss of vision",
+        "patient_words": "three months my left eye feels heavy and sometimes i see rainbow colored rings around lights at night"
+      },
+      {
+        "complaint": "rainbow-colored rings around lights",
+        "kb_id": "SYM-017",
+        "eye": "LE",
+        "duration": "3 months",
+        "character": "coloured haloes",
+        "patient_words": "my left eye feels heavy and sometimes i see rainbow colored rings around lights at night"
+      },
+      {
+        "complaint": "mild headache",
+        "kb_id": "SYM-022",
+        "eye": "BE",
+        "duration": "evening",
+        "character": "headache",
+        "patient_words": "mild headache in the evening but no vomiting"
+      }
+    ],
+    "history": {
+      "systemic": [
+        {
+          "condition": "hypertension",
+          "kb_id": "ABR-006",
+          "duration": "5 years",
+          "treatment": "amlodipine"
+        },
+        {
+          "condition": "family history of glaucoma",
+          "kb_id": "DIS-017",
+          "duration": "present",
+          "treatment": "mother had glaucoma"
+        }
+      ],
+      "ocular": [
+        {
+          "item": "visual acuity",
+          "kb_id": "ABR-012",
+          "eye": "RE"
+        }
+      ],
+      "current_medications": [
+        "amlodipine",
+        "no diabetes",
+        "no asthma"
+      ],
+      "allergies": []
+    },
+    "examination": [
+      {
+        "test": "visual acuity",
+        "kb_id": "TST-001",
+        "eye": "RE",
+        "result": "6/9"
+      },
+      {
+        "test": "visual acuity",
+        "kb_id": "TST-001",
+        "eye": "LE",
+        "result": "6/12"
+      }
+    ],
+    "clinical_findings": [
+      {
+        "finding": "visual field test",
+        "kb_id": "DIS-133",
+        "eye": "BE"
+      },
+      {
+        "finding": "OCT-RNFL scan",
+        "kb_id": "ABR-041",
+        "eye": "BE"
+      }
+    ],
+    "diagnosis": [
+      {
+        "condition": "glaucoma",
+        "kb_id": "DIS-017",
+        "eye": "LE",
+        "grade_or_notes": "present",
+        "certainty": "confirmed"
+      }
+    ],
+    "medications": [
+      {
+        "kb_id": "MED-034",
+        "generic_name": "Latanoprost",
+        "brand_said": "latanoprost",
+        "form": "Other",
+        "strength": "0.005%",
+        "eye": "LE",
+        "dose": "1 drop",
+        "frequency": "once daily",
+        "duration": "lifelong",
+        "phase": "pre-op",
+        "instructions": "at bedtime"
+      },
+      {
+        "kb_id": "MED-032",
+        "generic_name": "Timolol",
+        "brand_said": "timolol",
+        "form": "Other",
+        "strength": "0.5%",
+        "eye": "LE",
+        "dose": "1 drop",
+        "frequency": "twice daily",
+        "duration": "lifelong",
+        "phase": "pre-op",
+        "instructions": "at bedtime"
+      },
+      {
+        "kb_id": "MED-062",
+        "generic_name": "Carboxymethyl cellulose",
+        "brand_said": "carboxymethyl cellulose",
+        "form": "Other",
+        "strength": "0.5%",
+        "eye": "BE",
+        "dose": "4 drops",
+        "frequency": "once daily",
+        "duration": "1 month",
+        "phase": "pre-op",
+        "instructions": "at bedtime"
+      }
+    ],
+    "procedures": [
+      {
+        "procedure": "visual field test",
+        "kb_id": "",
+        "eye": "BE",
+        "notes": "HFA 24-2"
+      },
+      {
+        "procedure": "OCT-RNFL scan",
+        "kb_id": "",
+        "eye": "BE",
+        "notes": "OCT-RNFL"
+      }
+    ],
+    "investigations": [
+      {
+        "test": "visual field test",
+        "kb_id": "TST-027",
+        "eye": "BE",
+        "purpose": "to assess visual field defect"
+      },
+      {
+        "test": "OCT-RNFL scan",
+        "kb_id": "TST-030",
+        "eye": "BE",
+        "purpose": "to assess retinal nerve fiber layer"
+      }
+    ],
+    "glasses": [],
+    "advice": [
+      {
+        "text": "Keep a 5-minute gap between two different eyedrops",
+        "kb_id": "CNS-003"
+      },
+      {
+        "text": "Do not stop the drops on your own",
+        "kb_id": "CNS-003"
+      },
+      {
+        "text": "Come back after one month to check the pressure",
+        "kb_id": "CNS-003"
+      },
+      {
+        "text": "Your children should also get their eyes checked for glaucoma",
+        "kb_id": "CNS-014"
+      }
+    ],
+    "follow_up": [
+      {
+        "when": "after one month",
+        "purpose": "to check the pressure"
+      },
+      {
+        "when": "next visit",
+        "purpose": "to check the inner corner of the eye for two minutes"
+      }
+    ],
+    "terms": [
+      {
+        "heard": "left eye",
+        "kb_id": "OPT-001",
+        "canonical": "Right eye",
+        "category": "eye"
+      },
+      {
+        "heard": "right eye",
+        "kb_id": "OPT-002",
+        "canonical": "Left eye",
+        "category": "eye"
+      },
+      {
+        "heard": "both eyes",
+        "kb_id": "OPT-003",
+        "canonical": "Both eyes",
+        "category": "eye"
+      },
+      {
+        "heard": "inner corner",
+        "kb_id": "SYM-041",
+        "canonical": "Swelling near nose (inner corner)",
+        "category": "eye"
+      },
+      {
+        "heard": "HFA 24 2",
+        "kb_id": "TST-027",
+        "canonical": "Automated perimetry",
+        "category": "test"
+      },
+      {
+        "heard": "octr nfl",
+        "kb_id": "TST-030",
+        "canonical": "OCT RNFL / GCC",
+        "category": "test"
+      },
+      {
+        "heard": "at bedtime",
+        "kb_id": "ABR-068",
+        "canonical": "At bedtime (hora somni)",
+        "category": "time"
+      },
+      {
+        "heard": "eyedrops",
+        "kb_id": "ABR-058",
+        "canonical": "Eye drops",
+        "category": "medication form"
+      },
+      {
+        "heard": "dryness",
+        "kb_id": "SYM-033",
+        "canonical": "Dryness",
+        "category": "symptom"
+      },
+      {
+        "heard": "glaucoma",
+        "kb_id": "DIS-017",
+        "canonical": "Primary open-angle glaucoma",
+        "category": "disease"
+      },
+      {
+        "heard": "visual field test",
+        "kb_id": "DIS-133",
+        "canonical": "Homonymous hemianopia",
+        "category": "test"
+      },
+      {
+        "heard": "blood pressure",
+        "kb_id": "TST-027",
+        "canonical": "Automated perimetry",
+        "category": "test"
+      },
+      {
+        "heard": "headache",
+        "kb_id": "SYM-022",
+        "canonical": "Headache",
+        "category": "symptom"
+      },
+      {
+        "heard": "mild headache",
+        "kb_id": "SYM-022",
+        "canonical": "Headache",
+        "category": "symptom"
+      },
+      {
+        "heard": "amlodipine",
+        "kb_id": "MED-034",
+        "canonical": "Latanoprost",
+        "category": "medication"
+      },
+      {
+        "heard": "no sugar",
+        "kb_id": "SYM-022",
+        "canonical": "Headache",
+        "category": "condition"
+      },
+      {
+        "heard": "asthma nahi hai",
+        "kb_id": "SYM-022",
+        "canonical": "Headache",
+        "category": "condition"
+      }
+    ]
+  },
+  "kbRefs": {
+    "chief_complaints.0": {
+      "id": "SYM-002",
+      "name": "Sudden loss of vision",
+      "category": "symptom",
+      "verified": "llm",
+      "reference": {}
+    },
+    "chief_complaints.1": {
+      "id": "SYM-017",
+      "name": "Coloured haloes",
+      "category": "symptom",
+      "verified": "llm",
+      "reference": {}
+    },
+    "chief_complaints.2": {
+      "id": "SYM-022",
+      "name": "Headache",
+      "category": "symptom",
+      "verified": "llm",
+      "reference": {}
+    },
+    "history.systemic.0": {
+      "id": "ABR-006",
+      "name": "Hypertension",
+      "category": "abbreviation",
+      "verified": "resolved",
+      "reference": {}
+    },
+    "history.systemic.1": {
+      "id": "DIS-017",
+      "name": "Primary open-angle glaucoma",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H40.1",
+        "Category": "Glaucoma",
+        "Usual Management": "PG analogue / beta-blocker drops, SLT, trabeculectomy"
+      }
+    },
+    "history.ocular.0": {
+      "id": "ABR-012",
+      "name": "Visual acuity",
+      "category": "abbreviation",
+      "verified": "resolved",
+      "reference": {}
+    },
+    "examination.0": {
+      "id": "TST-001",
+      "name": "Visual acuity (distance)",
+      "category": "test",
+      "verified": "resolved",
+      "reference": {
+        "Abbreviation": "VA, UCVA / BCVA",
+        "Normal / Reference Value": "6/6 (20/20); LogMAR 0.0"
+      }
+    },
+    "examination.1": {
+      "id": "TST-001",
+      "name": "Visual acuity (distance)",
+      "category": "test",
+      "verified": "resolved",
+      "reference": {
+        "Abbreviation": "VA, UCVA / BCVA",
+        "Normal / Reference Value": "6/6 (20/20); LogMAR 0.0"
+      }
+    },
+    "clinical_findings.0": {
+      "id": "DIS-133",
+      "name": "Homonymous hemianopia",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H53.4",
+        "Category": "Neuro-ophthalmology",
+        "Usual Management": "Neuro workup, field awareness training"
+      }
+    },
+    "clinical_findings.1": {
+      "id": "ABR-041",
+      "name": "Retinal nerve fibre layer",
+      "category": "abbreviation",
+      "verified": "resolved",
+      "reference": {}
+    },
+    "diagnosis.0": {
+      "id": "DIS-017",
+      "name": "Primary open-angle glaucoma",
+      "category": "disease",
+      "verified": "llm",
+      "reference": {
+        "ICD-10 (indicative)": "H40.1",
+        "Category": "Glaucoma",
+        "Usual Management": "PG analogue / beta-blocker drops, SLT, trabeculectomy"
+      }
+    },
+    "medications.0": {
+      "id": "MED-034",
+      "name": "Latanoprost",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "Anti-glaucoma – prostaglandin analogue",
+        "Common Strength": "0.005%",
+        "Typical Prescription Usage": "1 drop once daily at bedtime (HS); refrigerate unopened bottle",
+        "Key Cautions / Side Effects": "Iris darkening, lash growth, redness, periocular pigmentation",
+        "Example Brands (India, indicative)": "Xalatan, Latoprost"
+      }
+    },
+    "medications.1": {
+      "id": "MED-032",
+      "name": "Timolol maleate",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "Anti-glaucoma – beta-blocker",
+        "Common Strength": "0.25% / 0.5%",
+        "Typical Prescription Usage": "1 drop BD (gel OD morning)",
+        "Key Cautions / Side Effects": "Avoid in asthma, COPD, bradycardia, heart block",
+        "Example Brands (India, indicative)": "Iotim, Glucomol, Timoptic"
+      }
+    },
+    "medications.2": {
+      "id": "MED-062",
+      "name": "Carboxymethylcellulose",
+      "category": "medicine",
+      "verified": "llm",
+      "reference": {
+        "Drug Class": "Lubricant / artificial tears",
+        "Common Strength": "0.5% / 1%",
+        "Typical Prescription Usage": "1 drop QID–6 times/day; gel at bedtime",
+        "Key Cautions / Side Effects": "Minimal; use preservative-free if > 4–6 times/day",
+        "Example Brands (India, indicative)": "Refresh Tears, Refresh Liquigel"
+      }
+    },
+    "investigations.0": {
+      "id": "TST-027",
+      "name": "Automated perimetry",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "HFA 24-2 / 30-2 / 10-2, SAP",
+        "Normal / Reference Value": "No defect; reliable indices"
+      }
+    },
+    "investigations.1": {
+      "id": "TST-030",
+      "name": "OCT RNFL / GCC",
+      "category": "test",
+      "verified": "llm",
+      "reference": {
+        "Abbreviation": "OCT-RNFL",
+        "Normal / Reference Value": "Green (within normal limits)"
+      }
+    },
+    "advice.0": {
+      "id": "CNS-003",
+      "name": "Keep a 5-minute gap between two different eye drops.",
+      "category": "counselling",
+      "verified": "llm",
+      "reference": {}
+    },
+    "advice.1": {
+      "id": "CNS-003",
+      "name": "Keep a 5-minute gap between two different eye drops.",
+      "category": "counselling",
+      "verified": "llm",
+      "reference": {}
+    },
+    "advice.2": {
+      "id": "CNS-003",
+      "name": "Keep a 5-minute gap between two different eye drops.",
+      "category": "counselling",
+      "verified": "llm",
+      "reference": {}
+    },
+    "advice.3": {
+      "id": "CNS-014",
+      "name": "Get your brothers, sisters and children checked for glaucoma.",
+      "category": "counselling",
+      "verified": "llm",
+      "reference": {}
+    }
+  },
+  "warnings": [
+    "\"visual field test\" (procedures) is not in the knowledge base — verify spelling.",
+    "\"OCT-RNFL scan\" (procedures) is not in the knowledge base — verify spelling.",
+    "⚠ Timolol maleate: caution mentions \"asthma\" and it appears in this patient's history — \"Avoid in asthma, COPD, bradycardia, heart block\""
+  ],
+  "detectedTerms": [
+    {
+      "id": "OPT-002",
+      "name": "Left eye",
+      "category": "optical",
+      "heardAs": "left eye",
+      "score": 1
+    },
+    {
+      "id": "SYM-022",
+      "name": "Headache",
+      "category": "symptom",
+      "heardAs": "headache",
+      "score": 1
+    },
+    {
+      "id": "TST-068",
+      "name": "Blood pressure",
+      "category": "test",
+      "heardAs": "blood pressure",
+      "score": 1
+    },
+    {
+      "id": "SYM-033",
+      "name": "Dryness",
+      "category": "symptom",
+      "heardAs": "dryness",
+      "score": 1
+    },
+    {
+      "id": "MED-034",
+      "name": "Latanoprost",
+      "category": "medicine",
+      "heardAs": "latanoprost",
+      "score": 1
+    },
+    {
+      "id": "OPT-001",
+      "name": "Right eye",
+      "category": "optical",
+      "heardAs": "right eye",
+      "score": 1
+    },
+    {
+      "id": "OPT-003",
+      "name": "Both eyes",
+      "category": "optical",
+      "heardAs": "both eyes",
+      "score": 1
+    },
+    {
+      "id": "ABR-011",
+      "name": "Right eye / left eye / both eyes (Latin)",
+      "category": "abbreviation",
+      "heardAs": "right eye",
+      "score": 0.95
+    },
+    {
+      "id": "SYM-041",
+      "name": "Swelling near nose (inner corner)",
+      "category": "symptom",
+      "heardAs": "inner corner",
+      "score": 0.95
+    },
+    {
+      "id": "TST-027",
+      "name": "Automated perimetry",
+      "category": "test",
+      "heardAs": "hfa 24 2",
+      "score": 0.95
+    },
+    {
+      "id": "MED-062",
+      "name": "Carboxymethylcellulose",
+      "category": "medicine",
+      "heardAs": "carboxymethyl cellulose",
+      "score": 0.95
+    },
+    {
+      "id": "ABR-010",
+      "name": "Right / left / both eyes",
+      "category": "abbreviation",
+      "heardAs": "both eyes",
+      "score": 0.95
+    },
+    {
+      "id": "ABR-058",
+      "name": "Eye drops",
+      "category": "abbreviation",
+      "heardAs": "eyedrops",
+      "score": 0.95
+    },
+    {
+      "id": "ABR-068",
+      "name": "At bedtime (hora somni)",
+      "category": "abbreviation",
+      "heardAs": "at bedtime",
+      "score": 0.95
+    },
+    {
+      "id": "CNS-004",
+      "name": "Use drops before ointment; apply ointment last / at bedtime.",
+      "category": "counselling",
+      "heardAs": "at bedtime",
+      "score": 0.95
+    },
+    {
+      "id": "TST-030",
+      "name": "OCT RNFL / GCC",
+      "category": "test",
+      "heardAs": "octr nfl",
+      "score": 0.9
+    },
+    {
+      "id": "DIS-017",
+      "name": "Primary open-angle glaucoma",
+      "category": "disease",
+      "heardAs": "glaucoma",
+      "score": 0.9
+    },
+    {
+      "id": "ABR-042",
+      "name": "Humphrey field analyser",
+      "category": "abbreviation",
+      "heardAs": "HFA",
+      "score": 0.85
+    },
+    {
+      "id": "CNS-003",
+      "name": "Keep a 5-minute gap between two different eye drops.",
+      "category": "counselling",
+      "heardAs": "next visit check the inner corner of the eye for two minutes keep a five minute gap between two different eyedrops these drops are",
+      "score": 0.85
+    },
+    {
+      "id": "TST-017",
+      "name": "Diurnal variation of IOP",
+      "category": "test",
+      "heardAs": "facing",
+      "score": 0.77
+    },
+    {
+      "id": "SYM-017",
+      "name": "Coloured haloes",
+      "category": "symptom",
+      "heardAs": "my left eye feels heavy and sometimes i see rainbow colored rings around lights at",
+      "score": 0.77
+    },
+    {
+      "id": "DIS-133",
+      "name": "Homonymous hemianopia",
+      "category": "disease",
+      "heardAs": "visual field test",
+      "score": 0.74
+    },
+    {
+      "id": "CNS-014",
+      "name": "Get your brothers, sisters and children checked for glaucoma.",
+      "category": "counselling",
+      "heardAs": "to check the pressure your children should also get their eyes checked for glaucoma patient",
+      "score": 0.71
+    },
+    {
+      "id": "SYM-002",
+      "name": "Sudden loss of vision",
+      "category": "symptom",
+      "heardAs": "three months my left eye feels heavy and sometimes i see rainbow",
+      "score": 0.66
+    }
+  ],
+  "llm": {
+    "model": "qwen/qwen3-vl-4b",
+    "ms": 80332
+  },
+  "asr": {
+    "language": "en",
+    "backend": "whisper-cli",
+    "ms": 22302
+  },
+  "markdown": "# Prescription draft\n_Auto-generated from the consultation audio/transcript. Must be reviewed and signed by the treating ophthalmologist._\n\n**Patient:** Sunil Das · 58 · male\n\n## C/o\n- left eye feels heavy LE × 3 months (sudden loss of vision) `SYM-002`\n- rainbow-colored rings around lights LE × 3 months (coloured haloes) `SYM-017`\n- mild headache BE × evening (headache) `SYM-022`\n\n## History\n- k/c/o hypertension × 5 years — amlodipine `ABR-006`\n- k/c/o family history of glaucoma × present — mother had glaucoma `DIS-017`\n- H/o visual acuity RE `ABR-012`\n- Current meds: amlodipine, no diabetes, no asthma\n\n## O/E\n- visual acuity RE : 6/9 `TST-001`\n- visual acuity LE : 6/12 `TST-001`\n- visual field test BE `DIS-133`\n- OCT-RNFL scan BE `ABR-041`\n\n## Diagnosis\n- glaucoma (present) LE [ICD-10 H40.1] `DIS-017`\n\n## Rx\n1. Other Latanoprost 0.005% (latanoprost) — 1 drop once daily LE × lifelong [pre-op] `MED-034`  \n   _at bedtime_\n   <sub>KB typical usage: 1 drop once daily at bedtime (HS); refrigerate unopened bottle</sub>\n2. Other Timolol 0.5% (timolol) — 1 drop twice daily LE × lifelong [pre-op] `MED-032`  \n   _at bedtime_\n   <sub>KB typical usage: 1 drop BD (gel OD morning)</sub>\n3. Other Carboxymethyl cellulose 0.5% (carboxymethyl cellulose) — 4 drops once daily BE × 1 month [pre-op] `MED-062`  \n   _at bedtime_\n   <sub>KB typical usage: 1 drop QID–6 times/day; gel at bedtime</sub>\n\n## Procedure / Surgery advised\n- visual field test BE — HFA 24-2 ⚠︎`not in KB`\n- OCT-RNFL scan BE — OCT-RNFL ⚠︎`not in KB`\n\n## Investigations\n- visual field test BE — to assess visual field defect `TST-027`\n- OCT-RNFL scan BE — to assess retinal nerve fiber layer `TST-030`\n\n## Advice\n- Keep a 5-minute gap between two different eyedrops\n- Do not stop the drops on your own\n- Come back after one month to check the pressure\n- Your children should also get their eyes checked for glaucoma\n\n## Review\n- after one month — to check the pressure\n- next visit — to check the inner corner of the eye for two minutes\n\n## Check before signing\n- \"visual field test\" (procedures) is not in the knowledge base — verify spelling.\n- \"OCT-RNFL scan\" (procedures) is not in the knowledge base — verify spelling.\n- ⚠ Timolol maleate: caution mentions \"asthma\" and it appears in this patient's history — \"Avoid in asthma, COPD, bradycardia, heart block\"\n\n## Terminology detected\n| Heard | Term | KB id | Category |\n|---|---|---|---|\n| left eye | Right eye | OPT-001 | eye |\n| right eye | Left eye | OPT-002 | eye |\n| both eyes | Both eyes | OPT-003 | eye |\n| inner corner | Swelling near nose (inner corner) | SYM-041 | eye |\n| HFA 24 2 | Automated perimetry | TST-027 | test |\n| octr nfl | OCT RNFL / GCC | TST-030 | test |\n| at bedtime | At bedtime (hora somni) | ABR-068 | time |\n| eyedrops | Eye drops | ABR-058 | medication form |\n| dryness | Dryness | SYM-033 | symptom |\n| glaucoma | Primary open-angle glaucoma | DIS-017 | disease |\n| visual field test | Homonymous hemianopia | DIS-133 | test |\n| headache | Headache | SYM-022 | symptom |\n| amlodipine | Latanoprost | MED-034 | medication |\n\n<sub>LLM: qwen/qwen3-vl-4b · 80.3 s · ASR: whisper-cli 22.3 s</sub>"
+}

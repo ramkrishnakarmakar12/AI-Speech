@@ -1,0 +1,110 @@
+{
+  "transcript": "চোখের পাতা ধারে রাতের শার আগে দুই চোখে জেল দেবেন দিনে দুবার গরম সেক দেবেন আর চোখের পাতার ধার পরিষ্কার করবেন কম্পিউটারে কাজের সময় প্রতি বিশ মিনিট পর বিশ সেকেন্ড দূরে তাকাবেন আর ঘন ঘন পলক ফেলবেন আর দেড় মাস পর আবার দেখাতে আসবেন আবার আসবো",
+  "english": "What is the problem?\nSugar pressure or Thyroid? Thyroid is there. Thyroxine is there. Sugar pressure is normal.\nThere is also maibomian gland plugging and barfractase. Your pressure is normal. There is also maibomian gland plugging and barfractase. There is also maibomian gland plugging and barfractase. There is also maibomian gland plugging and barfractase. There is also maibomian gland plugging and barfractase.\nBefore going to bed at night, give a gel to your eyes. Wash your eyes twice a day and clean the leaves of your eyes. After 20 minutes of working time on the computer, get out 20 seconds away and take a deep breath. After a month and a half, come to see me again. Thank you, thank you, doctor. I will come again. Thank you, thank you, doctor. I will come again.",
+  "language": "bn",
+  "prescription": {
+    "patient": {
+      "name": "",
+      "age": "",
+      "sex": ""
+    },
+    "chief_complaints": [],
+    "history": {
+      "systemic": [],
+      "ocular": [],
+      "current_medications": [],
+      "allergies": []
+    },
+    "examination": [],
+    "clinical_findings": [],
+    "diagnosis": [],
+    "medications": [],
+    "procedures": [],
+    "investigations": [],
+    "glasses": [],
+    "advice": [],
+    "follow_up": [],
+    "terms": [
+      {
+        "heard": "maibomian gland plugging",
+        "kb_id": "SGN-055",
+        "canonical": "Meibomian gland plugging",
+        "category": "sign"
+      },
+      {
+        "heard": "barfractase",
+        "kb_id": "",
+        "canonical": "",
+        "category": "sign"
+      },
+      {
+        "heard": "Thyroid is there",
+        "kb_id": "DIS-149",
+        "canonical": "Thyroid eye disease",
+        "category": "disease"
+      },
+      {
+        "heard": "Sugar pressure",
+        "kb_id": "DIS-017",
+        "canonical": "Primary open-angle glaucoma",
+        "category": "disease"
+      },
+      {
+        "heard": "Your pressure is normal",
+        "kb_id": "DIS-017",
+        "canonical": "Primary open-angle glaucoma",
+        "category": "disease"
+      }
+    ]
+  },
+  "kbRefs": {},
+  "warnings": [],
+  "detectedTerms": [
+    {
+      "id": "SGN-055",
+      "name": "Meibomian gland plugging",
+      "category": "sign",
+      "heardAs": "maibomian gland plugging",
+      "score": 0.91
+    },
+    {
+      "id": "DIS-149",
+      "name": "Thyroid eye disease",
+      "category": "disease",
+      "heardAs": "thyroid is",
+      "score": 0.72
+    },
+    {
+      "id": "DIS-061",
+      "name": "Corneal opacity",
+      "category": "disease",
+      "heardAs": "chokhe jel",
+      "score": 0.7
+    },
+    {
+      "id": "DIS-017",
+      "name": "Primary open-angle glaucoma",
+      "category": "disease",
+      "heardAs": "your pressure",
+      "score": 0.68
+    },
+    {
+      "id": "DIS-018",
+      "name": "Primary angle-closure glaucoma",
+      "category": "disease",
+      "heardAs": "your pressure",
+      "score": 0.68
+    }
+  ],
+  "llm": {
+    "model": "qwen/qwen3-vl-4b",
+    "ms": 24699
+  },
+  "asr": {
+    "language": "bn",
+    "model": "ai4bharat/indic-conformer-600m-multilingual",
+    "backend": "indic",
+    "ms": 281457
+  },
+  "markdown": "# Prescription draft\n_Auto-generated from the consultation audio/transcript. Must be reviewed and signed by the treating ophthalmologist._\n\n**Patient:** —\n\n## C/o\n- —\n\n## History\n- —\n\n## O/E\n- —\n\n## Diagnosis\n- —\n\n## Rx\n—\n\n## Advice\n- —\n\n## Review\n- —\n\n## Terminology detected\n| Heard | Term | KB id | Category |\n|---|---|---|---|\n| maibomian gland plugging | Meibomian gland plugging | SGN-055 | sign |\n| barfractase |  | — | sign |\n| Thyroid is there | Thyroid eye disease | DIS-149 | disease |\n| Sugar pressure | Primary open-angle glaucoma | DIS-017 | disease |\n\n<sub>LLM: qwen/qwen3-vl-4b · 24.7 s · ASR: indic 281.5 s</sub>"
+}

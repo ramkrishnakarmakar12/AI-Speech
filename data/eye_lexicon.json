@@ -1,0 +1,748 @@
+{
+ "about": "Eye-clinic lay phrases (Bengali, Hindi, English) and known speech-recognition mishearings mapped to knowledge-base ids. 'block' suppresses KB matches that these phrases wrongly trigger (e.g. প্রেশার → glaucoma). Add rows freely; restart the server to reload.",
+ "entries": [
+  {
+   "lang": "bn",
+   "match": [
+    "চালশে",
+    "চালসে",
+    "চালছে ধরেছে"
+   ],
+   "id": "DIS-143",
+   "hint": "চালশে = presbyopia (near-vision loss after 40)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "কাছের জিনিস",
+    "কাছের লেখা",
+    "কাছে পড়তে",
+    "চাষ জিনিস"
+   ],
+   "id": "DIS-143",
+   "hint": "difficulty with near work / reading (চাষ জিনিস is an ASR mishearing of কাছের জিনিস)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "ঝাপসা"
+   ],
+   "id": "SYM-001"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "ছানি"
+   ],
+   "id": "DIS-001"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "চোখ লাল",
+    "চোখটা লাল",
+    "চোখ লাল হয়"
+   ],
+   "id": "SYM-006"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "জল পড়",
+    "জল পড়ছে",
+    "জল আসে"
+   ],
+   "id": "SYM-007"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "আলোর দিকে তাকাতে",
+    "আলোতে তাকাতে",
+    "আলো সহ্য",
+    "আলতি টাকাতে"
+   ],
+   "id": "SYM-015",
+   "hint": "cannot look at light = photophobia (not a sensitivity to wind/dust)",
+   "block": [
+    "SYM-045"
+   ]
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "চুলকা"
+   ],
+   "id": "SYM-010"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "চোখে বালি",
+    "বালি পড়",
+    "মালি পরে"
+   ],
+   "id": "SYM-012",
+   "hint": "sand in the eye = foreign body sensation / grittiness (মালি পরে is an ASR mishearing of বালি পড়ে)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "শুকনো"
+   ],
+   "id": "SYM-033"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "জ্বালা"
+   ],
+   "id": "SYM-011"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "ব্যথা",
+    "বেথা"
+   ],
+   "id": "SYM-013"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "কালো ফুটকি",
+    "ভেসে বেড়ানো",
+    "ভাসমান"
+   ],
+   "id": "SYM-018"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "ঝলকানি",
+    "ঝরকি"
+   ],
+   "id": "SYM-019",
+   "hint": "flashes of light = photopsia"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "দুটো করে দেখ",
+    "ডবল দেখ"
+   ],
+   "id": "SYM-021"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "মাথাব্যথা",
+    "মাথা ব্যথা"
+   ],
+   "id": "SYM-022"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "পিচুটি"
+   ],
+   "id": "SYM-008"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "পাতা ফোলা",
+    "পাতা ফুলে"
+   ],
+   "id": "SYM-029"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "রাতকানা"
+   ],
+   "id": "SYM-024"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "ট্যারা"
+   ],
+   "id": "SYM-034"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "খুশকি"
+   ],
+   "id": "DIS-073",
+   "hint": "dandruff-like crusts on the lids suggest blepharitis (a finding, diagnose only if the doctor says so)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "ক্লান্তি"
+   ],
+   "id": "SYM-023",
+   "hint": "eye fatigue = asthenopia / eye strain"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "খাপছাড়া",
+    "খাপ ছাড়া",
+    "বাঁকা দেখা",
+    "বাঁকা দেখ"
+   ],
+   "hint": "distorted / wavy vision = metamorphopsia (a complaint)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "গরম সেঁক",
+    "গরম সেক",
+    "গরম শেক"
+   ],
+   "id": "CNS-025"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "পাতার ধার পরিষ্কার"
+   ],
+   "id": "CNS-025"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "বিশ সেকেন্ড",
+    "বিশ মিনিট"
+   ],
+   "id": "CNS-023"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "ঘষবেন না",
+    "ঘসবেন না",
+    "গসবেন না"
+   ],
+   "id": "CNS-021"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "কালো চশমা"
+   ],
+   "id": "CNS-022"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "থাইরয়েড",
+    "থাইরক্সিন",
+    "থাইরাইড",
+    "থাইরাক্সিন"
+   ],
+   "hint": "thyroid problem on thyroxine = hypothyroidism (systemic history), NOT thyroid eye disease unless the doctor diagnoses it",
+   "block": [
+    "DIS-149"
+   ]
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "সুগার",
+    "ডায়াবেটিস"
+   ],
+   "id": "ABR-005",
+   "hint": "সুগার = diabetes (systemic history)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "চোখের প্রেশার",
+    "চোখের চাপ",
+    "চোখের ভেতরের চাপ"
+   ],
+   "id": "TST-013",
+   "hint": "eye pressure = intraocular pressure"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "প্রেশার",
+    "প্রেসার"
+   ],
+   "id": "ABR-006",
+   "hint": "প্রেশার on its own = blood pressure (hypertension), not eye pressure or glaucoma",
+   "block": [
+    "DIS-017",
+    "DIS-018",
+    "DIS-021",
+    "DIS-023",
+    "TST-013"
+   ]
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "হাঁপানি"
+   ],
+   "id": "ABR-007"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "ধানের পাতা",
+    "গাছের পাতা"
+   ],
+   "hint": "injury with a paddy/plant leaf = vegetative trauma (risk factor for fungal keratitis)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "মেটফরমিন",
+    "মেথর্মিন",
+    "মেটফর্মিন"
+   ],
+   "id": "ABR-005",
+   "hint": "metformin = oral antidiabetic → diabetes history, not an eye prescription"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "धुंधला",
+    "धुंधलापन",
+    "धुँधला"
+   ],
+   "id": "SYM-001"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "मोतियाबिंद",
+    "मोतियाबिन्द"
+   ],
+   "id": "DIS-001"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "काला मोतिया"
+   ],
+   "id": "DIS-017",
+   "hint": "काला मोतिया = glaucoma"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "आंख लाल",
+    "आँख लाल",
+    "आंखें लाल",
+    "आँखें लाल"
+   ],
+   "id": "SYM-006"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "पानी आ",
+    "पानी बह"
+   ],
+   "id": "SYM-007"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "खुजली"
+   ],
+   "id": "SYM-010"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "जलन"
+   ],
+   "id": "SYM-011"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "किरकिरी",
+    "चुभन",
+    "कुछ पड़ा"
+   ],
+   "id": "SYM-012"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "सूखापन",
+    "सूखी आंख",
+    "सूखी आँख"
+   ],
+   "id": "SYM-033"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "आंख में दर्द",
+    "आँख में दर्द",
+    "आंखों में दर्द",
+    "आँखों में दर्द"
+   ],
+   "id": "SYM-013"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "सिरदर्द",
+    "सिर दर्द"
+   ],
+   "id": "SYM-022"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "दो दो दिख",
+    "दो-दो दिख",
+    "डबल दिख"
+   ],
+   "id": "SYM-021"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "कीचड़"
+   ],
+   "id": "SYM-008"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "रतौंधी"
+   ],
+   "id": "SYM-024"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "भेंगा",
+    "भेंगापन"
+   ],
+   "id": "SYM-034"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "रोशनी से तकलीफ",
+    "रोशनी चुभ",
+    "रोशनी बर्दाश्त"
+   ],
+   "id": "SYM-015",
+   "block": [
+    "SYM-045"
+   ]
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "मच्छर उड़",
+    "काले धब्बे"
+   ],
+   "id": "SYM-018"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "चमक दिख"
+   ],
+   "id": "SYM-019"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "पास का",
+    "नजदीक का",
+    "नज़दीक का",
+    "पढ़ने में दिक्कत",
+    "पढ़ने में परेशानी"
+   ],
+   "id": "DIS-143",
+   "hint": "difficulty with near vision / reading"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "शुगर",
+    "डायबिटीज",
+    "मधुमेह"
+   ],
+   "id": "ABR-005"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "आंख का प्रेशर",
+    "आँख का प्रेशर",
+    "आंखों का प्रेशर",
+    "आँखों का प्रेशर",
+    "आंख का दबाव"
+   ],
+   "id": "TST-013",
+   "hint": "eye pressure = intraocular pressure"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "बीपी",
+    "ब्लड प्रेशर",
+    "प्रेशर"
+   ],
+   "id": "ABR-006",
+   "hint": "प्रेशर on its own = blood pressure (hypertension)",
+   "block": [
+    "DIS-017",
+    "DIS-018",
+    "DIS-021",
+    "DIS-023",
+    "TST-013"
+   ]
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "दमा",
+    "अस्थमा"
+   ],
+   "id": "ABR-007"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "थायराइड",
+    "थायरॉइड",
+    "थायरॉक्सिन"
+   ],
+   "hint": "thyroid problem = systemic history, NOT thyroid eye disease unless the doctor diagnoses it",
+   "block": [
+    "DIS-149"
+   ]
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "गरम सेक",
+    "गर्म सेक",
+    "गरम पट्टी"
+   ],
+   "id": "CNS-025"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "आंखें न मलें",
+    "आंख न मलें",
+    "मलें नहीं",
+    "मसलें नहीं"
+   ],
+   "id": "CNS-021"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "काला चश्मा"
+   ],
+   "id": "CNS-022"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "blurry",
+    "blurred vision",
+    "blurring"
+   ],
+   "id": "SYM-001"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "grain of sand",
+    "gritty",
+    "something in my eye"
+   ],
+   "id": "SYM-012"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "sensitivity to light",
+    "sensitive to light",
+    "light sensitivity"
+   ],
+   "id": "SYM-015",
+   "block": [
+    "SYM-045"
+   ]
+  },
+  {
+   "lang": "en",
+   "match": [
+    "rainbow",
+    "rings around lights",
+    "halos",
+    "haloes"
+   ],
+   "id": "SYM-017"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "wavy",
+    "lines look bent",
+    "distorted vision"
+   ],
+   "hint": "distorted / wavy vision = metamorphopsia"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "eye pressure",
+    "pressure in the eye",
+    "pressure in my eye"
+   ],
+   "id": "TST-013"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "blood pressure",
+    "hypertension"
+   ],
+   "id": "ABR-006",
+   "block": [
+    "DIS-017",
+    "DIS-018",
+    "DIS-021",
+    "DIS-023",
+    "TST-013"
+   ]
+  },
+  {
+   "lang": "en",
+   "match": [
+    "sugar",
+    "diabetes",
+    "diabetic"
+   ],
+   "id": "ABR-005"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "asthma"
+   ],
+   "id": "ABR-007"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "thyroid",
+    "thyroxine"
+   ],
+   "hint": "thyroid problem = systemic history, NOT thyroid eye disease unless the doctor diagnoses it",
+   "block": [
+    "DIS-149"
+   ]
+  },
+  {
+   "lang": "en",
+   "match": [
+    "amstrad",
+    "abstract date",
+    "amsler"
+   ],
+   "id": "TST-060",
+   "hint": "Amsler grid for home monitoring — a test card, never a drug or implant",
+   "block": [
+    "MED-095"
+   ]
+  },
+  {
+   "lang": "en",
+   "match": [
+    "r-cyte",
+    "r cyte",
+    "r-side h2",
+    "r side h2",
+    "ards-2",
+    "ards 2",
+    "areds"
+   ],
+   "id": "MED-106",
+   "hint": "AREDS2 antioxidant supplement (ASR mishearing)"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "rani-bilumab",
+    "b-rani-bilumab",
+    "danivizumab",
+    "b-danivizumab"
+   ],
+   "id": "MED-089",
+   "hint": "ranibizumab (ASR mishearing)"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "appalachian tonometry",
+    "appellation tonometry"
+   ],
+   "id": "TST-015",
+   "hint": "Goldmann applanation tonometry (ASR mishearing)"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "metamorphosis"
+   ],
+   "hint": "\"metamorphosis\" in an eye history = metamorphopsia (ASR mishearing)"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "autopsy"
+   ],
+   "id": "SYM-019",
+   "hint": "\"autopsy\" = photopsia / flashes (ASR mishearing)"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "octr-nfl",
+    "octr nfl"
+   ],
+   "id": "TST-030"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "anionic therapy",
+    "another dynamic therapy",
+    "photodynamic"
+   ],
+   "id": "PRC-055",
+   "hint": "photodynamic therapy (ASR mishearing)"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "white conversion",
+    "word conversion"
+   ],
+   "hint": "\"white/word conversion\" = wet conversion of dry AMD (ASR mishearing)"
+  }
+ ]
+}

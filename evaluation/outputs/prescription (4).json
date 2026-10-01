@@ -1,0 +1,88 @@
+{
+  "transcript": "शुक्रवाद लिस्ता शर्मा बोशून, आज चोके कौन समस्या दे आपनी किल्निके ऐसे थें?\nआपनी किल्निके ऐसे थें?\nआपनी किल्निके ऐसे थें?\nआपनी किल्निके ऐसे थें?\nआपनी किल्निके ऐसे थें? आपनी किल्निके ऐसे थें?\nआपनी किल्निके ऐसे थें?\nआपनी किल्निके ऐसे थें?",
+  "english": "Thank you very much Dr. Sharma. Please sit down. What problems do you have in your clinic today? Thank you very much, Dr. Babu. For the past one month, I have been suffering from constipation, nausea, nausea in my stomach, and constipation in my chest.\nI have been suffering from constipation, nausea, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest.\nI have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest.\nI have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest.\nI have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest.\nI have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest.\nI have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest. I have been suffering from constipation, nausea in my stomach, and constipation in my chest.",
+  "language": "hi",
+  "prescription": {
+    "patient": {
+      "name": "Dr. Babu",
+      "age": "",
+      "sex": "male"
+    },
+    "chief_complaints": [],
+    "history": {
+      "systemic": [
+        {
+          "condition": "constipation",
+          "kb_id": "",
+          "duration": "one month",
+          "treatment": ""
+        },
+        {
+          "condition": "nausea",
+          "kb_id": "",
+          "duration": "one month",
+          "treatment": ""
+        },
+        {
+          "condition": "constipation in chest",
+          "kb_id": "",
+          "duration": "one month",
+          "treatment": ""
+        }
+      ],
+      "ocular": [],
+      "current_medications": [],
+      "allergies": []
+    },
+    "examination": [],
+    "clinical_findings": [],
+    "diagnosis": [],
+    "medications": [],
+    "procedures": [],
+    "investigations": [],
+    "glasses": [],
+    "advice": [],
+    "follow_up": [],
+    "terms": [
+      {
+        "heard": "constipation",
+        "kb_id": "",
+        "canonical": "constipation",
+        "category": "systemic"
+      },
+      {
+        "heard": "nausea",
+        "kb_id": "SYM-046",
+        "canonical": "Nausea / vomiting with eye pain",
+        "category": "systemic"
+      },
+      {
+        "heard": "constipation in chest",
+        "kb_id": "",
+        "canonical": "constipation in chest",
+        "category": "systemic"
+      }
+    ]
+  },
+  "kbRefs": {},
+  "warnings": [],
+  "detectedTerms": [
+    {
+      "id": "SYM-046",
+      "name": "Nausea / vomiting with eye pain",
+      "category": "symptom",
+      "heardAs": "nausea",
+      "score": 0.95
+    }
+  ],
+  "llm": {
+    "model": "qwen/qwen3-vl-4b",
+    "ms": 23026
+  },
+  "asr": {
+    "language": "hi",
+    "backend": "whisper-cli",
+    "ms": 102668
+  },
+  "markdown": "# Prescription draft\n_Auto-generated from the consultation audio/transcript. Must be reviewed and signed by the treating ophthalmologist._\n\n**Patient:** Dr. Babu · male\n\n## C/o\n- —\n\n## History\n- k/c/o constipation × one month ⚠︎`not in KB`\n- k/c/o nausea × one month ⚠︎`not in KB`\n- k/c/o constipation in chest × one month ⚠︎`not in KB`\n\n## O/E\n- —\n\n## Diagnosis\n- —\n\n## Rx\n—\n\n## Advice\n- —\n\n## Review\n- —\n\n## Terminology detected\n| Heard | Term | KB id | Category |\n|---|---|---|---|\n| constipation | constipation | — | systemic |\n| nausea | Nausea / vomiting with eye pain | SYM-046 | systemic |\n| constipation in chest | constipation in chest | — | systemic |\n\n<sub>LLM: qwen/qwen3-vl-4b · 23.0 s · ASR: whisper-cli 102.7 s</sub>"
+}

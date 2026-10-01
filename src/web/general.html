@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Transcription Accuracy</title>
+<link rel="icon" href="data:," />
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#1b1f24; --mute:#667085; --line:#e4e7ec; --acc:#1d6fd6; --warn:#b54708; --warnbg:#fffaeb; --ok:#067647; --okbg:#ecfdf3; --bad:#b42318; --badbg:#fef3f2; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111418; --card:#1a1e24; --ink:#e7e9ec; --mute:#98a2b3; --line:#2b3139; --acc:#5aa2ff; --warn:#fdb022; --warnbg:#2a2213; --ok:#47cd89; --okbg:#0f2a1c; --bad:#f97066; --badbg:#2d1414; } }
+  * { box-sizing: border-box; }
+  body { margin:0; font: 14px/1.5 system-ui, -apple-system, Segoe UI, sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); display:flex; gap:16px; align-items:baseline; flex-wrap:wrap; }
+  header h1 { font-size:17px; margin:0; } header small, .muted { color:var(--mute); } header a { color:var(--acc); }
+  main { display:grid; grid-template-columns:minmax(320px,420px) 1fr; gap:16px; padding:16px; }
+  @media (max-width:900px) { main { grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; min-width:0; }
+  label { display:block; font-weight:600; margin:12px 0 6px; }
+  textarea, input[type=text], select { width:100%; font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:transparent; color:inherit; }
+  textarea { min-height:120px; font:13px/1.45 ui-monospace, Menlo, monospace; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; align-items:center; }
+  button { font:inherit; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:inherit; cursor:pointer; }
+  button.primary { background:var(--acc); border-color:var(--acc); color:#fff; font-weight:600; }
+  button:disabled { opacity:.5; cursor:wait; }
+  #status { color:var(--mute); margin-top:10px; min-height:20px; }
+  h2 { font-size:15px; margin:18px 0 8px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .tile { border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+  .tile .v { font-size:24px; font-weight:700; } .tile .k { color:var(--mute); font-size:12px; }
+  .good .v { color:var(--ok); } .mid .v { color:var(--warn); } .poor .v { color:var(--bad); }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { text-align:left; border-bottom:1px solid var(--line); padding:5px 6px; vertical-align:top; }
+  th { color:var(--mute); font-weight:600; }
+  .warn { background:var(--warnbg); color:var(--warn); border-radius:8px; padding:8px 12px; margin:6px 0; }
+  .diff { line-height:2; word-wrap:break-word; }
+  .diff .sub { background:var(--badbg); color:var(--bad); border-radius:4px; padding:1px 3px; }
+  .diff .sub s { opacity:.7; } .diff .sub b { color:var(--ink); }
+  .diff .del { background:var(--warnbg); color:var(--warn); border-radius:4px; padding:1px 3px; text-decoration:line-through; }
+  .diff .ins { background:var(--okbg); color:var(--ok); border-radius:4px; padding:1px 3px; }
+  .text { white-space:pre-wrap; background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px; max-height:260px; overflow:auto; }
+  .legend span { margin-right:12px; font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Transcription accuracy</h1>
+  <small id="setup">loading…</small>
+  <small><a href="/">← prescription tool</a></small>
+</header>
+<main>
+  <section class="card">
+    <label for="audio">Audio (any topic)</label>
+    <input type="file" id="audio" accept="audio/*,video/*,.m4a,.mp3,.wav,.ogg,.webm" />
+    <label for="lang">Spoken language <span class="muted">(pick it — auto-detect often confuses Bengali)</span></label>
+    <select id="lang">
+      <option value="bn">Bengali</option>
+      <option value="hi">Hindi</option>
+      <option value="en">English</option>
+      <option value="auto">Auto-detect</option>
+    </select>
+    <label for="reference">Reference text <span class="muted">(what was really said — optional, gives measured WER/CER)</span></label>
+    <textarea id="reference" placeholder="Paste the exact script / correct transcript here…"></textarea>
+    <label for="context">Topic <span class="muted">(optional hint for the LLM, e.g. “cricket commentary”)</span></label>
+    <input type="text" id="context" />
+    <details style="margin-top:12px">
+      <summary class="muted">No audio? Paste a transcript to score instead</summary>
+      <textarea id="transcript" placeholder="ASR transcript to evaluate…"></textarea>
+    </details>
+    <div class="row">
+      <label style="margin:0;font-weight:400"><input type="checkbox" id="useLlm" checked /> Review with the LLM (Qwen3)</label>
+    </div>
+    <div class="row">
+      <button class="primary" id="go">Evaluate</button>
+    </div>
+    <div id="status"></div>
+  </section>
+
+  <section class="card" id="out"><p class="muted">Results appear here. With a reference you get measured word and character error rates for the raw ASR text and for the LLM-corrected text; without one, you get the LLM's and the heuristic's estimates.</p></section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pct = (x) => (x == null || !isFinite(x) ? "—" : (x * 100).toFixed(1) + "%");
+const cls = (acc) => (acc == null ? "" : acc >= 0.85 ? "good" : acc >= 0.6 ? "mid" : "poor");
+
+fetch("/api/config").then((r) => r.json()).then((c) => { $("setup").textContent = `ASR: ${c.asr} · LLM: ${c.llm.model}`; }).catch(() => ($("setup").textContent = ""));
+
+function tile(k, v, acc) { return `<div class="tile ${cls(acc)}"><div class="v">${v}</div><div class="k">${k}</div></div>`; }
+
+function diffHtml(al) {
+  return al.map((a) => a.op === "ok" ? esc(a.ref)
+    : a.op === "sub" ? `<span class="sub" title="said: ${esc(a.ref)}"><s>${esc(a.ref)}</s> <b>${esc(a.hyp)}</b></span>`
+    : a.op === "del" ? `<span class="del" title="missing from the transcript">${esc(a.ref)}</span>`
+    : `<span class="ins" title="extra word in the transcript">+${esc(a.hyp)}</span>`).join(" ");
+}
+
+function render(r) {
+  let h = "";
+  const m = r.measured?.raw, c = r.measured?.corrected;
+  h += `<div class="tiles">`;
+  h += tile(`Accuracy · ${esc(r.accuracy.source)}`, pct(r.accuracy.value), r.accuracy.value);
+  if (m) { h += tile("Word error rate (raw)", pct(m.wer), 1 - m.wer); h += tile("Character error rate (raw)", pct(m.cer), 1 - m.cer); h += tile("Coverage of reference", pct(m.coverage), Math.min(1, m.coverage)); }
+  if (c) h += tile(`WER after LLM ${r.measured.llmHelped ? "(helped)" : "(no gain)"}`, pct(c.wer), 1 - c.wer);
+  if (r.llm) h += tile("LLM estimate", r.llm.estimatedAccuracy + "%", r.llm.estimatedAccuracy / 100);
+  h += tile("Heuristic estimate", pct(r.heuristic.estimated), r.heuristic.estimated);
+  h += `</div>`;
+  const facts = [];
+  if (r.asr) facts.push(`ASR ${esc(r.asr.model || r.asr.backend)} · ${(r.asr.ms / 1000).toFixed(1)} s${r.asr.durationSec ? ` for ${r.asr.durationSec} s of audio` : ""}`);
+  if (r.llm) facts.push(`LLM ${esc(r.llm.model)} · ${(r.llm.ms / 1000).toFixed(1)} s`);
+  if (m) facts.push(`${m.substitutions} substituted · ${m.deletions} missing · ${m.insertions} extra of ${m.refWords} reference words`);
+  if (r.savedAs) facts.push(`saved: ${esc(r.savedAs)}.md`);
+  h += `<p class="muted">${facts.join(" · ")}</p>`;
+  if (r.llm?.summary) h += `<p><b>LLM summary:</b> ${esc(r.llm.summary)}</p>`;
+  for (const w of r.llm?.warnings ?? []) h += `<div class="warn">⚠ ${esc(w)}</div>`;
+  for (const w of r.heuristic.issues ?? []) h += `<div class="warn">${esc(w)}</div>`;
+  if (m?.alignment?.length) {
+    h += `<h2>Word diff (raw ASR vs reference)</h2><p class="legend"><span class="sub diff">wrong</span><span class="del diff">missing</span><span class="ins diff">+extra</span></p><div class="diff">${diffHtml(m.alignment)}</div>`;
+  }
+  if (m?.topErrors?.length) {
+    h += `<h2>Most frequent word errors</h2><table><tr><th>Said</th><th>Heard</th><th>Times</th></tr>${m.topErrors.map((e) => `<tr><td>${esc(e.ref)}</td><td>${esc(e.hyp)}</td><td>${e.count}</td></tr>`).join("")}</table>`;
+  }
+  if (r.llm?.issues?.length) {
+    h += `<h2>Problems found by the LLM</h2><table><tr><th>Type</th><th>In transcript</th><th>Probably</th></tr>${r.llm.issues.map((i) => `<tr><td>${esc(i.type)}</td><td>${esc(i.text)}</td><td>${esc(i.suggestion || "—")}</td></tr>`).join("")}</table>`;
+  }
+  h += `<h2>Raw transcript</h2><div class="text">${esc(r.transcript) || "<i>(empty)</i>"}</div>`;
+  if (r.llm) h += `<h2>LLM-corrected transcript${r.llm.correctionUsed ? "" : " — not used (rewrote too much)"}</h2><div class="text">${esc(r.llm.correctedText)}</div>`;
+  $("out").innerHTML = h;
+}
+
+$("go").onclick = async () => {
+  const f = $("audio").files[0], t = $("transcript").value.trim();
+  if (!f && !t) { $("status").textContent = "Choose an audio file or paste a transcript."; return; }
+  const fd = new FormData();
+  if (f) fd.append("audio", f);
+  else fd.append("transcript", t);
+  fd.append("language", $("lang").value);
+  fd.append("reference", $("reference").value);
+  fd.append("context", $("context").value);
+  fd.append("useLlm", $("useLlm").checked ? "true" : "false");
+  $("go").disabled = true;
+  const t0 = Date.now();
+  const tick = setInterval(() => ($("status").textContent = `Working… ${Math.round((Date.now() - t0) / 1000)} s (transcription, then the LLM review)`), 1000);
+  try {
+    const r = await fetch("/api/general", { method: "POST", body: fd });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.statusText);
+    render(j);
+    $("status").textContent = `Done in ${Math.round((Date.now() - t0) / 1000)} s.`;
+  } catch (e) {
+    $("status").textContent = "✘ " + e.message;
+  } finally {
+    clearInterval(tick);
+    $("go").disabled = false;
+  }
+};
+</script>
+</body>
+</html>

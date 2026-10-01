@@ -1,0 +1,233 @@
+name: Test and deploy
+
+# Only main is deployed (to prod). Other branches are not built or deployed by this workflow.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m py_compile deploy/asr-lambda/app.py deploy/asr-lambda/download_models.py src/asr/indic_asr.py
+      - run: bash -n deploy/app/remote-deploy.sh deploy/app/remote-deploy-nginx.sh
+      - run: terraform fmt -check -recursive deploy/terraform
+      - run: terraform -chdir=deploy/terraform init -backend=false
+      - run: terraform -chdir=deploy/terraform validate
+
+  deploy:
+    needs: test
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}
+      IMAGE_TAG: ${{ github.run_id }}-${{ github.run_attempt }}
+      TF_VAR_aws_region: ${{ vars.AWS_REGION || 'ap-south-1' }}
+      TF_VAR_environment: prod
+      TF_VAR_allowed_cidr_blocks: ${{ vars.ALLOWED_CIDR_BLOCKS }}
+      TF_VAR_llm_model: ${{ vars.LLM_MODEL }}
+      TF_VAR_domain: ${{ vars.DOMAIN }}
+      TF_VAR_existing_instance_id: ${{ vars.EXISTING_INSTANCE_ID }}
+      TF_VAR_route53_zone_name: ${{ vars.ROUTE53_ZONE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.5
+          terraform_wrapper: false
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Initialize Terraform
+        run: >-
+          terraform -chdir=deploy/terraform init
+          -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
+          -backend-config="key=ai-speech/prod/terraform.tfstate"
+          -backend-config="region=${{ env.AWS_REGION }}"
+          -backend-config="encrypt=true"
+          -backend-config="use_lockfile=true"
+
+      - name: Create ECR repositories
+        env:
+          TF_VAR_lambda_image_tag: not-used-by-this-step
+        run: >-
+          terraform -chdir=deploy/terraform apply -auto-approve -input=false
+          -target=aws_ecr_repository.app
+          -target=aws_ecr_repository.asr
+
+      - name: Log in to ECR
+        run: |
+          APP_REPOSITORY="$(terraform -chdir=deploy/terraform output -raw app_repository_url)"
+          aws ecr get-login-password --region "$AWS_REGION" |
+            docker login --username AWS --password-stdin "${APP_REPOSITORY%/*}"
+
+      - name: Build and push app image
+        run: |
+          APP_REPOSITORY="$(terraform -chdir=deploy/terraform output -raw app_repository_url)"
+          docker build --file deploy/app/Dockerfile --tag "$APP_REPOSITORY:$IMAGE_TAG" .
+          docker push "$APP_REPOSITORY:$IMAGE_TAG"
+
+      # The speech image (~7 GB, models baked in) is tagged by a hash of the files that go into it,
+      # so it is rebuilt only when one of them changes. Otherwise the existing image is reused.
+      - name: Check whether the Lambda image needs a rebuild
+        id: asr
+        run: |
+          HASH="$(git ls-files -s deploy/asr-lambda src/asr/indic_asr.py .dockerignore | sha256sum | cut -c1-16)"
+          TAG="asr-$HASH"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          REPO_NAME="$(terraform -chdir=deploy/terraform output -raw asr_repository_url)"
+          REPO_NAME="${REPO_NAME#*/}"
+          if aws ecr describe-images --repository-name "$REPO_NAME" --image-ids imageTag="$TAG" >/dev/null 2>&1; then
+            echo "build=false" >> "$GITHUB_OUTPUT"
+            echo "Lambda image $TAG already exists - skipping the rebuild" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            echo "Lambda image $TAG not found - building it" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Free runner disk space for the Lambda image
+        if: steps.asr.outputs.build == 'true'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          docker system prune -af
+          df -h /
+
+      - name: Build and push Lambda image
+        if: steps.asr.outputs.build == 'true'
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          ASR_TAG: ${{ steps.asr.outputs.tag }}
+        run: |
+          ASR_REPOSITORY="$(terraform -chdir=deploy/terraform output -raw asr_repository_url)"
+          docker buildx create --use
+          docker buildx build \
+            --platform linux/amd64 \
+            --provenance=false --sbom=false \
+            --secret id=hf_token,env=HF_TOKEN \
+            --file deploy/asr-lambda/Dockerfile \
+            --tag "$ASR_REPOSITORY:$ASR_TAG" \
+            --push .
+
+      - name: Apply infrastructure
+        env:
+          TF_VAR_lambda_image_tag: ${{ steps.asr.outputs.tag }}
+        run: terraform -chdir=deploy/terraform apply -auto-approve -input=false
+
+      # Let's Encrypt can only issue the HTTPS certificate once the domain points at the server.
+      # With ROUTE53_ZONE set, Terraform has just created the record; this waits for it to be live.
+      - name: Check the domain points at the server
+        if: vars.DOMAIN != ''
+        env:
+          ZONE: ${{ vars.ROUTE53_ZONE }}
+        run: |
+          DOMAIN="$(terraform -chdir=deploy/terraform output -raw site_domain)"
+          IP="$(terraform -chdir=deploy/terraform output -raw public_ip)"
+          NS="1.1.1.1"
+          if [[ -n "$ZONE" ]]; then
+            NS="$(dig +short NS "$ZONE" @1.1.1.1 | head -1)"
+            NS="${NS:-1.1.1.1}"
+          fi
+          for _ in $(seq 1 30); do
+            A="$(dig +short A "$DOMAIN" "@$NS" | grep -E '^[0-9.]+$' | sort | tr '\n' ' ' | xargs || true)"
+            AAAA="$(dig +short AAAA "$DOMAIN" "@$NS" | grep ':' | tr '\n' ' ' | xargs || true)"
+            if [[ "$A" == "$IP" && -z "$AAAA" ]]; then
+              echo "$DOMAIN -> $IP OK (checked at $NS)"
+              exit 0
+            fi
+            sleep 10
+          done
+          {
+            echo "### DNS for $DOMAIN is not ready"
+            echo "Set **exactly one A record**: \`$DOMAIN -> $IP\` (and no AAAA record)."
+            echo "Currently at $NS: A = \`${A:-none}\`, AAAA = \`${AAAA:-none}\`. Re-run once it has propagated."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::Point $DOMAIN (A record) at $IP and remove any AAAA record, then re-run. Now: A='${A:-none}' AAAA='${AAAA:-none}'"
+          exit 1
+
+      - name: Wait for EC2 Systems Manager
+        run: |
+          INSTANCE_ID="$(terraform -chdir=deploy/terraform output -raw instance_id)"
+          for _ in $(seq 1 60); do
+            STATUS="$(aws ssm describe-instance-information \
+              --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
+              --query 'InstanceInformationList[0].PingStatus' --output text)"
+            if [[ "$STATUS" == "Online" ]]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::EC2 instance $INSTANCE_ID is not Online in Systems Manager (Fleet Manager). Check that the SSM agent is installed and running on it (sudo systemctl status amazon-ssm-agent, or snap.amazon-ssm-agent.amazon-ssm-agent on Ubuntu) and that its IAM role now has the ai-speech-prod-runtime policy. A newly attached role can take a few minutes; restarting the agent picks it up immediately." >&2
+          exit 1
+
+      - name: Deploy app through Systems Manager
+        env:
+          HOST_PORT: ${{ vars.APP_HOST_PORT || '5055' }}
+          CERTBOT_EMAIL: ${{ vars.CERTBOT_EMAIL }}
+        run: |
+          TF="terraform -chdir=deploy/terraform output -raw"
+          INSTANCE_ID="$($TF instance_id)"
+          APP_REPOSITORY="$($TF app_repository_url)"
+          SITE_DOMAIN="$($TF site_domain)"
+          APP_URL="$($TF app_url)"
+          # existing server (LEF) -> its nginx; dedicated server -> Caddy
+          if [[ "$($TF proxy)" == "nginx" ]]; then SCRIPT=deploy/app/remote-deploy-nginx.sh; else SCRIPT=deploy/app/remote-deploy.sh; fi
+          ALLOWED_CIDRS="$(jq -r 'join(" ")' <<<"$TF_VAR_allowed_cidr_blocks")"
+          PRELUDE="$(printf 'export AWS_REGION=%q ECR_REGISTRY=%q APP_IMAGE=%q PARAMETER_NAME=%q SITE_DOMAIN=%q ALLOWED_CIDRS=%q HOST_PORT=%q CERTBOT_EMAIL=%q\n' \
+            "$AWS_REGION" "${APP_REPOSITORY%/*}" "$APP_REPOSITORY:$IMAGE_TAG" "$($TF app_env_parameter_name)" "$SITE_DOMAIN" \
+            "$ALLOWED_CIDRS" "$HOST_PORT" "$CERTBOT_EMAIL")"
+          COMMAND_ID="$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name AWS-RunShellScript \
+            --comment "ai-speech $IMAGE_TAG" \
+            --timeout-seconds 600 \
+            --parameters "$(jq -n --arg pre "$PRELUDE" --rawfile script "$SCRIPT" \
+              '{commands: [$pre + "\n" + $script], executionTimeout: ["900"]}')" \
+            --query 'Command.CommandId' --output text)"
+          for _ in $(seq 1 180); do
+            STATUS="$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" \
+              --query 'Status' --output text 2>/dev/null || true)"
+            case "$STATUS" in
+              Success) break ;;
+              Failed|TimedOut|Cancelled|Cancelling)
+                aws ssm get-command-invocation --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" \
+                  --query '[StandardOutputContent, StandardErrorContent]' --output text
+                exit 1
+                ;;
+            esac
+            sleep 5
+          done
+          if [[ "$STATUS" != "Success" ]]; then
+            echo "Timed out waiting for the app deployment command" >&2
+            exit 1
+          fi
+          aws ssm get-command-invocation --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" \
+            --query 'StandardOutputContent' --output text
+          echo "App deployed to $APP_URL" >> "$GITHUB_STEP_SUMMARY"

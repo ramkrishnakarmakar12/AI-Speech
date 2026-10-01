@@ -1,8 +1,42 @@
 /** Renders an ExtractionResult as an OPD-style prescription draft (Markdown). */
-import type { ExtractionResult } from "./pipeline.js";
+import type { Analysis, ExtractionResult } from "./pipeline.js";
+import type { KeywordCategory } from "./match/keywords.js";
 
 const j = (...xs: (string | undefined)[]) => xs.map((x) => (x ?? "").trim()).filter(Boolean).join(" ");
 const bullet = (xs: string[]) => (xs.length ? xs.map((x) => `- ${x}`).join("\n") : "- —");
+
+const TIER_ICON: Record<string, string> = { high: "🟢", medium: "🟡", low: "🟠", unusable: "🔴" };
+const KW_LABEL: Record<KeywordCategory, string> = {
+  eye_side: "Eye side", eye: "Eye / vision", number: "Numbers", measurement: "Measurements", time_unit: "Durations",
+  time_of_day: "Time of day", frequency: "Frequency", dosage_form: "Dosage form", symptom: "Lay symptoms",
+  negation: "Negation", affirmation: "Yes / OK", speaker: "Speakers", follow_up: "Follow-up",
+};
+
+/** Stage 1 + stage 2 summary (also printed by `npm run analyze` / `transcribe`). */
+export function renderQuality(a: Pick<Analysis, "quality" | "keywords" | "policy">): string {
+  const q = a.quality;
+  const out: string[] = [];
+  out.push("## 1. Transcription accuracy");
+  const head =
+    q.source === "measured"
+      ? `measured ${q.measured!.metric} ${Math.round((q.measured!.metric === "WER" ? q.measured!.wer : q.measured!.cer) * 100)}% (WER ${q.measured!.wer}, CER ${q.measured!.cer}) → accuracy ${Math.round(q.score * 100)}% · reference-free estimate ${Math.round(q.estimated * 100)}%`
+      : `estimated ${Math.round(q.score * 100)}%`;
+  out.push(`${TIER_ICON[q.tier]} **${q.tier.toUpperCase()}** — ${head} · language ${q.language} · ${q.words} words`);
+  out.push("\n| Signal | Score | Detail |\n|---|---|---|");
+  for (const s of q.signals) out.push(`| ${s.name.replace(/_/g, " ")} | ${s.score === null ? "—" : s.score.toFixed(2)} | ${s.note} |`);
+  if (q.issues.length) out.push("\n" + q.issues.map((i) => `- ${i}`).join("\n"));
+  out.push(`\n_Medical-term matching: ${a.policy.description}._`);
+
+  out.push("\n## 2. General keywords");
+  const k = a.keywords;
+  out.push(`${k.totalHits} hits · ${k.perHundredWords} per 100 words · ${k.categoriesFound} kinds`);
+  if (k.hits.length) {
+    out.push("\n| Kind | Found |\n|---|---|");
+    for (const [cat, keys] of Object.entries(k.byCategory))
+      out.push(`| ${KW_LABEL[cat as KeywordCategory] ?? cat} | ${keys!.map((key) => { const h = k.hits.find((x) => x.category === cat && x.key === key)!; return `${key} ×${h.count}`; }).join(", ")} |`);
+  }
+  return out.join("\n");
+}
 
 export function renderMarkdown(r: ExtractionResult): string {
   const p = r.prescription;
@@ -15,6 +49,9 @@ export function renderMarkdown(r: ExtractionResult): string {
 
   out.push("# Prescription draft");
   out.push("_Auto-generated from the consultation audio/transcript. Must be reviewed and signed by the treating ophthalmologist._\n");
+  out.push(renderQuality(r) + "\n");
+  out.push("## 3. Medical terms → prescription\n");
+  if (r.llm.skipped) out.push(`> **No prescription generated** (${r.llm.skipped}). Terms detected in the text are listed at the end for reference.\n`);
   const pt = [p.patient.name, p.patient.age && `${p.patient.age}`, p.patient.sex].filter(Boolean).join(" · ");
   out.push(`**Patient:** ${pt || "—"}\n`);
 
@@ -84,7 +121,13 @@ export function renderMarkdown(r: ExtractionResult): string {
     seen.add(k);
     out.push(`| ${t.heard} | ${t.canonical} | ${t.kb_id || "—"} | ${t.category} |`);
   }
+  const unsure = r.detectedTerms.filter((d) => d.uncertain);
+  if (unsure.length) out.push(`\n⚠ Heard where the speech model was unsure: ${unsure.map((d) => `${d.name} (“${d.heardAs}”)`).join(", ")}`);
+  if (r.llm.skipped && r.detectedTerms.length) {
+    out.push("\n| Heard | KB term | KB id | Category | Score |\n|---|---|---|---|---|");
+    for (const d of r.detectedTerms) out.push(`| ${d.heardAs} | ${d.name} | ${d.id} | ${d.category} | ${d.score}${d.uncertain ? " ⚠" : ""} |`);
+  }
 
-  out.push(`\n<sub>LLM: ${r.llm.model} · ${(r.llm.ms / 1000).toFixed(1)} s${r.asr ? ` · ASR: ${r.asr.backend} ${(r.asr.ms / 1000).toFixed(1)} s` : ""}</sub>`);
+  out.push(`\n<sub>LLM: ${r.llm.skipped ? "skipped" : r.llm.model} · ${(r.llm.ms / 1000).toFixed(1)} s${r.asr ? ` · ASR: ${r.asr.backend} ${(r.asr.ms / 1000).toFixed(1)} s` : ""}</sub>`);
   return out.join("\n");
 }

@@ -14,6 +14,16 @@ export interface Match {
   heardAs: string; // span from transcript
   kind: "exact" | "abbr" | "fuzzy" | "overlap";
   count: number;
+  /** heard in a part of the audio the ASR itself was unsure about (stage-1 low-confidence words) */
+  uncertain?: boolean;
+}
+
+/** Stage-3 thresholds; set per transcript-accuracy tier by policyFor() in quality/accuracy.ts */
+export interface MatchOptions {
+  /** min fuzzy similarity on Latin-script (English / romanised) text. Default 0.8 */
+  fuzzyMinLatin?: number;
+  /** min fuzzy similarity on Devanagari/Bengali text (after transliteration). Default 0.8 */
+  fuzzyMinIndic?: number;
 }
 
 const STOP = new Set(
@@ -142,21 +152,23 @@ function buildForms(kb: KnowledgeBase): Form[] {
  * Lines written in Devanagari/Bengali script are matched with looser phonetic rules than
  * English lines (the English translation is usually appended to the same text).
  */
-export function findMatches(transcript: string, kb: KnowledgeBase): Match[] {
+export function findMatches(transcript: string, kb: KnowledgeBase, opts: MatchOptions = {}): Match[] {
   const lines = transcript.split("\n");
   const indic = lines.filter(hasIndicScript).join("\n");
   const latin = lines.filter((l) => !hasIndicScript(l)).join("\n");
-  if (!indic.trim()) return matchCore(latin, kb, false);
-  if (!latin.trim()) return matchCore(indic, kb, true);
+  const fLatin = opts.fuzzyMinLatin ?? 0.8;
+  const fIndic = opts.fuzzyMinIndic ?? 0.8;
+  if (!indic.trim()) return matchCore(latin, kb, false, fLatin);
+  if (!latin.trim()) return matchCore(indic, kb, true, fIndic);
   const best = new Map<string, Match>();
-  for (const m of [...matchCore(latin, kb, false), ...matchCore(indic, kb, true)]) {
+  for (const m of [...matchCore(latin, kb, false, fLatin), ...matchCore(indic, kb, true, fIndic)]) {
     const cur = best.get(m.term.id);
     if (!cur || m.score > cur.score) best.set(m.term.id, m);
   }
   return [...best.values()].sort((a, b) => b.score - a.score || b.count - a.count);
 }
 
-function matchCore(transcript: string, kb: KnowledgeBase, loose: boolean): Match[] {
+function matchCore(transcript: string, kb: KnowledgeBase, loose: boolean, fuzzyMin = 0.8): Match[] {
   const forms = buildForms(kb);
   const normT = normalize(transcript);
   const tt = tokens(normT);
@@ -261,7 +273,7 @@ function matchCore(transcript: string, kb: KnowledgeBase, loose: boolean): Match
         }
       }
     }
-    if (bestSim >= 0.8) record(f, 0.95 * bestSim, bestSpan, "fuzzy");
+    if (bestSim >= fuzzyMin) record(f, 0.95 * bestSim, bestSpan, "fuzzy");
   }
 
   // Drop fuzzy/overlap hits whose transcript span sits inside a stronger match's span
@@ -276,8 +288,8 @@ function matchCore(transcript: string, kb: KnowledgeBase, loose: boolean): Match
 }
 
 /** Pick candidates for the LLM: best matches, capped, with a per-category floor so nothing is crowded out. */
-export function selectCandidates(matches: Match[], max: number): Match[] {
-  const strong = matches.filter((m) => m.score >= 0.6);
+export function selectCandidates(matches: Match[], max: number, minScore = 0.6): Match[] {
+  const strong = matches.filter((m) => m.score >= minScore);
   if (strong.length <= max) return strong;
   const byCat = new Map<string, Match[]>();
   for (const m of strong) byCat.set(m.term.category, [...(byCat.get(m.term.category) ?? []), m]);
