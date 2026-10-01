@@ -19,9 +19,28 @@ log() { echo "[ai-speech] $*"; }
 pm_install() {
   if command -v dnf >/dev/null; then dnf install -y "$@"
   elif command -v yum >/dev/null; then yum install -y "$@"
-  else DEBIAN_FRONTEND=noninteractive apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -y "$@"
+  else
+    # NEEDRESTART_SUSPEND: never let apt restart services mid-deploy (it would kill the SSM agent running this)
+    DEBIAN_FRONTEND=noninteractive NEEDRESTART_SUSPEND=1 apt-get update -y &&
+      DEBIAN_FRONTEND=noninteractive NEEDRESTART_SUSPEND=1 apt-get install -y "$@"
   fi
 }
+
+# SSM gives a minimal PATH; snap and the AWS CLI installer live here
+export PATH="/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:$PATH"
+
+# ---------- AWS CLI v2 (Ubuntu images don't ship it; Amazon Linux does) ----------
+if ! command -v aws >/dev/null; then
+  log "installing AWS CLI v2"
+  command -v curl >/dev/null || pm_install curl
+  command -v unzip >/dev/null || pm_install unzip
+  tmp="$(mktemp -d)"
+  curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "$tmp/awscliv2.zip"
+  unzip -q "$tmp/awscliv2.zip" -d "$tmp"
+  "$tmp/aws/install" --update
+  rm -rf "$tmp"
+fi
+aws --version
 
 command -v nginx >/dev/null || { echo "nginx is not installed on this server" >&2; exit 1; }
 systemctl is-active --quiet nginx || { echo "nginx is not running (systemctl status nginx)" >&2; exit 1; }
