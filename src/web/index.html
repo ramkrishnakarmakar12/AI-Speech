@@ -51,7 +51,7 @@
   .timer { font:600 20px/1 ui-monospace, Menlo, monospace; }
   .meter { height:6px; border-radius:3px; background:var(--line); overflow:hidden; margin-top:8px; }
   .meter i { display:block; height:100%; width:0; background:linear-gradient(90deg, var(--ok), var(--warn)); transition:width .08s; }
-  .drop { margin-top:10px; border:1.5px dashed var(--line); border-radius:10px; padding:14px; text-align:center; color:var(--mute); cursor:pointer; }
+  .drop { display:block; line-height:1.6; margin-top:10px; border:1.5px dashed var(--line); border-radius:10px; padding:14px; text-align:center; color:var(--mute); cursor:pointer; }
   .drop.over, .drop:hover { border-color:var(--acc); background:var(--accbg); color:var(--acc); }
   .drop b { color:var(--ink2); }
   audio { width:100%; margin-top:10px; }
