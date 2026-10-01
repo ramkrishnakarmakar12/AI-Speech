@@ -54,6 +54,7 @@ jobs:
       TF_VAR_domain: ${{ vars.DOMAIN }}
       TF_VAR_existing_instance_id: ${{ vars.EXISTING_INSTANCE_ID }}
       TF_VAR_route53_zone_name: ${{ vars.ROUTE53_ZONE }}
+      TF_VAR_asr_decoding: ${{ vars.ASR_DECODING || 'rnnt' }}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
