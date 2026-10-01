@@ -222,13 +222,16 @@ jobs:
           PRELUDE="$(printf 'export AWS_REGION=%q ECR_REGISTRY=%q APP_IMAGE=%q PARAMETER_NAME=%q SITE_DOMAIN=%q ALLOWED_CIDRS=%q HOST_PORT=%q CERTBOT_EMAIL=%q\n' \
             "$AWS_REGION" "${APP_REPOSITORY%/*}" "$APP_REPOSITORY:$IMAGE_TAG" "$($TF app_env_parameter_name)" "$SITE_DOMAIN" \
             "$ALLOWED_CIDRS" "$HOST_PORT" "$CERTBOT_EMAIL")"
+          # SSM runs commands with /bin/sh (dash on Ubuntu, which has no `pipefail`), so the script is sent
+          # base64-encoded and executed with bash explicitly.
+          PAYLOAD="$(printf '%s\n%s' "$PRELUDE" "$(cat "$SCRIPT")" | base64 -w0)"
           COMMAND_ID="$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \
             --document-name AWS-RunShellScript \
             --comment "ai-speech $IMAGE_TAG" \
             --timeout-seconds 600 \
-            --parameters "$(jq -n --arg pre "$PRELUDE" --rawfile script "$SCRIPT" \
-              '{commands: [$pre + "\n" + $script], executionTimeout: ["900"]}')" \
+            --parameters "$(jq -n --arg b64 "$PAYLOAD" \
+              '{commands: ["echo " + $b64 + " | base64 -d > /tmp/ai-speech-deploy.sh && bash /tmp/ai-speech-deploy.sh"], executionTimeout: ["900"]}')" \
             --query 'Command.CommandId' --output text)"
           for _ in $(seq 1 180); do
             STATUS="$(aws ssm get-command-invocation \
