@@ -20,17 +20,60 @@ GitHub Actions runs type checking and tests before deploying. Only pushes to `ma
 5. Ensure Bedrock model access is enabled in the selected region. The EC2 instance role receives Bedrock invoke permissions; the application config and generated ASR bearer token are stored in SSM Parameter Store as a `SecureString` encrypted with a dedicated KMS key.
 6. Push to `main`. The initial run creates ECR repositories before building and pushing images; Terraform then provisions the rest of the infrastructure and the app is rolled out through Systems Manager.
 
-## Using your own domain (prod)
+## Prod: on the existing LEF server, at rx-lef.paninieight.com
 
-1. Push to `main` once **without** `DOMAIN`. This creates the Elastic IP, shown as `public_ip` in the Terraform output and in the deploy log. The site comes up on `https://<ip>.sslip.io`.
-2. At your domain registrar or DNS provider, add an **A record** pointing your hostname (for example `rx.yourclinic.in`) at that IP. Remove any AAAA record for it.
-3. In GitHub, go to Settings, then Environments, then `prod`, then Variables, and set `DOMAIN=rx.yourclinic.in`. Re-run the workflow, or push again.
+Prod runs as one more Docker container on the existing LEF EC2, behind that server's nginx, on its own subdomain. The LEF site keeps running as before.
 
-The Elastic IP never changes, so this is a one-time step. If `DOMAIN` is set but its DNS doesn't point at the Elastic IP yet, the workflow stops before deploying and shows the record to create. Caddy renews the certificate automatically.
+Set these extra variables in the GitHub `prod` environment:
 
-You can also set the A record and `DOMAIN` before the first deploy. That run then stops at the DNS check and prints the new IP. Create the record and re-run.
+| Variable | Value |
+| --- | --- |
+| `EXISTING_INSTANCE_ID` | `i-03f02b13190d592e0` |
+| `DOMAIN` | `rx-lef.paninieight.com` |
+| `ROUTE53_ZONE` | `paninieight.com` |
+| `CERTBOT_EMAIL` (optional) | email address for Let's Encrypt expiry notices |
+| `APP_HOST_PORT` (optional) | local port for the app container, default `5055`; change it only if something on the server already uses 5055 |
 
-## How the site is served
+### What each deploy does
+
+- **Terraform**
+  - Creates the `rx-lef` A record in Route 53, pointing at the LEF server's public IP.
+  - Adds an inline policy `ai-speech-prod-runtime` to the server's existing IAM role. The policy lets the server pull the app image, read its settings, call Bedrock and run the SSM agent. If the server has no role yet, Terraform attaches a new `ai-speech-prod-ec2` role instead.
+  - Never creates, replaces or reconfigures the server, its security group or its IP.
+- **`deploy/app/remote-deploy-nginx.sh`, run on the server over SSM**
+  - Installs Docker if it's missing, and runs the app on `127.0.0.1:<APP_HOST_PORT>`, so it isn't reachable from outside.
+  - Writes **its own** nginx file, `ai-speech.conf`, with:
+    - HTTPS
+    - the `ALLOWED_CIDR_BLOCKS` allow-list
+    - 50 MB uploads
+    - 15-minute timeouts
+  - Gets a Let's Encrypt certificate for the subdomain with certbot (webroot, so nginx keeps running) and sets up automatic renewal.
+  - Runs `nginx -t` before every reload and restores its previous file if the test fails. LEF's nginx files are never edited.
+  - Removes only older AI Speech images.
+
+### Before the first deploy, the AWS admin needs to
+
+1. Find the LEF server's role. Go to **EC2**, open the instance `i-03f02b13190d592e0`, then the **Security** tab, then **IAM Role**. If it shows none, skip to step 3.
+2. Add this statement to the `ai-speech-github-deploy` role's inline policy `ai-speech-iam`, replacing `<LEF_ROLE_NAME>`:
+   ```json
+   {
+     "Effect": "Allow",
+     "Action": ["iam:GetRole", "iam:PutRolePolicy", "iam:GetRolePolicy", "iam:DeleteRolePolicy", "iam:ListRolePolicies"],
+     "Resource": "arn:aws:iam::170079868967:role/<LEF_ROLE_NAME>"
+   }
+   ```
+3. Add this statement too. Terraform needs it to read which role the server uses:
+   ```json
+   { "Effect": "Allow", "Action": "iam:GetInstanceProfile", "Resource": "arn:aws:iam::170079868967:instance-profile/*" }
+   ```
+4. Make sure the LEF server's **security group** allows inbound **80 and 443 from 0.0.0.0/0**. Port 80 is needed for Let's Encrypt; access to the app itself is limited in nginx.
+5. Make sure the LEF server has an **Elastic IP**. Without one its IP changes on stop/start, and the next deploy would update the DNS record.
+
+### Switching to a dedicated server later
+
+Clear `EXISTING_INSTANCE_ID`. Terraform then creates its own EC2, Elastic IP and security group, with Caddy for HTTPS. `ROUTE53_ZONE` and `DOMAIN` still work in that mode.
+
+## How the site is served (dedicated-server mode)
 
 - **Elastic IP.** The server keeps a fixed public address, even across stop/start or replacement. Terraform outputs it as `public_ip`.
 - **HTTPS.** Caddy runs in front of the app (`deploy/app/remote-deploy.sh`) and gets a free Let's Encrypt certificate. Browsers only allow the microphone on HTTPS pages, so **live recording works only through this HTTPS address**. Without `DOMAIN`, the hostname is `<elastic-ip-with-dashes>.sslip.io`, which needs no DNS setup. The deploy summary shows the exact URL (`app_url`).

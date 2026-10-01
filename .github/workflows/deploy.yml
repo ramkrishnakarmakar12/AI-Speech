@@ -31,7 +31,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m py_compile deploy/asr-lambda/app.py deploy/asr-lambda/download_models.py src/asr/indic_asr.py
-      - run: bash -n deploy/app/remote-deploy.sh
+      - run: bash -n deploy/app/remote-deploy.sh deploy/app/remote-deploy-nginx.sh
       - run: terraform fmt -check -recursive deploy/terraform
       - run: terraform -chdir=deploy/terraform init -backend=false
       - run: terraform -chdir=deploy/terraform validate
@@ -52,6 +52,8 @@ jobs:
       TF_VAR_allowed_cidr_blocks: ${{ vars.ALLOWED_CIDR_BLOCKS }}
       TF_VAR_llm_model: ${{ vars.LLM_MODEL }}
       TF_VAR_domain: ${{ vars.DOMAIN }}
+      TF_VAR_existing_instance_id: ${{ vars.EXISTING_INSTANCE_ID }}
+      TF_VAR_route53_zone_name: ${{ vars.ROUTE53_ZONE }}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -138,25 +140,36 @@ jobs:
           TF_VAR_lambda_image_tag: ${{ steps.asr.outputs.tag }}
         run: terraform -chdir=deploy/terraform apply -auto-approve -input=false
 
-      # With your own domain, Let's Encrypt can only issue the HTTPS certificate once the domain's
-      # DNS points at the Elastic IP. Stop here with clear instructions instead of failing later.
-      - name: Check the domain points at the Elastic IP
+      # Let's Encrypt can only issue the HTTPS certificate once the domain points at the server.
+      # With ROUTE53_ZONE set, Terraform has just created the record; this waits for it to be live.
+      - name: Check the domain points at the server
         if: vars.DOMAIN != ''
+        env:
+          ZONE: ${{ vars.ROUTE53_ZONE }}
         run: |
           DOMAIN="$(terraform -chdir=deploy/terraform output -raw site_domain)"
           IP="$(terraform -chdir=deploy/terraform output -raw public_ip)"
-          A="$(dig +short A "$DOMAIN" @1.1.1.1 | grep -E '^[0-9.]+$' | sort | tr '\n' ' ' | xargs || true)"
-          AAAA="$(dig +short AAAA "$DOMAIN" @1.1.1.1 | grep ':' | tr '\n' ' ' | xargs || true)"
-          if [[ "$A" != "$IP" || -n "$AAAA" ]]; then
-            {
-              echo "### DNS for $DOMAIN is not ready"
-              echo "In your domain's DNS settings, set **exactly one A record**: \`$DOMAIN -> $IP\` (and no AAAA record)."
-              echo "Currently: A = \`${A:-none}\`, AAAA = \`${AAAA:-none}\`. Re-run this workflow once it has propagated."
-            } >> "$GITHUB_STEP_SUMMARY"
-            echo "::error::Point $DOMAIN (A record) at $IP and remove any AAAA record, then re-run. Now: A='${A:-none}' AAAA='${AAAA:-none}'"
-            exit 1
+          NS="1.1.1.1"
+          if [[ -n "$ZONE" ]]; then
+            NS="$(dig +short NS "$ZONE" @1.1.1.1 | head -1)"
+            NS="${NS:-1.1.1.1}"
           fi
-          echo "$DOMAIN -> $IP OK"
+          for _ in $(seq 1 30); do
+            A="$(dig +short A "$DOMAIN" "@$NS" | grep -E '^[0-9.]+$' | sort | tr '\n' ' ' | xargs || true)"
+            AAAA="$(dig +short AAAA "$DOMAIN" "@$NS" | grep ':' | tr '\n' ' ' | xargs || true)"
+            if [[ "$A" == "$IP" && -z "$AAAA" ]]; then
+              echo "$DOMAIN -> $IP OK (checked at $NS)"
+              exit 0
+            fi
+            sleep 10
+          done
+          {
+            echo "### DNS for $DOMAIN is not ready"
+            echo "Set **exactly one A record**: \`$DOMAIN -> $IP\` (and no AAAA record)."
+            echo "Currently at $NS: A = \`${A:-none}\`, AAAA = \`${AAAA:-none}\`. Re-run once it has propagated."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::Point $DOMAIN (A record) at $IP and remove any AAAA record, then re-run. Now: A='${A:-none}' AAAA='${AAAA:-none}'"
+          exit 1
 
       - name: Wait for EC2 Systems Manager
         run: |
@@ -170,24 +183,31 @@ jobs:
             fi
             sleep 10
           done
-          echo "EC2 instance did not register as online in Systems Manager" >&2
+          echo "::error::EC2 instance $INSTANCE_ID is not Online in Systems Manager (Fleet Manager). Check that the SSM agent is installed and running on it (sudo systemctl status amazon-ssm-agent, or snap.amazon-ssm-agent.amazon-ssm-agent on Ubuntu) and that its IAM role now has the ai-speech-prod-runtime policy. A newly attached role can take a few minutes; restarting the agent picks it up immediately." >&2
           exit 1
 
       - name: Deploy app through Systems Manager
+        env:
+          HOST_PORT: ${{ vars.APP_HOST_PORT || '5055' }}
+          CERTBOT_EMAIL: ${{ vars.CERTBOT_EMAIL }}
         run: |
           TF="terraform -chdir=deploy/terraform output -raw"
           INSTANCE_ID="$($TF instance_id)"
           APP_REPOSITORY="$($TF app_repository_url)"
           SITE_DOMAIN="$($TF site_domain)"
           APP_URL="$($TF app_url)"
-          PRELUDE="$(printf 'export AWS_REGION=%q ECR_REGISTRY=%q APP_IMAGE=%q PARAMETER_NAME=%q SITE_DOMAIN=%q\n' \
-            "$AWS_REGION" "${APP_REPOSITORY%/*}" "$APP_REPOSITORY:$IMAGE_TAG" "$($TF app_env_parameter_name)" "$SITE_DOMAIN")"
+          # existing server (LEF) -> its nginx; dedicated server -> Caddy
+          if [[ "$($TF proxy)" == "nginx" ]]; then SCRIPT=deploy/app/remote-deploy-nginx.sh; else SCRIPT=deploy/app/remote-deploy.sh; fi
+          ALLOWED_CIDRS="$(jq -r 'join(" ")' <<<"$TF_VAR_allowed_cidr_blocks")"
+          PRELUDE="$(printf 'export AWS_REGION=%q ECR_REGISTRY=%q APP_IMAGE=%q PARAMETER_NAME=%q SITE_DOMAIN=%q ALLOWED_CIDRS=%q HOST_PORT=%q CERTBOT_EMAIL=%q\n' \
+            "$AWS_REGION" "${APP_REPOSITORY%/*}" "$APP_REPOSITORY:$IMAGE_TAG" "$($TF app_env_parameter_name)" "$SITE_DOMAIN" \
+            "$ALLOWED_CIDRS" "$HOST_PORT" "$CERTBOT_EMAIL")"
           COMMAND_ID="$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \
             --document-name AWS-RunShellScript \
             --comment "ai-speech $IMAGE_TAG" \
             --timeout-seconds 600 \
-            --parameters "$(jq -n --arg pre "$PRELUDE" --rawfile script deploy/app/remote-deploy.sh \
+            --parameters "$(jq -n --arg pre "$PRELUDE" --rawfile script "$SCRIPT" \
               '{commands: [$pre + "\n" + $script], executionTimeout: ["900"]}')" \
             --query 'Command.CommandId' --output text)"
           for _ in $(seq 1 180); do

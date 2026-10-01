@@ -192,6 +192,6 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(config.server.port, () => {
+server.listen(config.server.port, config.server.host || undefined, () => {
   console.log(`▶ http://localhost:${config.server.port}  ·  general accuracy: http://localhost:${config.server.port}/general   (ASR: ${config.asr.backend}, LLM: ${config.llm.provider}/${config.llm.model})`);
 });

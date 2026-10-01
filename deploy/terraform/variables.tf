@@ -44,5 +44,17 @@ variable "lambda_image_tag" {
 variable "domain" {
   type        = string
   default     = ""
-  description = "Hostname for HTTPS (an A record pointing at the Elastic IP). Empty = <elastic-ip>.sslip.io."
+  description = "Hostname for HTTPS, e.g. rx-lef.paninieight.com. Empty = <server-ip>.sslip.io (dedicated server only)."
+}
+
+variable "existing_instance_id" {
+  type        = string
+  default     = ""
+  description = "Run the app on this existing EC2 (behind its nginx) instead of creating a server. Empty = create a dedicated EC2."
+}
+
+variable "route53_zone_name" {
+  type        = string
+  default     = ""
+  description = "Public Route 53 hosted zone that contains var.domain (e.g. paninieight.com). Set it to have Terraform create the A record."
 }

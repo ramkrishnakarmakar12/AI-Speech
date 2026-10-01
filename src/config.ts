@@ -139,6 +139,8 @@ export const config = {
   },
   server: {
     port: num("PORT", 5055),
+    /** "" = all interfaces; 127.0.0.1 when a reverse proxy on the same machine is in front (prod on the LEF server) */
+    host: env("LISTEN_HOST", ""),
   },
 };
 

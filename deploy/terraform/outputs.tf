@@ -1,5 +1,14 @@
 output "instance_id" {
-  value = aws_instance.app.id
+  value = local.instance_id
+}
+
+output "proxy" {
+  description = "nginx = existing server's nginx in front of the app; caddy = dedicated server with Caddy"
+  value       = local.proxy
+}
+
+output "runtime_role_name" {
+  value = local.runtime_role_name
 }
 
 output "app_url" {
@@ -11,7 +20,7 @@ output "site_domain" {
 }
 
 output "public_ip" {
-  value = aws_eip.app.public_ip
+  value = local.public_ip
 }
 
 output "app_repository_url" {

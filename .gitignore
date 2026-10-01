@@ -12,3 +12,7 @@ data/approved/
 data/training/
 # local test runs
 evaluation/general/20*/
+
+# one-off AWS setup files
+/iam.json
+/trust.json
