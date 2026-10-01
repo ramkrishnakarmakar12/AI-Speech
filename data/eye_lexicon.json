@@ -34,7 +34,12 @@
    "match": [
     "ছানি"
    ],
-   "id": "DIS-001"
+   "id": "DIS-001",
+   "block": [
+    "DIS-002",
+    "DIS-003",
+    "DIS-004"
+   ]
   },
   {
    "lang": "bn",
@@ -324,7 +329,12 @@
     "मोतियाबिंद",
     "मोतियाबिन्द"
    ],
-   "id": "DIS-001"
+   "id": "DIS-001",
+   "block": [
+    "DIS-002",
+    "DIS-003",
+    "DIS-004"
+   ]
   },
   {
    "lang": "hi",
@@ -743,6 +753,475 @@
     "word conversion"
    ],
    "hint": "\"white/word conversion\" = wet conversion of dry AMD (ASR mishearing)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "ছানি",
+    "চানি",
+    "ছানী"
+   ],
+   "id": "DIS-001",
+   "hint": "ছানি = cataract (type NOT specified — use a sub-type only if the doctor names it)",
+   "block": [
+    "DIS-002",
+    "DIS-003",
+    "DIS-004"
+   ]
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "मोतियाबिंद",
+    "मोतियाबिन्द",
+    "मोतिया"
+   ],
+   "id": "DIS-001",
+   "hint": "cataract (type NOT specified)",
+   "block": [
+    "DIS-002",
+    "DIS-003",
+    "DIS-004"
+   ]
+  },
+  {
+   "lang": "en",
+   "match": [
+    "motiyabind",
+    "chhani",
+    "chani"
+   ],
+   "id": "DIS-001",
+   "hint": "cataract (type NOT specified)",
+   "block": [
+    "DIS-002",
+    "DIS-003",
+    "DIS-004"
+   ]
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "নিউক্লিয়ার",
+    "নিউক্লিয়ার",
+    "নিউক্লিয়ার ক্যাটারাক্ট"
+   ],
+   "id": "DIS-002"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "न्यूक्लियर"
+   ],
+   "id": "DIS-002"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "nuclear cataract",
+    "nuclear sclerosis",
+    "nuclear sclerotic"
+   ],
+   "id": "DIS-002"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "কর্টিক্যাল",
+    "কর্টিকাল"
+   ],
+   "id": "DIS-003"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "कॉर्टिकल",
+    "कोर्टिकल"
+   ],
+   "id": "DIS-003"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "cortical cataract",
+    "cortical spokes"
+   ],
+   "id": "DIS-003"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "পোস্টেরিয়র সাবক্যাপসুলার",
+    "সাবক্যাপসুলার",
+    "পিএসসি"
+   ],
+   "id": "DIS-004"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "posterior subcapsular",
+    "pscc"
+   ],
+   "id": "DIS-004"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "এ স্ক্যান",
+    "এ-স্ক্যান",
+    "এস্ক্যান",
+    "স্ক্যান বায়োমেট্রি",
+    "স্ক্যান বায়োমেট্রি"
+   ],
+   "id": "TST-036",
+   "hint": "A-scan (ultrasound) biometry — not optical biometry",
+   "block": [
+    "TST-037"
+   ]
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "ए स्कैन",
+    "ए-स्कैन"
+   ],
+   "id": "TST-036",
+   "block": [
+    "TST-037"
+   ]
+  },
+  {
+   "lang": "en",
+   "match": [
+    "a scan",
+    "a-scan",
+    "ascan"
+   ],
+   "id": "TST-036",
+   "block": [
+    "TST-037"
+   ]
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "অপটিক্যাল বায়োমেট্রি",
+    "আইওএল মাস্টার"
+   ],
+   "id": "TST-037"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "optical biometry",
+    "iol master",
+    "iolmaster"
+   ],
+   "id": "TST-037"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "মক্সিফ্লক্সাসিন",
+    "মক্সিফ্লোক্সাসিন",
+    "মক্সিফলেসিন",
+    "মক্সিফ্লেসিন",
+    "মক্সিফ্লক্স",
+    "মোক্সিফ্লক্সাসিন",
+    "মক্সি"
+   ],
+   "id": "MED-001",
+   "hint": "Moxifloxacin eye drops (ASR often garbles the name)"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "मोक्सीफ्लोक्सासिन",
+    "मॉक्सीफ्लोक्सासिन",
+    "मोक्सी"
+   ],
+   "id": "MED-001"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "ফেকো",
+    "ফ্যাকো"
+   ],
+   "id": "PRC-001"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "फेको",
+    "फैको"
+   ],
+   "id": "PRC-001"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "সিরিঞ্জিং",
+    "সিরিঞ্জ করে",
+    "সিরিঞ্জিংও"
+   ],
+   "id": "TST-050"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "सिरिंजिंग"
+   ],
+   "id": "TST-050"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "কেরাটোমেট্রি",
+    "কেরাডোমেট্রি",
+    "কেরাটমেট্রি"
+   ],
+   "id": "TST-038"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "ইসিজি",
+    "ই সি জি",
+    "ইসিজিও"
+   ],
+   "id": "TST-069",
+   "hint": "ECG — write the investigation as 'ECG' (systemic test, eye '')"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "ईसीजी",
+    "ई सी जी"
+   ],
+   "id": "TST-069",
+   "hint": "ECG (systemic test, eye '')"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "ecg",
+    "e c g",
+    "ekg"
+   ],
+   "id": "TST-069",
+   "hint": "ECG (systemic test, eye '')"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "এইচবিএওয়ানসি",
+    "এইচ বি এ ওয়ান সি",
+    "এইচবিএ ওয়ান সি",
+    "এইচ বি এানসি",
+    "এইচ বি এ"
+   ],
+   "id": "TST-067",
+   "hint": "HbA1c — blood test (eye '')"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "एचबीए1सी",
+    "एच बी ए वन सी"
+   ],
+   "id": "TST-067",
+   "hint": "HbA1c (eye '')"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "hba1c",
+    "hb a1c",
+    "glycated haemoglobin"
+   ],
+   "id": "TST-067"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "পিপি সুগার",
+    "ফাস্টিং সুগার",
+    "ফাস্টিং আর পিপি",
+    "খালি পেটে সুগার"
+   ],
+   "id": "TST-067",
+   "hint": "fasting / post-prandial blood sugar — an investigation when the doctor orders it, a history value when a past result is quoted (eye '')"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "মেটফরমিন",
+    "মেটফর্মিন",
+    "মেটফোরমিন"
+   ],
+   "hint": "Metformin — the patient's diabetes tablet (history.current_medications)"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "मेटफॉर्मिन",
+    "मेटफोर्मिन"
+   ],
+   "hint": "Metformin — diabetes tablet (history.current_medications)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "অ্যামলোডিপিন",
+    "এমলোডিপিন",
+    "অ্যামলোডিপিন"
+   ],
+   "hint": "Amlodipine — the patient's blood-pressure tablet (history.current_medications)"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "एम्लोडिपिन",
+    "अम्लोडिपिन"
+   ],
+   "hint": "Amlodipine — BP tablet (history.current_medications)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "চোখ ধাঁধিয়ে",
+    "চোখ ধাধিয়ে",
+    "ধাঁধিয়ে যায়",
+    "আলোর চারপাশে"
+   ],
+   "id": "SYM-016",
+   "hint": "glare / light scattering around lights at night"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "चकाचौंध",
+    "आंखें चौंधिया"
+   ],
+   "id": "SYM-016"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "শুকনো ভাব",
+    "শুকনো ভাবটার"
+   ],
+   "id": "DIS-045",
+   "hint": "the doctor treating শুকনো ভাব = dry eye disease (diagnosis)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "পলক ফেলবেন",
+    "পলক ফেলুন",
+    "পলক ফেলতে"
+   ],
+   "id": "CNS-024",
+   "hint": "advice: blink often (keep the doctor's wording; this is NOT the 20-20-20 rule)"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "पलक झपकाते",
+    "पलक झपकाएं"
+   ],
+   "id": "CNS-024",
+   "hint": "advice: blink often"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "অ্যালার্জি আছে না",
+    "অ্যালার্জি নেই",
+    "কোনো অ্যালার্জি নেই",
+    "অ্যালার্জি নাই"
+   ],
+   "hint": "the patient has NO known drug allergy → allergy_status 'none known'"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "एलर्जी नहीं",
+    "कोई एलर्जी नहीं"
+   ],
+   "hint": "no known drug allergy → allergy_status 'none known'"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "অপারেশন হয়নি",
+    "অপারেশন হয় নি",
+    "অপারেশন হয়নি"
+   ],
+   "hint": "no previous eye surgery (history.ocular)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "পড়ার চশমা",
+    "পরার চশমা",
+    "পড়ার জন্য চশমা"
+   ],
+   "hint": "reading glasses — history if the patient already has them; plan/advice if the doctor will give new ones"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "पढ़ने का चश्मा",
+    "पढ़ने वाला चश्मा"
+   ],
+   "hint": "reading glasses"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "বাঁ চোখ",
+    "বাম চোখ",
+    "বাো চোখ",
+    "বাঁয়ে",
+    "বামে"
+   ],
+   "hint": "= LEFT eye (LE)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "সুগারের ডাক্তার",
+    "সুগার ডাক্তার",
+    "ডায়াবেটিসের ডাক্তার"
+   ],
+   "hint": "advice: see the physician / diabetologist for sugar control"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "বয়স কত",
+    "বয়স কত",
+    "বয়স কতো"
+   ],
+   "hint": "the doctor asking the patient's age",
+   "block": [
+    "MED-086"
+   ]
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "চোখ বথা",
+    "চোখ ব্যথা",
+    "চোখে ব্যথা"
+   ],
+   "id": "SYM-013",
+   "block": [
+    "SYM-043"
+   ]
   }
  ]
 }

@@ -120,6 +120,10 @@ These run on every prescription:
 - `src/domain/negation.ts`: finds things the patient denied.
 - `src/domain/postprocess.ts`: removes unheard medicines, duplicate rows, greeting-as-name, and false pre/post-op labels.
 
+- `src/domain/numbers.ts`: decodes Bengali/Hindi number words (আটান্ন = 58) so ages, durations and values aren't guessed.
+- Evidence check: every item quotes the transcript words it came from. Advice with no supporting words is removed, and other unsupported items are flagged.
+- Coverage check (`COVERAGE_CHECK=on`, the default): a second LLM pass lists things said but missing from the draft, shown under "Check before signing". Set it to `off` to skip the extra call.
+
 Each prescription you **Approve & save** in the UI goes into `data/approved/` and is reused as a prompt example. `npm run export-training` turns those into a LoRA training set; see `scripts/finetune-mlx.md`.
 
 ## 3. The three stages

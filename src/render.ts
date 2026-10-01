@@ -62,7 +62,7 @@ export function renderMarkdown(r: ExtractionResult): string {
     ...p.history.systemic.map((h, i) => j("k/c/o", h.condition, h.duration && `× ${h.duration}`, h.treatment && `— ${h.treatment}`) + tag("history.systemic", i)),
     ...p.history.ocular.map((h, i) => j("H/o", h.item, h.eye) + tag("history.ocular", i)),
     ...(p.history.current_medications.length ? [`Current meds: ${p.history.current_medications.join(", ")}`] : []),
-    ...(p.history.allergies.length ? [`Allergies: ${p.history.allergies.join(", ")}`] : []),
+    ...(p.history.allergies.length ? [`Allergies: ${p.history.allergies.join(", ")}`] : p.history.allergy_status === "none known" ? ["No known drug allergy"] : []),
   ];
   out.push("\n## History");
   out.push(bullet(hx));
@@ -83,7 +83,7 @@ export function renderMarkdown(r: ExtractionResult): string {
   out.push("\n## Rx");
   if (!p.medications.length) out.push("—");
   p.medications.forEach((m, i) => {
-    const line = j(m.form, m.generic_name, m.strength, m.brand_said && `(${m.brand_said})`, "—", m.dose, m.frequency, m.eye, m.duration && `× ${m.duration}`, m.phase && `[${m.phase}]`);
+    const line = j(m.form, m.generic_name, m.strength, m.brand_said && `(${m.brand_said})`, "—", m.dose, m.frequency, m.eye, m.duration && `× ${m.duration}`, m.status === "continue" ? "[continue]" : "", m.phase && `[${m.phase}]`, m.start_when && `— start ${m.start_when}`);
     out.push(`${i + 1}. ${line}${tag("medications", i)}${m.instructions ? `  \n   _${m.instructions}_` : ""}`);
     const usual = ref("medications", i)?.reference?.["Typical Prescription Usage"];
     if (usual) out.push(`   <sub>KB typical usage: ${usual}</sub>`);

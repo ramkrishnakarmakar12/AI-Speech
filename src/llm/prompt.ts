@@ -10,12 +10,14 @@ Rules:
 1. Extract ONLY what is said in the conversation. Never invent a drug, dose, frequency, duration, test value or diagnosis.
    If something is not stated, use "" (or an empty array).
 2. Map every clinical term to the knowledge base: put the matching id in kb_id and use the KB's canonical name.
-   Prefer ids from CANDIDATES; you may use ids from the INDEX. If nothing fits, kb_id = "".
+   Use ids from CANDIDATES only. A term that is not in CANDIDATES may still be written in plain English with kb_id = "".
 3. Correct obvious speech-recognition misspellings using the KB (e.g. "nepafinac" → Nepafenac, "moxi flox acin" → Moxifloxacin).
    Brand names map to their generic (e.g. Moxicip → Moxifloxacin); keep the brand in brand_said.
 4. Eye: RE (right), LE (left), BE (both). Hindi: daayi/dahini/दाहिनी = right, baayi/बायीं = left, dono/दोनों = both.
-   Bengali: dan/ডান = right, bam/বাম = left, duto/dutoi/দুটো = both.
+   Bengali: dan/ডান/ডানে = right; বাঁ/বাঁয়ে/বাম/বামে/লেফট = left (speech recognition often garbles বাঁ as বা, বাো, বয়ে, মা);
+   দুই চোখ/দু চোখ/দুটো = both. When the doctor gives a value for ডান and then a second value right after it, the second is the LEFT eye.
    Numbers may be spoken in Hindi/Bengali (char/চার = 4, teen/তিন = 3, do/dui/দুই = 2, din/দিন = day, hafta/সপ্তাহ = week, mahina/মাস = month).
+   Use the NUMBERS section below (decoded deterministically) for ages, durations and values — do not convert number words yourself.
 5. Frequencies: once a day → "once daily" (never "OD"), twice → BD, three times → TID, four times → QID,
    at bedtime → HS, as needed → SOS, "six times a day" → "6x/day". Durations like "7 days", "4 weeks, tapering".
 6. Colloquial complaints → medical terms (e.g. "dhundhla dikhna"/"jhapsa dekha" → Diminution of vision,
@@ -32,7 +34,23 @@ Rules:
 13. The doctor's questions are not findings: a symptom counts only if the patient confirms it.
 14. patient.name only when the patient states it; greetings (আসুন বসুন, নমস্কার, नमस्ते) and the doctor's name are not the patient.
     phase: "pre-op"/"post-op" only when surgery is discussed, otherwise "".
-15. Write each item once. Do not repeat rows.
+15. Write each item once. Do not repeat rows. A finding that is also the diagnosis goes under diagnosis only.
+16. EVIDENCE: every complaint, history item, finding, diagnosis, medicine, procedure, investigation and advice must quote in
+    "evidence" the exact words of the transcript (original script) it comes from. If you cannot quote supporting words, leave the item out.
+17. Advice: write only advice the doctor spoke in THIS conversation, close to the doctor's meaning (e.g. "blink often while using
+    the mobile" stays that — do not replace it with a different standard instruction). Never add routine advice that was not said.
+18. Diagnosis sub-types (nuclear / cortical / posterior subcapsular cataract, NPDR grade …) only when that word was spoken.
+    "Cataract starting in the left eye, mild" with no type = "Cataract (early)", not a specific sub-type.
+19. Examination: one row per eye (RE and LE separately); never merge two eyes into a range like "16-17".
+20. Investigations: one test per row (fasting sugar, PP sugar, HbA1c, ECG, A-scan biometry, keratometry, syringing …);
+    eye = "" for blood tests, ECG, blood pressure and other systemic tests. "Continue BP medicines" is advice, not a test.
+21. Medicines: status "new" for drugs prescribed today, "continue" for drugs the patient already uses and is told to keep.
+    Medicines the patient already takes for other illnesses (e.g. diabetes, blood pressure tablets) go in history.current_medications
+    with the names as said. A drug started later ("from 3 days before the operation") is still a medicine row: put that in start_when.
+22. History is the PAST (previous surgery, glasses, systemic illness). Today's examination findings never go in history.
+    A duration belongs only to the condition it was said for — never copy one condition's duration to another.
+23. allergy_status = "none known" when the patient says they have no drug allergy; "not discussed" if allergy was not asked.
+24. Age, durations, visual acuity and pressure values: copy the numbers exactly as decoded; if a number is unclear leave it "".
 Return JSON only.`;
 
 const DETAIL_KEYS: Record<string, string[]> = {
@@ -77,19 +95,12 @@ export function buildUserPrompt(opts: {
   parts.push("## CANDIDATES (knowledge-base terms detected in this conversation)");
   parts.push(candidates.length ? candidates.map((c) => candidateLine(c.term, c.heardAs)).join("\n") : "(none detected)");
 
-  if (indexCategories.length) {
-    parts.push("\n## INDEX (other knowledge-base terms you may use)");
-    for (const cat of indexCategories) {
-      const rows = kb.terms.filter((t) => t.category === cat && !candIds.has(t.id));
-      if (rows.length) parts.push(`# ${cat}\n` + rows.map((t) => `${t.id} ${t.name}`).join("\n"));
-    }
-  }
-
-  if (scenarios.length) {
-    parts.push("\n## STYLE EXAMPLE (how this clinic writes a similar case — do NOT copy its content)");
-    for (const s of scenarios)
-      parts.push(`Diagnosis: ${s.diagnosis}\nExam: ${s.exam}\nPlan/Rx: ${s.plan}\nAdvice: ${s.advice}`);
-  }
+  // The full KB index and the KB "style example" were removed: the index made up ~65% of the prompt (burying the
+  // transcript) and the style example leaked its advice/plan into unrelated patients (LEF evaluation, Oct 2026).
+  void indexCategories;
+  void scenarios;
+  void kb;
+  void candIds;
 
   if (opts.qualityNote) parts.push("\n## " + opts.qualityNote);
   for (const note of opts.domainNotes ?? []) if (note.trim()) parts.push("\n## " + note.trim());

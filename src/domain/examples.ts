@@ -60,26 +60,48 @@ export function compact(p: Prescription): unknown {
   return strip(rest) ?? {};
 }
 
+/**
+ * Approved examples are shown only when they share a DIAGNOSIS with this visit (not just any term), and only
+ * the term-mapping parts are shown. In the LEF evaluation a single dry-eye example made the model copy its
+ * advice ("warm compress", "20-20-20") into a cataract patient.
+ */
 export function pickExamples(language: string | null | undefined, termIds: string[], n = config.llm.fewShot): ApprovedExample[] {
   if (n <= 0) return [];
   const want = new Set(termIds);
+  const dxIds = (ex: ApprovedExample) => (ex.prescription.diagnosis ?? []).map((d) => d.kb_id).filter(Boolean);
   return loadApproved()
-    .map((ex) => ({ ex, score: ex.termIds.filter((t) => want.has(t)).length + (ex.language === language ? 2 : 0) }))
-    .filter((x) => x.score > 0)
+    .map((ex) => {
+      const sharedDx = dxIds(ex).filter((id) => want.has(id)).length;
+      return { ex, sharedDx, score: sharedDx * 3 + ex.termIds.filter((t) => want.has(t)).length + (ex.language === language ? 1 : 0) };
+    })
+    .filter((x) => x.sharedDx > 0)
     .sort((a, b) => b.score - a.score || b.ex.savedAt.localeCompare(a.ex.savedAt))
     .slice(0, n)
     .map((x) => x.ex);
 }
 
-export function examplesSection(exs: ApprovedExample[], maxTranscript = 700, maxJson = 1800): string {
+/** Only the parts that teach speech → term mapping; never the patient, advice, follow-up or numbers to copy. */
+function mappingOnly(p: Prescription): unknown {
+  const pick = (rows: any[] | undefined, keys: string[]) => (rows ?? []).map((r) => Object.fromEntries(keys.filter((k) => r?.[k]).map((k) => [k, r[k]])));
+  return compact({
+    chief_complaints: pick(p.chief_complaints, ["complaint", "kb_id", "eye", "patient_words"]),
+    diagnosis: pick(p.diagnosis, ["condition", "kb_id", "eye"]),
+    medications: pick(p.medications, ["generic_name", "brand_said", "kb_id", "form", "frequency", "eye", "status", "start_when"]),
+    procedures: pick(p.procedures, ["procedure", "kb_id", "eye"]),
+    investigations: pick(p.investigations, ["test", "kb_id", "eye"]),
+  } as any);
+}
+
+export function examplesSection(exs: ApprovedExample[], maxTranscript = 600, maxJson = 1200): string {
   if (!exs.length) return "";
   return (
-    "APPROVED EXAMPLES FROM THIS CLINIC (doctor-verified; follow how they map speech to terms and fields — never copy their content into this patient)\n" +
+    "APPROVED MAPPING EXAMPLES FROM THIS CLINIC (doctor-verified; they show how spoken words map to terms and fields. " +
+    "They are a DIFFERENT patient: never copy their complaints, findings, numbers, medicines or advice into this prescription)\n" +
     exs
       .map((ex, i) => {
         const t = ex.transcript.length > maxTranscript ? ex.transcript.slice(0, maxTranscript) + " …" : ex.transcript;
-        const j = JSON.stringify(compact(ex.prescription));
-        return `### Example ${i + 1} (${ex.language})\nTranscript: ${t}\nApproved prescription: ${j.length > maxJson ? j.slice(0, maxJson) + " …" : j}`;
+        const j = JSON.stringify(mappingOnly(ex.prescription));
+        return `### Example ${i + 1} (${ex.language})\nTranscript excerpt: ${t}\nTerm mapping: ${j.length > maxJson ? j.slice(0, maxJson) + " …" : j}`;
       })
       .join("\n\n")
   );

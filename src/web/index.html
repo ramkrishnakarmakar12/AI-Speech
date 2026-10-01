@@ -162,12 +162,14 @@
 
   @media print {
     @page { size:A4; margin:12mm; }
-    body { background:#fff !important; }
-    body * { visibility:hidden !important; }
-    #rxSheet, #rxSheet * { visibility:visible !important; }
-    #rxSheet { position:absolute; left:0; top:0; width:100%; max-width:none; box-shadow:none; padding:0; margin:0; outline:none !important; }
-    #rxSheet .screen-only { display:none !important; }
+    html, body { background:#fff !important; height:auto !important; }
+    /* only the copied sheet is printed; hiding the rest with display:none (not visibility) avoids blank trailing pages */
+    body > *:not(#printRoot) { display:none !important; }
+    #printRoot { display:block !important; }
+    #printRoot .sheet { max-width:none; width:100%; box-shadow:none; padding:0; margin:0; border-radius:0; outline:none !important; }
+    #printRoot .screen-only { display:none !important; }
   }
+  #printRoot { display:none; }
 </style>
 </head>
 <body>
@@ -490,7 +492,7 @@ function renderRx() {
     ...p.history.systemic.map((x, i) => esc(j("k/c/o", x.condition, x.duration && "× " + x.duration, x.treatment && "— " + x.treatment)) + tag("history.systemic." + i)),
     ...p.history.ocular.map((x, i) => esc(j("H/o", x.item, x.eye && `(${x.eye})`)) + tag("history.ocular." + i)),
     ...(p.history.current_medications.length ? ["Current medications: " + esc(p.history.current_medications.join(", "))] : []),
-    ...(p.history.allergies.length ? ["Allergies: " + esc(p.history.allergies.join(", "))] : []),
+    ...(p.history.allergies.length ? ["Allergies: " + esc(p.history.allergies.join(", "))] : p.history.allergy_status === "none known" ? ["No known drug allergy"] : []),
   ];
   if (hist.length) h += `<h4>History</h4>` + list(hist);
   const oe = [
@@ -505,7 +507,7 @@ function renderRx() {
   h += `<div class="rxsym">℞</div>`;
   h += p.medications.length ? `<table><tr><th>#</th><th>Medicine</th><th>Dose</th><th>Frequency</th><th>Eye</th><th>Duration</th></tr>` + p.medications.map((m, i) => {
     const ref = refs["medications." + i]?.reference || {};
-    return `<tr><td>${i + 1}</td><td><span class="med">${esc(j(m.form, m.generic_name, m.strength))}</span>${m.brand_said && m.brand_said !== m.generic_name ? ` <span class="inst">(${esc(m.brand_said)})</span>` : ""}${tag("medications." + i)}${m.phase ? ` <span class="inst">[${esc(m.phase)}]</span>` : ""}
+    return `<tr><td>${i + 1}</td><td><span class="med">${esc(j(m.form, m.generic_name, m.strength))}</span>${m.brand_said && m.brand_said !== m.generic_name ? ` <span class="inst">(${esc(m.brand_said)})</span>` : ""}${tag("medications." + i)}${m.status === "continue" ? ` <span class="inst">[continue]</span>` : ""}${m.phase ? ` <span class="inst">[${esc(m.phase)}]</span>` : ""}${m.start_when ? `<div class="inst">Start: ${esc(m.start_when)}</div>` : ""}
       ${m.instructions ? `<div class="inst">${esc(m.instructions)}</div>` : ""}${ref["Typical Prescription Usage"] ? `<div class="kbref screen-only">KB typical: ${esc(ref["Typical Prescription Usage"])}</div>` : ""}</td>
       <td>${esc(m.dose)}</td><td>${esc(m.frequency)}</td><td>${esc(m.eye)}</td><td>${esc(m.duration)}</td></tr>`;
   }).join("") + `</table>` : `<div class="none">No medicines prescribed.</div>`;
@@ -514,7 +516,10 @@ function renderRx() {
   if (p.investigations.length) h += `<h4>Investigations</h4>` + list(p.investigations.map((x, i) => esc(j(x.test, x.eye && `(${x.eye})`, x.purpose && "— " + x.purpose)) + tag("investigations." + i)));
   h += `<h4>Advice</h4>` + list(p.advice.map((a) => esc(a.text)));
   h += `<h4>Review</h4>` + list(p.follow_up.map((f) => esc(j(f.when, f.purpose && "— " + f.purpose))));
-  h += `<div class="foot"><div class="disc">AI-assisted draft generated from the consultation audio. Reviewed and approved by the treating ophthalmologist.</div><div class="sign">${esc(c.doctor || "Doctor's signature")}</div></div>`;
+  const appr = r.approvedAt
+    ? `AI-assisted prescription generated from the consultation audio. Reviewed and approved by ${esc(c.doctor || "the treating ophthalmologist")} on ${esc(new Date(r.approvedAt).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }))}.`
+    : `<b>DRAFT — not yet reviewed.</b> AI-assisted draft generated from the consultation audio; it must be checked and approved by the treating ophthalmologist before use.`;
+  h += `<div class="foot"><div class="disc">${appr}</div><div class="sign">${esc(c.doctor || "Doctor's signature")}</div></div>`;
   h += `</div></div>`;
 
   // below the sheet (screen only)
@@ -532,7 +537,7 @@ function renderRx() {
   $("approveBtn").onclick = approve;
   $("copyMd").onclick = () => navigator.clipboard.writeText(sheetText()).then(() => toast("Copied"));
   $("applyJson").onclick = () => {
-    try { current.prescription = JSON.parse($("jsonEdit").value); renderRx(); toast("Prescription updated"); }
+    try { current.prescription = JSON.parse($("jsonEdit").value); current.approvedAt = null; renderRx(); toast("Prescription updated"); }
     catch (e) { toast("Invalid JSON: " + e.message); }
   };
 }
@@ -608,6 +613,21 @@ $("dlBtn").onclick = (e) => { e.stopPropagation(); $("dlMenu").classList.toggle(
 document.addEventListener("click", () => $("dlMenu").classList.remove("open"));
 for (const b of document.querySelectorAll("[data-dl]")) b.onclick = () => { $("dlMenu").classList.remove("open"); download(b.dataset.dl); };
 
+/* ---------- print: copy only the sheet into #printRoot (no blank trailing pages) ---------- */
+window.addEventListener("beforeprint", () => {
+  const sheet = document.getElementById("rxSheet");
+  if (!sheet) return;
+  document.getElementById("printRoot")?.remove();
+  const root = document.createElement("div");
+  root.id = "printRoot";
+  const copy = sheet.cloneNode(true);
+  copy.removeAttribute("id");
+  copy.removeAttribute("contenteditable");
+  root.appendChild(copy);
+  document.body.appendChild(root);
+});
+window.addEventListener("afterprint", () => document.getElementById("printRoot")?.remove());
+
 /* ---------- approve ---------- */
 async function approve() {
   if (!current) return;
@@ -615,7 +635,8 @@ async function approve() {
     const r = await fetch("/api/approve", { method: "POST", headers: { "content-type": "application/json" },
       body: JSON.stringify({ transcript: current.transcript || $("transcript").value, english: $("english").value, language: current.language || lang, prescription: current.prescription, doctor: clinic().doctor }) }).then((r) => r.json());
     if (r.error) throw new Error(r.error);
-    $("approveBtn").textContent = "✓ Saved"; $("approveBtn").disabled = true;
+    current.approvedAt = new Date().toISOString(); renderRx();
+    $("approveBtn").textContent = "✓ Approved & saved"; $("approveBtn").disabled = true;
     toast(`Saved — ${r.approved} approved example(s) now guide future drafts`);
   } catch (e) { toast("✘ " + e.message); }
 }
