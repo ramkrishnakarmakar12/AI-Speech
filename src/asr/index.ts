@@ -15,6 +15,8 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
+import http from "node:http";
+import https from "node:https";
 import os from "node:os";
 import path from "node:path";
 import { config, ROOT, type AsrBackend } from "../config.js";
@@ -330,35 +332,68 @@ async function remoteAsr(audio: string, language: string): Promise<RawTranscript
   const bytes = fs.readFileSync(audio);
   if (bytes.length > 5.5 * 1024 * 1024)
     throw new Error(`Audio is ${(bytes.length / 1048576).toFixed(1)} MB; the remote speech endpoint accepts up to ~5.5 MB. Upload m4a/mp3 instead of WAV, or shorten the recording.`);
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), config.asr.remoteTimeoutMs);
+  const t0 = Date.now();
+  // Not fetch(): Node's built-in fetch gives up after 5 minutes without response headers
+  // (UND_ERR_HEADERS_TIMEOUT), and a cold Lambda plus a long visit can take longer than that.
+  const r = await postJson(
+    config.asr.remoteUrl,
+    { "content-type": "application/json", ...(config.asr.remoteToken ? { authorization: `Bearer ${config.asr.remoteToken}` } : {}) },
+    JSON.stringify({ audio_b64: bytes.toString("base64"), filename: path.basename(audio), language }),
+    config.asr.remoteTimeoutMs,
+  ).catch((e: any) => {
+    throw new Error(
+      e?.code === "ETIMEDOUT"
+        ? `Remote speech model did not answer within ${config.asr.remoteTimeoutMs / 1000}s`
+        : `Cannot reach the remote speech model at ${config.asr.remoteUrl}: ${e?.code ?? e?.message}`,
+    );
+  });
+  console.log(`[asr] remote ${language || "auto"}: HTTP ${r.status} in ${((Date.now() - t0) / 1000).toFixed(0)}s (${(bytes.length / 1048576).toFixed(1)} MB audio)`);
+  const body = r.body;
+  let d: any;
   try {
-    const r = await fetch(config.asr.remoteUrl, {
-      method: "POST",
-      headers: { "content-type": "application/json", ...(config.asr.remoteToken ? { authorization: `Bearer ${config.asr.remoteToken}` } : {}) },
-      body: JSON.stringify({ audio_b64: bytes.toString("base64"), filename: path.basename(audio), language }),
-      signal: ctrl.signal,
-    }).catch((e: any) => {
-      throw new Error(e?.name === "AbortError" ? `Remote speech model timed out after ${config.asr.remoteTimeoutMs / 1000}s` : `Cannot reach the remote speech model at ${config.asr.remoteUrl}: ${e?.cause?.code ?? e?.message}`);
-    });
-    const body = await r.text();
-    let d: any;
-    try {
-      d = JSON.parse(body);
-    } catch {
-      throw new Error(`Remote speech model returned ${r.status}: ${body.slice(0, 300)}`);
-    }
-    if (!r.ok || d.error) throw new Error(`Remote speech model error (${r.status}): ${d.error ?? body.slice(0, 300)}`);
-    return {
-      text: String(d.text ?? "").trim(),
-      english: d.english ? String(d.english) : undefined,
-      language: langCode(d.language ?? language) || null,
-      model: d.model,
-      durationSec: typeof d.duration_sec === "number" ? d.duration_sec : null,
-    } as RawTranscript;
-  } finally {
-    clearTimeout(timer);
+    d = JSON.parse(body);
+  } catch {
+    throw new Error(`Remote speech model returned ${r.status}: ${body.slice(0, 300)}`);
   }
+  if (r.status >= 400 || d.error) throw new Error(`Remote speech model error (${r.status}): ${d.error ?? body.slice(0, 300)}`);
+  return {
+    text: String(d.text ?? "").trim(),
+    english: d.english ? String(d.english) : undefined,
+    language: langCode(d.language ?? language) || null,
+    model: d.model,
+    durationSec: typeof d.duration_sec === "number" ? d.duration_sec : null,
+  } as RawTranscript;
+}
+
+/** POST a JSON body and read the whole reply, waiting up to timeoutMs in total (no 5-minute header limit). */
+function postJson(url: string, headers: Record<string, string>, body: string, timeoutMs: number): Promise<{ status: number; body: string }> {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = (u.protocol === "http:" ? http : https).request(
+      u,
+      { method: "POST", headers: { ...headers, "content-length": Buffer.byteLength(body) } },
+      (res) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (c: Buffer) => chunks.push(c));
+        res.on("end", () => {
+          clearTimeout(timer);
+          resolve({ status: res.statusCode ?? 0, body: Buffer.concat(chunks).toString("utf8") });
+        });
+        res.on("error", (e) => {
+          clearTimeout(timer);
+          reject(e);
+        });
+      },
+    );
+    const timer = setTimeout(() => req.destroy(Object.assign(new Error("timed out"), { code: "ETIMEDOUT" })), timeoutMs);
+    // keep the long-waiting connection alive through NATs / proxies
+    req.on("socket", (s) => s.setKeepAlive(true, 30_000));
+    req.on("error", (e) => {
+      clearTimeout(timer);
+      reject(e);
+    });
+    req.end(body);
+  });
 }
 
 // ---------------- Qwen3-ASR (MLX) ----------------

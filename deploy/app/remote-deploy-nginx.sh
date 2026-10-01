@@ -2,6 +2,7 @@
 # Runs ON an existing server that already has nginx (prod: the LEF server). Sent by
 # .github/workflows/deploy.yml through SSM Run Command, which prepends:
 #   AWS_REGION ECR_REGISTRY APP_IMAGE PARAMETER_NAME SITE_DOMAIN ALLOWED_CIDRS HOST_PORT CERTBOT_EMAIL
+#   BASIC_AUTH  ("user:<apr1 hash>" made on the GitHub runner; the plain password never reaches this server)
 #
 #   browser ──HTTPS──► nginx (existing; new server block for $SITE_DOMAIN only)
 #                        └─► ai-speech-web container (host network, listening on 127.0.0.1:$HOST_PORT only)
@@ -108,8 +109,27 @@ else
 fi
 mkdir -p "$WEBROOT"
 
+# IP allow-list: skipped entirely when it contains 0.0.0.0/0 (open to everyone, password-protected below)
 ALLOW=""
-for c in $ALLOWED_CIDRS; do ALLOW="$ALLOW        allow $c;\n"; done
+if [[ " $ALLOWED_CIDRS " != *" 0.0.0.0/0 "* ]]; then
+  for c in $ALLOWED_CIDRS; do ALLOW="$ALLOW        allow $c;\n"; done
+  ALLOW="$ALLOW        deny all;\n"
+fi
+
+# Username/password prompt (HTTP basic auth) for the whole site
+HTPASSWD=/etc/nginx/ai-speech.htpasswd
+AUTH=""
+if [ -n "${BASIC_AUTH:-}" ]; then
+  printf '%s\n' "$BASIC_AUTH" > "$HTPASSWD.new"
+  NGINX_USER="$(ps -o user= -C nginx 2>/dev/null | grep -v '^root$' | head -1 || true)"
+  chown "root:${NGINX_USER:-www-data}" "$HTPASSWD.new" 2>/dev/null || chown root:root "$HTPASSWD.new"
+  chmod 640 "$HTPASSWD.new"
+  [ -z "$NGINX_USER" ] && chmod 644 "$HTPASSWD.new"
+  mv "$HTPASSWD.new" "$HTPASSWD"
+  AUTH="        auth_basic \"AI Speech\";\n        auth_basic_user_file $HTPASSWD;\n"
+else
+  rm -f "$HTPASSWD"
+fi
 
 write_conf() { # $1 = with_tls (0/1)
   local backup=""
@@ -148,12 +168,15 @@ server {
     proxy_read_timeout   900s;
     proxy_send_timeout   900s;
 
-    location / {
-        # only the clinic's IPs (ALLOWED_CIDR_BLOCKS) and this server itself
+    # health check for the deploy script only (no password, local requests only)
+    location = /ai-speech-healthz {
         allow 127.0.0.1;
-$(printf "%b" "$ALLOW")
         deny all;
+        proxy_pass http://127.0.0.1:$HOST_PORT/api/config;
+    }
 
+    location / {
+$(printf "%b" "$ALLOW$AUTH")
         proxy_pass http://127.0.0.1:$HOST_PORT;
         proxy_http_version 1.1;
         proxy_set_header Host \$host;
@@ -236,7 +259,7 @@ fi
 
 # ---------- end-to-end check through nginx with the real certificate ----------
 for _ in $(seq 1 12); do
-  if curl -fsS -o /dev/null --resolve "$SITE_DOMAIN:443:127.0.0.1" "https://$SITE_DOMAIN/api/config"; then
+  if curl -fsS -o /dev/null --resolve "$SITE_DOMAIN:443:127.0.0.1" "https://$SITE_DOMAIN/ai-speech-healthz"; then
     log "deployed $APP_IMAGE at https://$SITE_DOMAIN"
     # remove only older AI Speech images (other apps' images on this server are left alone)
     docker images --format '{{.Repository}}:{{.Tag}}' | grep "^${APP_IMAGE%:*}:" | grep -vxF "$APP_IMAGE" \

@@ -118,7 +118,8 @@ resource "aws_lambda_function" "asr" {
 
   environment {
     variables = {
-      ASR_TOKEN = random_password.asr_token.result
+      ASR_TOKEN      = random_password.asr_token.result
+      INDIC_DECODING = var.asr_decoding
     }
   }
 

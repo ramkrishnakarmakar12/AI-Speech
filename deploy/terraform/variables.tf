@@ -58,3 +58,14 @@ variable "route53_zone_name" {
   default     = ""
   description = "Public Route 53 hosted zone that contains var.domain (e.g. paninieight.com). Set it to have Terraform create the A record."
 }
+
+variable "asr_decoding" {
+  type        = string
+  default     = "rnnt"
+  description = "IndicConformer decoder on Lambda: rnnt (more accurate, slow on CPU) or ctc (several times faster, slightly less accurate)."
+
+  validation {
+    condition     = contains(["rnnt", "ctc"], var.asr_decoding)
+    error_message = "asr_decoding must be rnnt or ctc."
+  }
+}
