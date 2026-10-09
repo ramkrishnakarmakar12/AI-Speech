@@ -8,7 +8,7 @@
  *   · greetings or ASR noise as the patient's name ("Ashan Bhusun" = আসুন বসুন), impossible ages ("At 8")
  *   · "pre-op" / "post-op" on visits where no surgery was discussed
  */
-import type { KnowledgeBase } from "../kb/types.js";
+import type { KnowledgeBase, Term } from "../kb/types.js";
 import type { Prescription } from "../llm/schema.js";
 import { findMatches, normalize } from "../match/matcher.js";
 import { allNumberValues, findNumbers } from "./numbers.js";
@@ -480,7 +480,7 @@ function layoutSanity(p: Prescription, out: PostResult) {
   if (before !== p.clinical_findings.length) out.notes.push(`Removed ${before - p.clinical_findings.length} finding${before - p.clinical_findings.length > 1 ? "s" : ""} already shown in the examination or diagnosis.`);
 
   // Follow-up belongs in Review, not Advice
-  const FOLLOW = /^(come back|come again|review|follow.?up|revisit|see me|return)\b|আবার (আসবেন|দেখাবেন|আসুন)|फिर (आइए|आना|दिखाइए)|दोबारा आ/i;
+  const FOLLOW = /^(come back|come again|review|follow.?up|revisit|see me|return)\b|^(come|return|visit)\b.*\b(after|in|within|next)\b|\bfollow.?up (after|in|visit)\b|আবার (আসবেন|দেখাবেন|আসুন)|फिर (आइए|आना|दिखाइए)|दोबारा आ/i;
   const followAdvice = p.advice.filter((a) => FOLLOW.test(a.text.trim()));
   if (followAdvice.length) {
     if (!p.follow_up.length) p.follow_up = followAdvice.map((a) => ({ when: a.text.replace(/^(come back|come again|review|follow.?up|revisit|return)\s*(after|in)?\s*/i, "").trim() || a.text, purpose: "" }));
@@ -574,6 +574,89 @@ function procedureFallback(p: Prescription, heard: string, kb: KnowledgeBase, po
   }
 }
 
+// ---------------------------------------------------------------------------------------------
+// Bench round 3 (Bedrock 32B): IOP values said but put nowhere ("Non-contact tonometry" listed as a test to order),
+// clinic examinations listed as investigations, complaints the model dropped although the words were clearly said.
+// ---------------------------------------------------------------------------------------------
+const IOP_ANCHOR = /প্রেশার|প্রেসার|চাপ|pressure|\biop\b|\bnct\b|এনসিটি|এনসিটিতে|tonometr|टोनोमेट्री|प्रेशर|एनसीटी/i;
+const RIGHT_EYE = /^(ডান|ডানে|ডানদিকের|right|দাঈ|दाईं|दायीं|दाहिनी|दाएं|दाईं|दायें)$/i;
+const LEFT_EYE = /^(বাম|বাঁ|বামে|বামচোখে|left|बाईं|बायीं|बाएं|बायें)$/i;
+
+/** Eye pressures said as "প্রেশার … ডান ষোলো বাঁ ছাব্বিশ" / "प्रेशर … दाईं चौदह, बाईं पंद्रह" when the model put no IOP row. */
+function iopFallback(p: Prescription, heard: string, out: PostResult) {
+  if (p.examination.some((e) => IOP_TEST.test(e.test))) return;
+  const toks = heard.split(/[\s,।.?!;:()"'“”‘’]+/).filter(Boolean);
+  const valueAt = (i: number) => {
+    for (let j = i + 1; j <= i + 3 && j < toks.length; j++) {
+      if (RIGHT_EYE.test(toks[j]) || LEFT_EYE.test(toks[j])) return null;
+      const vals = [...allNumberValues(toks[j])].filter((n) => n >= 5 && n <= 70 && Number.isInteger(n));
+      if (vals.length === 1) return { n: vals[0], end: j };
+    }
+    return null;
+  };
+  for (let a = 0; a < toks.length; a++) {
+    if (!IOP_ANCHOR.test(toks[a])) continue;
+    const found: { eye: "RE" | "LE"; n: number; from: number; to: number }[] = [];
+    for (let i = a + 1; i < Math.min(toks.length, a + 14); i++) {
+      const eye = RIGHT_EYE.test(toks[i]) ? "RE" : LEFT_EYE.test(toks[i]) ? "LE" : null;
+      if (!eye || found.some((f) => f.eye === eye)) continue;
+      const v = valueAt(i);
+      if (v) found.push({ eye, n: v.n, from: i, to: v.end });
+    }
+    if (found.length === 2) {
+      for (const f of found) {
+        p.examination.push({ test: "Intraocular pressure", kb_id: "", eye: f.eye, result: `${f.n} mmHg`, evidence: toks.slice(a, f.to + 1).join(" ") } as any);
+        out.flags.push(`IOP ${f.eye} ${f.n} mmHg was said but missing from the model's draft — added from «${toks.slice(f.from, f.to + 1).join(" ")}»; check it`);
+      }
+      return;
+    }
+  }
+}
+
+const CLINIC_TEST = /snellen|visual acuity|slit.?lamp|biomicroscop|ophthalmoscop|tonometr|\bnct\b|applanation|retinoscop|\brefraction\b/i;
+
+/** Examinations done in the clinic are not investigations to order. */
+function clinicTestsNotInvestigations(p: Prescription, out: PostResult) {
+  const before = p.investigations.map((t) => t.test);
+  p.investigations = p.investigations.filter((t) => !CLINIC_TEST.test(t.test) || /photo|oct|angiograph|ffa|field|perimetr|biometr|scan/i.test(t.test));
+  const gone = before.filter((t) => !p.investigations.some((x) => x.test === t));
+  if (gone.length) out.notes.push(`Not investigations (examined in the clinic): ${[...new Set(gone)].join(", ")}.`);
+}
+
+/** Symptoms clearly said in the patient's words (eye-lexicon phrase or exact vocabulary term, not denied) that no complaint covers. */
+function symptomBackfill(p: Prescription, heard: string, kb: KnowledgeBase, out: PostResult) {
+  const neg = findNegations(heard);
+  const inNeg = (start: number, end: number) => neg.some((n) => start >= n.start && end <= n.end);
+  const lines = p.chief_complaints.map((c) => normalize(`${c.complaint} ${c.character} ${c.patient_words}`)).join(" | ");
+  const have = new Set(p.chief_complaints.map((c) => c.kb_id).filter(Boolean));
+  const seen = new Set<string>();
+  const add = (t: Term, quote: string) => {
+    if (seen.has(t.id) || have.has(t.id)) return;
+    seen.add(t.id);
+    const key = normalize(t.name).split(" ").filter((w) => w.length >= 4 && !/^(vision|sensation|with|from|both|eyes?)$/.test(w));
+    if (key.length && key.some((w) => lines.includes(w.slice(0, 5)))) return;
+    p.chief_complaints.push({ complaint: t.name, kb_id: t.id, eye: "", duration: "", character: "", patient_words: quote, evidence: quote });
+    out.flags.push(`Complaint "${t.name}" was said («${quote}») but missing from the model's draft — added; confirm it`);
+  };
+  // the doctor's own lines are questions and explanations, not complaints ("Any headache or vomiting?")
+  const doctorSpans = [...heard.matchAll(/^\s*(doctor|dr\.?|ডাক্তার|ডাঃ|डॉक्टर|डॉ\.?)\s*[:：].*$/gimu)].map((m) => [m.index!, m.index! + m[0].length]);
+  const byDoctor = (at: number) => doctorSpans.some(([a, b]) => at >= a && at < b);
+  // a symptom denied anywhere in the visit is never added
+  const denied = new Set<string>();
+  const hits: { term: Term; quote: string; at: number; end: number }[] = [];
+  for (const h of scanLexicon(heard, kb)) if (h.term?.category === "symptom" && h.start >= 0) hits.push({ term: h.term, quote: h.heard, at: h.start, end: h.end });
+  const symptoms = { ...kb, terms: kb.terms.filter((t) => t.category === "symptom") };
+  for (const m of findMatches(heard, symptoms).filter((x) => x.kind === "exact" && x.score >= 0.95)) {
+    let at = heard.indexOf(m.heardAs);
+    while (at >= 0) {
+      hits.push({ term: m.term, quote: m.heardAs, at, end: at + m.heardAs.length });
+      at = heard.indexOf(m.heardAs, at + 1);
+    }
+  }
+  for (const h of hits) if (inNeg(h.at, h.end)) denied.add(h.term.id);
+  for (const h of hits) if (!denied.has(h.term.id) && !byDoctor(h.at)) add(h.term, h.quote);
+}
+
 export function postProcess(
   p: Prescription,
   ctx: { heardText: string; kb: KnowledgeBase; negatedIds: Set<string>; negatedText: string; positiveIds: Set<string> },
@@ -582,6 +665,7 @@ export function postProcess(
   medicinesHeard(p, ctx.heardText, ctx.kb, out, ctx.positiveIds);
   negatedItems(p, ctx.negatedIds, ctx.negatedText, ctx.positiveIds, out, ctx.heardText);
   allergySanity(p, ctx.heardText, out);
+  iopFallback(p, ctx.heardText, out);
   examinationSanity(p, ctx.heardText, out);
   procedureFallback(p, ctx.heardText, ctx.kb, ctx.positiveIds, out);
   patientSanity(p, out, ctx.heardText);
@@ -596,7 +680,9 @@ export function postProcess(
   layoutSanity(p, out);
   adviceDuplicates(p, out);
   investigationSanity(p, ctx.heardText, out);
+  clinicTestsNotInvestigations(p, out);
   adviceSanity(p, ctx.kb, out);
+  symptomBackfill(p, ctx.heardText, ctx.kb, out);
   dedupe(p, out);
   return out;
 }
