@@ -368,6 +368,11 @@ function iopTime(heard: string): string {
 function examinationSanity(p: Prescription, heard: string, out: PostResult) {
   const said = allNumberValues(heard);
   p.examination = p.examination.filter((e) => {
+    // "Dynamic retinoscopy: (nothing)" — a test named without any result is not an examination finding
+    if (!String(e.result ?? "").trim() && !IOP_TEST.test(e.test) && !VA_TEST.test(e.test)) {
+      out.notes.push(`"${e.test}"${e.eye ? ` (${e.eye})` : ""} left out of the examination: no result was said.`);
+      return false;
+    }
     if (!IOP_TEST.test(e.test) && !VA_TEST.test(e.test)) return true;
     // "we'll check your vision / pressure" is a plan, not a result: no value → no row ("Normal" here was invented)
     if (!/\d|\b(cf|fc|hm|hmcf|pl|npl|pr|nlp|counting fingers?|hand movements?|perception of light|no perception)\b|[০-৯०-९]/i.test(e.result ?? "")) {
@@ -422,7 +427,9 @@ function adviceSanity(p: Prescription, kb: KnowledgeBase, out: PostResult) {
     if (DOCTOR_PLAN.test(text)) {
       const raw = text.replace(/[।.]$/, "");
       const plan = /প্রেশার|প্রেসার|प्रेशर|pressure/i.test(raw) ? "Recheck eye pressure" : /দৃষ্টি|नज़र|नजर|vision/i.test(raw) ? "Recheck vision" : raw;
-      if (p.follow_up.length) p.follow_up[0].purpose = [p.follow_up[0].purpose, plan].filter(Boolean).join("; ");
+      if (p.follow_up.length) {
+        if (!(p.follow_up[0].purpose ?? "").includes(plan)) p.follow_up[0].purpose = [p.follow_up[0].purpose, plan].filter(Boolean).join("; ");
+      }
       else p.follow_up.push({ when: "", purpose: plan });
       out.notes.push(`"${text}" is the doctor's plan for the next visit — moved from Advice to Review.`);
       return false;
@@ -459,7 +466,7 @@ function investigationSanity(p: Prescription, heard: string, out: PostResult) {
 }
 
 /** One line per fact: findings already printed as an examination result or a diagnosis are not repeated. */
-function layoutSanity(p: Prescription, out: PostResult) {
+function layoutSanity(p: Prescription, out: PostResult, heardAll = "") {
   const spell = (s: string) =>
     normalize(s).replace(/oedema/g, "edema").replace(/haemorrh/g, "hemorrh").replace(/\b(in|of|the|right|left|both|eye|eyes|re|le|be)\b/g, " ").replace(/\s+/g, " ").trim();
   const covered = (text: string, eye: string) => {
@@ -488,11 +495,29 @@ function layoutSanity(p: Prescription, out: PostResult) {
     out.notes.push("Follow-up moved from Advice to Review.");
   }
 
+  // "এক মাস পরে আবার আসবেন, প্রেশার দেখব" — the doctor's reason for the next visit
+  if (p.follow_up.length && !p.follow_up[0].purpose && /(প্রেশার|প্রেসার|pressure|प्रेशर)\s*(দেখব|দেখবো|মাপব|check|recheck|देखेंगे|देखूंगा|चेक)/i.test(heardAll)) p.follow_up[0].purpose = "Recheck eye pressure";
+
   // Family history is not about the patient's eyes
   for (const h of p.history.ocular) if (/family|mother|father|sibling|brother|sister|মা|বাবা|माँ|पिता/i.test(h.item)) h.eye = "";
 }
 
 const CONDITIONAL = /\bif\b|\bin case\b|\bunless\b|\bshould (it|the|this)\b|considered if|যদি|হলে তবে|हो जाए तो|अगर|यदि|अगर .* तो/i;
+
+const NOT_NEEDED = /not (required|indicated|needed|necessary|advised)|no need|প্রয়োজন নেই|প্রয়োজন নেই|দরকার নেই|লাগবে না|দিতে হবে না|ज़रूरत नहीं|जरूरत नहीं|आवश्यकता नहीं|नहीं चाहिए/i;
+
+/** "Intravitreal injection — not required currently": what the doctor said is NOT needed is not advised or prescribed. */
+function notNeeded(p: Prescription, out: PostResult) {
+  const drop = <T extends { evidence?: string }>(rows: T[], note: (x: T) => string, label: (x: T) => string) =>
+    rows.filter((x) => {
+      if (!NOT_NEEDED.test(`${note(x)} ${x.evidence ?? ""}`)) return true;
+      out.removed.push(`${label(x)} — the doctor said it is not needed`);
+      return false;
+    });
+  p.procedures = drop(p.procedures, (x) => x.notes ?? "", (x) => `Procedure "${x.procedure}"`);
+  p.medications = drop(p.medications, (x) => x.instructions ?? "", (x) => `Medicine "${x.generic_name || x.brand_said}"`);
+  p.investigations = drop(p.investigations, (x) => x.purpose ?? "", (x) => `Investigation "${x.test}"`);
+}
 
 /** "Photodynamic therapy if it turns wet": a procedure for a future "if" is not advised today — it becomes advice. */
 function conditionalProcedures(p: Prescription, out: PostResult) {
@@ -623,11 +648,19 @@ function clinicTestsNotInvestigations(p: Prescription, out: PostResult) {
   if (gone.length) out.notes.push(`Not investigations (examined in the clinic): ${[...new Set(gone)].join(", ")}.`);
 }
 
+/** Eye symptoms the vocabulary has no entry for, in English / Bengali / Hindi */
+const EXTRA_SYMPTOMS: [string, RegExp][] = [
+  ["Metamorphopsia (distorted vision)", /metamorphops|distort|wavy lines|lines look (bent|wavy|crooked)|বাঁকা দেখ|খাপছাড়া|টেরা বাঁকা|टेढ़ा दिख|टेढ़ी दिख|लहरदार/i],
+  ["Photopsia (flashes of light)", /photops|flashes of light|flashing lights|আলোর ঝলক|ঝলকানি|चमक दिख|रोशनी की चमक/i],
+  ["Asthenopia (eye strain)", /asthenop|eye strain|eyes? (feel )?tired|চোখের ক্লান্তি|চোখ ক্লান্ত|आँखों में थकान|आंखों में थकान/i],
+];
+
 /** Symptoms clearly said in the patient's words (eye-lexicon phrase or exact vocabulary term, not denied) that no complaint covers. */
 function symptomBackfill(p: Prescription, heard: string, kb: KnowledgeBase, out: PostResult) {
   const neg = findNegations(heard);
   const inNeg = (start: number, end: number) => neg.some((n) => start >= n.start && end <= n.end);
-  const lines = p.chief_complaints.map((c) => normalize(`${c.complaint} ${c.character} ${c.patient_words}`)).join(" | ");
+  // the patient's quote is not counted: "metamorphopsia" sitting only inside a quoted sentence is not a listed complaint
+  const lines = p.chief_complaints.map((c) => normalize(`${c.complaint} ${c.character}`)).join(" | ");
   const have = new Set(p.chief_complaints.map((c) => c.kb_id).filter(Boolean));
   const seen = new Set<string>();
   const add = (t: Term, quote: string) => {
@@ -655,6 +688,11 @@ function symptomBackfill(p: Prescription, heard: string, kb: KnowledgeBase, out:
   }
   for (const h of hits) if (inNeg(h.at, h.end)) denied.add(h.term.id);
   for (const h of hits) if (!denied.has(h.term.id) && !byDoctor(h.at)) add(h.term, h.quote);
+  for (const [name, re] of EXTRA_SYMPTOMS) {
+    const m = re.exec(heard);
+    if (!m || byDoctor(m.index) || inNeg(m.index, m.index + m[0].length)) continue;
+    add({ id: `X-${name}`, name, category: "symptom", aliases: [], colloquial: [], details: {} } as Term, m[0]);
+  }
 }
 
 export function postProcess(
@@ -676,8 +714,9 @@ export function postProcess(
   systemicEye(p);
   fieldSanity(p, ctx.heardText, out);
   evidenceCheck(p, ctx.heardText, out);
+  notNeeded(p, out);
   conditionalProcedures(p, out);
-  layoutSanity(p, out);
+  layoutSanity(p, out, ctx.heardText);
   adviceDuplicates(p, out);
   investigationSanity(p, ctx.heardText, out);
   clinicTestsNotInvestigations(p, out);

@@ -1477,6 +1477,18 @@
     "পাতা লেগেছিল"
    ],
    "hint": "injury with a (paddy) leaf — record as history of trauma (risk of fungal keratitis)"
+  },
+  {
+   "lang": "en",
+   "match": [
+    "floating dark specks",
+    "dark specks",
+    "floating spots",
+    "floating specks",
+    "black spots floating"
+   ],
+   "id": "SYM-018",
+   "hint": "floaters (a complaint)"
   }
  ]
 }

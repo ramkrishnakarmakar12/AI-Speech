@@ -248,3 +248,14 @@ test("bench round 3: a symptom the doctor only asked about, or the patient denie
   const names = p.chief_complaints.map((c) => c.complaint.toLowerCase()).join(" | ");
   assert.ok(!/vomit|nausea/.test(names), names);
 });
+
+test("bench round 4: a procedure the doctor said is NOT needed is dropped; unnamed symptoms (metamorphopsia) come back; empty exam rows go", () => {
+  const T = "Patient: I've noticed progressive metamorphopsia and blurred vision in my left eye.\nDoctor: Since there's no active neovascular membrane, anti-VEGF intravitreal injections are not indicated. We'll perform dynamic retinoscopy.";
+  const p = empty();
+  p.procedures = [{ procedure: "Intravitreal injection", kb_id: "PRC-050", eye: "LE", notes: "Not required currently", evidence: "anti-VEGF intravitreal injections are not indicated" }];
+  p.examination = [{ test: "Dynamic retinoscopy", kb_id: "", eye: "LE", result: "", evidence: "" }];
+  run(T, p);
+  assert.deepEqual(p.procedures, []);
+  assert.deepEqual(p.examination, []);
+  assert.ok(p.chief_complaints.some((c) => /metamorphopsia/i.test(c.complaint)), JSON.stringify(p.chief_complaints));
+});
