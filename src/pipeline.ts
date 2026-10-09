@@ -9,6 +9,7 @@ import { config } from "./config.js";
 import { loadKb } from "./kb/build-kb.js";
 import type { KnowledgeBase, Term, TermCategory } from "./kb/types.js";
 import { findMatches, normalize, pickScenarios, selectCandidates, type Match } from "./match/matcher.js";
+import { hasIndicScript, transliterate } from "./match/translit.js";
 import { detectKeywords, type KeywordReport } from "./match/keywords.js";
 import { assessTranscript, inferLanguage, policyFor, type AsrSignals, type MedicalPolicy, type TranscriptQuality } from "./quality/accuracy.js";
 import { chatJson } from "./llm/client.js";
@@ -280,8 +281,16 @@ export function analyzeTranscript(transcript: string, opts: ExtractOptions = {},
   const lexNeg = (h: LexHit) => (h.start >= 0 ? insideNegation(h.start, h.end, negSpans) : normalize(negatedText).includes(normalize(h.heard)) && !normalize(positiveText).includes(normalize(h.heard)));
   const explicit = new Set(lex.filter((h) => h.entry.id).map((h) => h.entry.id!));
   const blocked = new Set(lex.flatMap((h) => h.entry.block ?? []).filter((id) => !explicit.has(id)));
+  // A block only suppresses matches that come FROM the blocking phrase's own words (প্রেশার → not glaucoma):
+  // "গ্লুকোমা" said in its own words is still glaucoma, "ছানি" does not cancel a spoken "nuclear".
+  const roman = (s: string) => normalize(hasIndicScript(s) ? transliterate(s) : s);
+  const blockers = lex.filter((h) => h.entry.block?.length).map((h) => ({ ids: new Set(h.entry.block), words: roman(h.heard).split(" ").filter((w) => w.length >= 3) }));
+  const fromBlocker = (m: Match) => {
+    const heard = roman(m.heardAs).split(" ").filter((w) => w.length >= 3);
+    return blockers.some((b) => b.ids.has(m.term.id) && heard.some((w) => b.words.some((x) => x === w || x.startsWith(w) || w.startsWith(x))));
+  };
   const before = matches.length;
-  matches = matches.filter((m) => !blocked.has(m.term.id));
+  matches = matches.filter((m) => !blocked.has(m.term.id) || !fromBlocker(m));
   // short fuzzy matches on diseases/signs caused most false diagnoses ("চোখে ছয়" → cataract, "চোখে জেল" → corneal opacity)
   matches = matches.filter((m) => !(m.kind === "fuzzy" && (m.term.category === "disease" || m.term.category === "sign") && m.score < 0.75));
   const blockedNames = before !== matches.length ? [...blocked].map((id) => kb.terms.find((t) => t.id === id)?.name ?? id) : [];

@@ -17,6 +17,8 @@ export interface NegatedSpan {
 const CLAUSE = /[।॥?!.,;:\n]+/u;
 /** Bengali / Hindi: the negator follows the noun ("সুগার নেই", "शुगर नहीं है") */
 const AFTER_NEG_BN = new Set(["নেই", "নাই", "নয়", "নেইতো", "নেই।"]);
+const NUMBER_CONTEXT_BEFORE = /^(বাই|by|এন|n|ছয়|ছয়|ছ|পয়েন্ট|দশমিক|\d+|\d+\/)$/i;
+const NUMBER_CONTEXT_AFTER = /^(মাস|মাসের|বছর|বছরের|দিন|দিনের|সপ্তাহ|ঘণ্টা|ঘন্টা|মিনিট|টা|টি|বার|বাই|মিলিমিটার|সেকেন্ড|পয়েন্ট|দশমিক)$/;
 const AFTER_NEG_HI = new Set(["नहीं", "नही", "नहीँ"]);
 const HI_INABILITY = /^(पा|पाता|पाती|पाते|पाया|दिख|दिखता|दिखती|दिखाई|देख|देता|देती|सक|सकता|सकती|सकते|हो)$/;
 const HI_BE = /^(है|हैं|था|थी|थे|हुआ|हुई)$/;
@@ -51,7 +53,11 @@ export function findNegations(text: string): NegatedSpan[] {
         if (!part.length) return;
         spans.push({ phrase: part.map((x) => x.w).join(" "), start: part[0].start, end: part.at(-1)!.end, negator: t.w });
       };
-      if (AFTER_NEG_BN.has(t.w)) push(i - 3, i);
+      if (AFTER_NEG_BN.has(t.w)) {
+        // "নয়" is also the number nine: "ছয় বাই নয়" (6/9), "নয় মাস" (9 months), "এন নয়" (N9)
+        if (/^নয়|^নয়/.test(t.w) && (NUMBER_CONTEXT_BEFORE.test(toks[i - 1]?.w ?? "") || NUMBER_CONTEXT_AFTER.test(toks[i + 1]?.w ?? ""))) return;
+        push(i - 3, i);
+      }
       else if (AFTER_NEG_HI.has(t.w)) {
         const prev = toks[i - 1]?.w ?? "";
         const next = toks[i + 1]?.w ?? "";
