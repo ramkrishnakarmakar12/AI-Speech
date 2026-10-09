@@ -7,7 +7,7 @@ import assert from "node:assert/strict";
 import { loadKb } from "../src/kb/build-kb.js";
 import { postProcess, systemicAnswer } from "../src/domain/postprocess.js";
 import { allNumberValues, findNumbers } from "../src/domain/numbers.js";
-import { analyzeTranscript, emptySections } from "../src/pipeline.js";
+import { analyzeTranscript, coerce, emptySections } from "../src/pipeline.js";
 import type { Prescription } from "../src/llm/schema.js";
 
 const kb = loadKb();
@@ -170,4 +170,12 @@ test("third run (14:24): unsaid NCT removed, 'OCT of macula' only when macula wa
   run(DR, q);
   assert.equal(q.examination[0].test, "Intraocular pressure (NCT)");
   assert.match(q.investigations[0].test, /macula/);
+});
+
+test("fourth run (14:37): renamed or wrapped sections from the model are still read", () => {
+  const p = coerce({ prescription: { complaints: [{ complaint: "DOV" }], on_examination: [{ test: "Visual acuity", eye: "LE", result: "6/18" }], history: { systemic: [] } } });
+  assert.equal(p.chief_complaints.length, 1);
+  assert.equal(p.examination[0].result, "6/18");
+  const q = coerce({ chief_complaints: [], complaints: [{ complaint: "x" }] });
+  assert.equal(q.chief_complaints.length, 1);
 });
