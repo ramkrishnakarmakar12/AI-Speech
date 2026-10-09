@@ -1,0 +1,11 @@
+Doctor: Good morning, please sit. What brings you in today?
+Patient: Doctor, for the last three months my right eye vision is getting hazy, and I get headaches in the evening.
+Doctor: Do you have sugar, BP or asthma?
+Patient: I have BP for five years, I take amlodipine. No sugar, no asthma.
+Doctor: Anyone in the family with glaucoma?
+Patient: Yes, my father had glaucoma.
+Doctor: Any allergy to medicines?
+Patient: Yes, I'm allergic to sulfa drugs.
+Doctor: Your vision is 6/12 in the right eye and 6/6 in the left. Eye pressure by NCT at ten thirty is twenty-four in the right eye and eighteen in the left. On fundus, the right cup-disc ratio is 0.7 with inferior rim thinning, the left cup-disc ratio is 0.4. Anterior chamber is deep in both eyes.
+Doctor: This is primary open angle glaucoma in the right eye. We will do an OCT RNFL and a visual field test today. I'm starting timolol drops twice daily in the right eye.
+Doctor: Use the drops at the same time every day, and don't stop them on your own. Come back after six weeks.

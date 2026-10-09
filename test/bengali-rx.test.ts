@@ -179,3 +179,49 @@ test("fourth run (14:37): renamed or wrapped sections from the model are still r
   const q = coerce({ chief_complaints: [], complaints: [{ complaint: "x" }] });
   assert.equal(q.chief_complaints.length, 1);
 });
+
+test("fifth run (15:23): advice left in Bengali is flagged; the doctor's 'প্রেশার দেখব' goes to Review", () => {
+  const p = empty();
+  p.advice = [
+    { text: "mobile কম দেখবেন", kb_id: "", evidence: "মোবাইল কম দেখবেন" },
+    { text: "Do not stop drops on your own", kb_id: "", evidence: "ড্রপ নিজে থেকে বন্ধ করবেন না" },
+    { text: "প্রেশার দেখব", kb_id: "", evidence: "প্রেশার দেখব" },
+  ];
+  p.follow_up = [{ when: "1 month", purpose: "" }];
+  const r = run(GLAUCOMA, p);
+  assert.deepEqual(p.advice.map((a) => a.text), ["mobile কম দেখবেন", "Do not stop drops on your own"]);
+  assert.ok(r.flags.some((f) => /mobile কম দেখবেন.*not written in English/.test(f)), r.flags.join("\n"));
+  assert.equal(p.follow_up[0].purpose, "Recheck eye pressure");
+});
+
+test("bench round 1 (Bedrock 32B): code in a medicine field, wrong tonometer, value-less VA/IOP rows, symptom as finding, OCT purpose", () => {
+  const p = empty();
+  p.chief_complaints = [{ complaint: "Headache", kb_id: "", eye: "BE", duration: "", character: "", patient_words: "", evidence: "" }];
+  p.medications = [{ kb_id: "", generic_name: "Latanoprost", brand_said: "", form: "E/D", strength: "", eye: "LE", dose: "1 drop", frequency: "ABR-068", duration: "", phase: "", instructions: "", evidence: "latanoprost" } as any];
+  p.examination = [
+    { test: "Schiøtz / iCare / Tono-Pen tonometry", kb_id: "", eye: "RE", result: "16 mmHg", evidence: "ডান ষোলো" },
+    { test: "Visual acuity", kb_id: "", eye: "LE", result: "", evidence: "" },
+    { test: "Goldmann applanation tonometry", kb_id: "", eye: "BE", result: "Normal", evidence: "" },
+  ];
+  p.clinical_findings = [{ finding: "Headache", kb_id: "", eye: "BE", evidence: "" }];
+  p.investigations = [{ test: "Optical coherence tomography", kb_id: "", eye: "", purpose: "Assessment of macula and optic nerve", evidence: "ওসিটি" }];
+  const r = run(GLAUCOMA + " latanoprost at bedtime", p);
+  assert.equal(p.medications[0].frequency, "HS");
+  assert.ok(r.flags.some((f) => /ABR-068/.test(f)));
+  assert.deepEqual(p.examination.map((e) => e.test), ["Intraocular pressure"]);
+  assert.deepEqual(p.clinical_findings, []);
+  assert.equal(p.investigations[0].purpose, "Assessment of optic nerve");
+});
+
+test("bench round 2: a procedure planned only 'if' something happens is advice, and repeated advice is merged", () => {
+  const p = empty();
+  p.procedures = [{ procedure: "Photodynamic therapy", kb_id: "", eye: "LE", notes: "If conversion to wet AMD occurs", evidence: "যদি এটি ওয়েট বা ভেজা ক্যাটাগরিতে রূপান্তরিত হয়, তবে ফটোডায়নামিক থেরাপি দেওয়া হবে" }];
+  p.advice = [
+    { text: "Use mobile less", kb_id: "", evidence: "মোবাইল কম দেখবেন" },
+    { text: "Limit mobile phone use", kb_id: "", evidence: "মোবাইল কম দেখবেন" },
+  ];
+  run(GLAUCOMA, p);
+  assert.deepEqual(p.procedures, []);
+  assert.ok(p.advice.some((a) => /Photodynamic therapy \(LE\) — only if conversion to wet AMD occurs/.test(a.text)), JSON.stringify(p.advice));
+  assert.equal(p.advice.filter((a) => /mobile/i.test(a.text)).length, 1);
+});

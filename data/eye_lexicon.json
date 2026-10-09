@@ -1314,6 +1314,169 @@
    ],
    "id": "SYM-017",
    "hint": "coloured haloes around lights"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "এফএফএ",
+    "এফ এফ এ",
+    "ফ্লুরোসিন অ্যানজিওগ্রাফি",
+    "ফ্লুরোসিন এনজিওগ্রাফি"
+   ],
+   "id": "TST-032",
+   "hint": "FFA = fundus fluorescein angiography (investigation)"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "एफएफए",
+    "एफ एफ ए",
+    "फ्लोरेसिन एंजियोग्राफी"
+   ],
+   "id": "TST-032",
+   "hint": "FFA = fundus fluorescein angiography"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "এনসিটি",
+    "এন সি টি",
+    "এনসিটিতে",
+    "নন কন্টাক্ট"
+   ],
+   "id": "TST-014",
+   "hint": "NCT = non-contact tonometry (the IOP method)"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "एनसीटी",
+    "एन सी टी",
+    "नॉन कॉन्टैक्ट"
+   ],
+   "id": "TST-014",
+   "hint": "NCT = non-contact tonometry (the IOP method)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "টেরিজিয়াম",
+    "টেরিজিয়ম",
+    "টেরিজিয়াম",
+    "পটেরিজিয়াম"
+   ],
+   "id": "DIS-047",
+   "hint": "pterygium (slit-lamp finding and diagnosis)"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "टेरिजियम",
+    "टेरीजियम",
+    "नाखूना",
+    "नाखूने"
+   ],
+   "id": "DIS-047",
+   "hint": "pterygium (slit-lamp finding and diagnosis)"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "कंजंक्टिवल ऑटोग्राफ्ट",
+    "ऑटोग्राफ्ट",
+    "टेरिजियम एक्सिशन"
+   ],
+   "id": "PRC-035",
+   "hint": "pterygium excision with conjunctival autograft (procedure)"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "के ओ एच",
+    "केओएच",
+    "के ओ एच माउंट"
+   ],
+   "id": "TST-048",
+   "hint": "KOH mount — write it as its own investigation row ('KOH mount'), besides culture"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "কে ও এইচ",
+    "কেওএইচ"
+   ],
+   "id": "TST-048",
+   "hint": "KOH mount — write it as its own investigation row"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "रोशनी में आँख नहीं खुलती",
+    "रोशनी में आंख नहीं खुलती",
+    "रोशनी चुभती"
+   ],
+   "id": "SYM-015",
+   "hint": "photophobia (a complaint)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "আলোতে তাকাতে অসুবিধা",
+    "আলোর দিকে তাকাতে পারছি না",
+    "আলোয় তাকাতে পারি না",
+    "আলো সহ্য হয় না"
+   ],
+   "id": "SYM-015",
+   "hint": "photophobia (a complaint)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "ভেসে বেড়ানো কালো ফুটকি",
+    "ভাসমান কালো"
+   ],
+   "id": "SYM-018",
+   "hint": "floaters (a complaint)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "আলোর ঝলকানি",
+    "আলোর ঝলক"
+   ],
+   "hint": "photopsia — flashes of light (a complaint)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "বাঁকা দেখার"
+   ],
+   "hint": "metamorphopsia — straight lines look wavy/distorted (a complaint)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "চোখের ক্লান্তি",
+    "চোখ ক্লান্ত"
+   ],
+   "hint": "asthenopia — eye strain (a complaint)"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "पत्ता लग गया",
+    "पत्ता लगा",
+    "पत्ती लग"
+   ],
+   "hint": "injury with a leaf/vegetative matter — record as history of trauma (risk of fungal keratitis)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "পাতা ডান চোখে লেগেছিল",
+    "পাতা লেগেছিল"
+   ],
+   "hint": "injury with a (paddy) leaf — record as history of trauma (risk of fungal keratitis)"
   }
  ]
 }

@@ -440,7 +440,9 @@ const coverageSchema = {
 };
 
 /** Second LLM pass: things said but missing from the draft. Shown to the doctor as warnings, never merged silently. */
-async function coverageCheck(transcript: string, english: string | undefined, p: Prescription): Promise<string[]> {
+interface Missed { section: string; item: string; evidence: string }
+
+async function coverageCheck(transcript: string, english: string | undefined, p: Prescription): Promise<Missed[]> {
   if (!config.llm.coverageCheck) return [];
   const draft = JSON.stringify(p, (k, v) => (k === "evidence" || k === "kb_id" || k === "terms" || k === "patient_words" || v === "" || (Array.isArray(v) && !v.length) ? undefined : v));
   const res = await chatJson(
@@ -455,8 +457,58 @@ async function coverageCheck(transcript: string, english: string | undefined, p:
   const heard = transcript + "\n" + (english ?? "");
   return rows
     .filter((m) => m?.item && supported(m.evidence, heard)) // only items that really are in the conversation
+    // commentary about the draft ("… is not mentioned", "the duration is missing") is not a missed fact
+    .filter((m) => !/not (mentioned|specified|stated|included)|is missing|are missing|in the draft|the patient (is|was) advised|reason for this/i.test(String(m.item)))
     .slice(0, 12)
-    .map((m) => `Possibly missed (${m.section}): ${m.item} — «${String(m.evidence).trim()}»`);
+    .map((m) => ({ section: String(m.section), item: String(m.item).trim(), evidence: String(m.evidence).trim() }));
+}
+
+const words = (s: string) => normalize(s).split(" ").filter((w) => w.length >= 3 && !/^(the|and|with|for|your|you|eye|eyes|both|right|left|of|in|on|to|do|not)$/.test(w));
+/** Is this item (mostly) already somewhere in these lines? */
+function covered(item: string, lines: string[]): boolean {
+  const w = words(item);
+  if (!w.length) return true;
+  const text = ` ${normalize(lines.join(" "))} `;
+  return w.filter((x) => text.includes(` ${x}`) || text.includes(x.slice(0, 5))).length / w.length >= 0.6;
+}
+
+/**
+ * The coverage pass found things the main answer left out. Complaints and advice it found (with a quote that is
+ * really in the conversation) are added to the draft and flagged; everything else stays a warning for the doctor.
+ */
+/** words that make a sentence the doctor's advice (imperative / polite request), in Bengali, Hindi and English */
+const ADVICE_SPEECH = /(বেন|বেন না|করুন|রাখুন|দিন|নিন|পরুন|খাবেন|ইয়ে|इए|िए|िएगा|ियेगा|मत|न करें|करें|रखें|लें|पहनें|डालिए|आइए)(?=[\s,।.!?]|$)|\b(avoid|use|keep|do not|don't|please|should|must|wear|apply|stop|start|come|take|put)\b/i;
+const sameQuote = (a: string, b: string) => {
+  const x = normalize(a), y = normalize(b);
+  return x.length >= 6 && y.length >= 6 && (x === y || x.includes(y) || y.includes(x));
+};
+
+function mergeMissed(p: Prescription, missed: Missed[], out: string[]): string[] {
+  const warnings: string[] = [];
+  for (const m of missed) {
+    const quote = `«${m.evidence}»`;
+    const short = m.item.length <= 80 && !/\bpatient\b/i.test(m.item);
+    if (m.section === "complaint") {
+      const lines = p.chief_complaints.map((c) => `${c.complaint} ${c.character} ${c.patient_words}`);
+      if (covered(m.item, lines)) continue;
+      if (!short) {
+        warnings.push(`Possibly missed (${m.section}): ${m.item} — ${quote}`);
+        continue;
+      }
+      p.chief_complaints.push({ complaint: m.item.replace(/^complaint:\s*/i, ""), kb_id: "", eye: "", duration: "", character: "", patient_words: "", evidence: m.evidence });
+      out.push(`Complaint "${m.item}" was added by the second check — confirm it (${quote})`);
+    } else if (m.section === "advice") {
+      // same spoken words as an advice line already there → the same advice; a patient's sentence is not advice
+      if (covered(m.item, p.advice.map((a) => a.text)) || p.advice.some((a) => sameQuote(a.evidence ?? "", m.evidence))) continue;
+      if (!short || !ADVICE_SPEECH.test(m.evidence)) {
+        warnings.push(`Possibly missed (${m.section}): ${m.item} — ${quote}`);
+        continue;
+      }
+      p.advice.push({ text: m.item, kb_id: "", evidence: m.evidence });
+      out.push(`Advice "${m.item}" was added by the second check — confirm it (${quote})`);
+    } else warnings.push(`Possibly missed (${m.section}): ${m.item} — ${quote}`);
+  }
+  return warnings;
 }
 
 export async function extractFromTranscript(transcript: string, opts: ExtractOptions = {}, kb = loadKb()): Promise<ExtractionResult> {
@@ -529,8 +581,15 @@ export async function extractFromTranscript(transcript: string, opts: ExtractOpt
   for (const r of post.removed) warnings.push(`Removed: ${r}.`);
   for (const f of post.flags) warnings.push(`Check: ${f}.`);
   // Second pass: what was said but is not in the draft? (LEF evaluation: allergy, ECG, glare, referral … dropped)
-  const missed = await coverageCheck(transcript, englishForLlm, prescription).catch((e) => [`Coverage check skipped: ${e?.message ?? e}`]);
-  warnings.push(...missed);
+  let missed: Missed[] = [];
+  try {
+    missed = await coverageCheck(transcript, englishForLlm, prescription);
+  } catch (e: any) {
+    warnings.push(`Coverage check skipped: ${e?.message ?? e}`);
+  }
+  const added: string[] = [];
+  warnings.push(...mergeMissed(prescription, missed, added));
+  for (const a of added) warnings.push(`Check: ${a}.`);
   if (repair?.sections.length) warnings.push(`The first answer left out ${repair.sections.join(" and ")}; they were filled by a second, focused model pass — check them against the transcript.`);
   if (domain.translation.reason && opts.english?.trim()) warnings.push(`Machine English translation not used: ${domain.translation.reason}.`);
   if (res.truncated) warnings.unshift(`⚠ The model's answer was cut short (${res.truncated}); some items may be missing — check against the transcript.`);
