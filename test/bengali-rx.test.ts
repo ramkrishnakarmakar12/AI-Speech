@@ -155,3 +155,19 @@ test("glaucoma transcript: «ছয় বাই নয়» is 6/9 not a denial
   // still a real denial
   assert.ok(a.domain.negated.some((n) => /সুগার নেই/.test(n)));
 });
+
+test("third run (14:24): unsaid NCT removed, 'OCT of macula' only when macula was said", () => {
+  const p = empty();
+  p.examination = [{ test: "Intraocular pressure (NCT)", kb_id: "", eye: "LE", result: "26 mmHg", evidence: "বাঁ চোখে ছাব্বিশ" }];
+  p.investigations = [{ test: "Optical coherence tomography (OCT) of macula", kb_id: "", eye: "", purpose: "", evidence: "ওসিটি করাতে হবে" }];
+  run(GLAUCOMA, p);
+  assert.equal(p.examination[0].test, "Intraocular pressure");
+  assert.equal(p.investigations[0].test, "Optical coherence tomography (OCT)");
+  // the DR visit did say ম্যাকুলা and NCT: both stay
+  const q = empty();
+  q.examination = [{ test: "Intraocular pressure (NCT)", kb_id: "", eye: "RE", result: "16 mmHg", evidence: "ডান ষোলো" }];
+  q.investigations = [{ test: "Optical coherence tomography (OCT) of macula", kb_id: "", eye: "RE", purpose: "", evidence: "ওসিটি ম্যাকুলা" }];
+  run(DR, q);
+  assert.equal(q.examination[0].test, "Intraocular pressure (NCT)");
+  assert.match(q.investigations[0].test, /macula/);
+});

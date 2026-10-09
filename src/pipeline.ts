@@ -209,6 +209,12 @@ function ground(p: Prescription, kb: KnowledgeBase, transcript: string) {
         term = resolveByName(item[nameField], cats, kb) ?? (item.brand_said ? resolveByName(item.brand_said, cats, kb) : null);
         verified = term ? "resolved" : "none";
       }
+      // plain "Glaucoma" is not "Glaucoma suspect" (H40.0) or POAG: no sub-type, no sub-type ICD code
+      if (term && section === "diagnosis" && /^glaucoma$/i.test(normalize(item[nameField] ?? "")) && !/^glaucoma$/i.test(normalize(term.name))) {
+        warnings.push(`"${item[nameField]}"${item.eye ? ` (${item.eye})` : ""}: type of glaucoma not stated — no ICD-10 sub-code given; add the type (e.g. POAG H40.1) when known.`);
+        term = null;
+        verified = "none";
+      }
       if (term) {
         item.kb_id = term.id;
         const refFields = REFERENCE_FIELDS[term.category] ?? [];
@@ -217,7 +223,7 @@ function ground(p: Prescription, kb: KnowledgeBase, transcript: string) {
         if (section === "medications" && !item.generic_name) item.generic_name = term.name;
       } else {
         item.kb_id = "";
-        if (["medications", "diagnosis", "procedures"].includes(section))
+        if (["medications", "diagnosis", "procedures"].includes(section) && !(section === "diagnosis" && /^glaucoma$/i.test(normalize(item[nameField] ?? ""))))
           warnings.push(`"${item[nameField] || item.brand_said}" (${section}) is not in the knowledge base — verify spelling.`);
       }
     });

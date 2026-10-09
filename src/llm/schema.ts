@@ -42,7 +42,7 @@ export const prescriptionSchema = obj({
     allergies: arr(str()),
   }),
   examination: arr(
-    obj({ test: str(), kb_id: kbId, eye: en(["RE", "LE", "BE", ""], "ONE eye per row: write RE and LE values as separate rows, never a range across eyes"), result: str("value exactly as stated for that eye, e.g. '6/24', '16 mmHg'. For eye pressure put the method in the test name, e.g. 'Intraocular pressure (NCT)'"), evidence }),
+    obj({ test: str(), kb_id: kbId, eye: en(["RE", "LE", "BE", ""], "ONE eye per row: write RE and LE values as separate rows, never a range across eyes"), result: str("value exactly as stated for that eye, e.g. '6/24', '16 mmHg'. For eye pressure add the method to the test name ONLY if the doctor named it (NCT / applanation / rebound)"), evidence }),
   ),
   clinical_findings: arr(obj({ finding: str(), kb_id: kbId, eye, evidence })),
   diagnosis: arr(
