@@ -485,6 +485,13 @@ export async function extractFromTranscript(transcript: string, opts: ExtractOpt
   warnings.push(...missed);
   if (domain.translation.reason && opts.english?.trim()) warnings.push(`Machine English translation not used: ${domain.translation.reason}.`);
   if (res.truncated) warnings.unshift(`⚠ The model's answer was cut short (${res.truncated}); some items may be missing — check against the transcript.`);
+  // A whole section left empty although the conversation clearly has it (Oct 2026 run: complaints and the full
+  // examination missing from a clean Bengali transcript) — say so instead of printing "—".
+  const gaps = emptySections(prescription, matchText);
+  if (gaps.length) {
+    warnings.unshift(`⚠ ${gaps.join(" ")} Enter them from the transcript or generate again.`);
+    console.warn("[extract] sections empty although spoken:", gaps.join(" | "), res.truncated ? `(truncated: ${res.truncated})` : "");
+  }
 
   // Medical items the ASR was unsure about (stage 1 word confidence → stage 3)
   const unsure = new Set(matches.filter((m) => m.uncertain).map((m) => m.term.id));
@@ -503,6 +510,17 @@ export async function extractFromTranscript(transcript: string, opts: ExtractOpt
     warnings,
     llm: { model: res.model, ms: res.ms, promptTokens: res.usage?.prompt, completionTokens: res.usage?.completion },
   };
+}
+
+const EXAM_SAID = /দৃষ্টি|ভিশন|চোখের প্রেশার|ফান্ডাস|স্লিট|কাপ ডিস্ক|কাপডিস্ক|visual acuity|vision is|vision \d|eye pressure|fundus|slit.?lamp|cup.?disc|नज़र|नजर|आँख का प्रेशर|आंख का प्रेशर|स्लिट|फंडस|बटा|\b6\/\d{1,2}\b|ছয় বাই|ছ বাই|छह बटा/i;
+const COMPLAINT_SAID = /অসুবিধা|সমস্যা|কষ্ট|ঝাপসা|ব্যথা|problem|trouble|complain|blur|pain|तकलीफ|परेशानी|दिक्कत|धुंधला|दर्द/i;
+
+/** Sections the model left empty although the conversation has them. */
+export function emptySections(p: Prescription, heard: string): string[] {
+  const out: string[] = [];
+  if (!p.chief_complaints.length && COMPLAINT_SAID.test(heard)) out.push("No complaints were extracted, but the patient described a problem.");
+  if (!p.examination.length && !p.clinical_findings.length && EXAM_SAID.test(heard)) out.push("The examination section is empty, but the doctor gave examination findings (vision / pressure / slit lamp / fundus).");
+  return out;
 }
 
 /** Transcript fields that carry stage-1 signals */

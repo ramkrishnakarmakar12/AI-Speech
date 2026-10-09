@@ -36,13 +36,13 @@ export const prescriptionSchema = obj({
   ),
   history: obj({
     systemic: arr(obj({ condition: str(), kb_id: kbId, duration: str("only if stated for THIS condition"), treatment: str("drug names exactly as said"), evidence })),
-    ocular: arr(obj({ item: str("PAST ocular history only (previous surgery, old glasses, past disease) — not today's findings"), kb_id: kbId, eye, evidence })),
+    ocular: arr(obj({ item: str("PAST ocular history only (previous surgery, old glasses, past disease) — not today's findings. Family eye disease as 'Family history: glaucoma (mother)' with eye ''"), kb_id: kbId, eye, evidence })),
     current_medications: arr(str("medicines the patient already takes, with strength if said (e.g. 'Metformin', 'Amlodipine 5 mg')")),
     allergy_status: en(["none known", "present", "not discussed"], "'none known' when the patient says they have no drug allergy"),
     allergies: arr(str()),
   }),
   examination: arr(
-    obj({ test: str(), kb_id: kbId, eye: en(["RE", "LE", "BE", ""], "ONE eye per row: write RE and LE values as separate rows, never a range across eyes"), result: str("value exactly as stated for that eye, e.g. '6/24', '16 mmHg'"), evidence }),
+    obj({ test: str(), kb_id: kbId, eye: en(["RE", "LE", "BE", ""], "ONE eye per row: write RE and LE values as separate rows, never a range across eyes"), result: str("value exactly as stated for that eye, e.g. '6/24', '16 mmHg'. For eye pressure put the method in the test name, e.g. 'Intraocular pressure (NCT)'"), evidence }),
   ),
   clinical_findings: arr(obj({ finding: str(), kb_id: kbId, eye, evidence })),
   diagnosis: arr(
