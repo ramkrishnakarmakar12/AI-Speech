@@ -557,6 +557,8 @@ export async function extractFromTranscript(transcript: string, opts: ExtractOpt
   // Bengali test runs, 9 Oct 2026). Ask once more for just those sections before checking the draft.
   let repair: { ms: number; sections: string[] } | undefined;
   const before = emptySections(prescription, matchText);
+  // the fundus sentence dropped while the rest of the examination came back (bench r5: drusen / atrophy / oedema lost)
+  if (!before.length && FUNDUS_SAID.test(matchText) && !hasFundus(prescription)) before.push("The fundus findings the doctor gave are missing.");
   if (before.length) {
     const raw = res.json && typeof res.json === "object" ? Object.keys(res.json as object).join(", ") : typeof res.json;
     console.warn("[extract] empty sections in the first answer:", before.join(" | "), "· answer keys:", raw, res.truncated ? `· truncated: ${res.truncated}` : "");
@@ -620,6 +622,10 @@ export async function extractFromTranscript(transcript: string, opts: ExtractOpt
   };
 }
 
+const FUNDUS_SAID = /ophthalmoscop|fundus|ফান্ডাস|ফান্ডুস|फंडस|फण्डस|drusen|ড্রুসেন|cup.?disc|কাপ ?ডিস্ক|হেমারেজ|হেমরেজ|exudat|এক্সুডেট|geographic|ভৌগোলিক ক্ষয়|retinal pigment|রেটিনাল পিগমেন্ট/i;
+const FUNDUS_ROW = /fundus|retina|ophthalmoscop|drusen|disc|macula|cdr|cup|h(a)?emorrh|exudat|npdr|pdr|atroph|rpe|o?edema|neovascular|vessel/i;
+const hasFundus = (p: Prescription) => p.examination.some((e) => FUNDUS_ROW.test(`${e.test} ${e.result}`)) || p.clinical_findings.some((f) => FUNDUS_ROW.test(f.finding));
+
 const REPAIR_SECTIONS = ["chief_complaints", "examination", "clinical_findings"] as const;
 
 /** Second, focused model call for the complaint and examination sections only; merged into p in place. */
@@ -647,6 +653,10 @@ async function repairSections(user: string, p: Prescription): Promise<{ ms: numb
     p.examination = j.examination;
     p.clinical_findings = j.clinical_findings;
     sections.push("the examination");
+  } else if (!hasFundus(p) && hasFundus(j)) {
+    p.examination.push(...j.examination.filter((e) => FUNDUS_ROW.test(`${e.test} ${e.result}`)));
+    p.clinical_findings.push(...j.clinical_findings.filter((f) => FUNDUS_ROW.test(f.finding)));
+    sections.push("the fundus findings");
   }
   return { ms: res.ms, sections };
 }

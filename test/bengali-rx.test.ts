@@ -259,3 +259,28 @@ test("bench round 4: a procedure the doctor said is NOT needed is dropped; unnam
   assert.deepEqual(p.examination, []);
   assert.ok(p.chief_complaints.some((c) => /metamorphopsia/i.test(c.complaint)), JSON.stringify(p.chief_complaints));
 });
+
+test("bench round 5: Bengali review period and drug names in English; a systemic illness never mentioned is removed", () => {
+  const p = empty();
+  p.follow_up = [{ when: "দেড় মাস পরে", purpose: "" }];
+  p.history.systemic = [
+    { condition: "Hypothyroidism", kb_id: "", duration: "", treatment: "থাইরক্সিন", evidence: "থাইরয়েড আছে" },
+    { condition: "Hypertension", kb_id: "", duration: "", treatment: "", evidence: "" },
+  ];
+  p.history.current_medications = ["থাইরক্সিন"];
+  const T = "রোগী: থাইরয়েড আছে, থাইরক্সিন খাই। ডাক্তার: চোখের প্রেশার মাপব। দেড় মাস পরে আসবেন।";
+  run(T, p);
+  assert.equal(p.follow_up[0].when, "1.5 months");
+  assert.deepEqual(p.history.systemic.map((h) => `${h.condition}|${h.treatment}`), ["Hypothyroidism|Thyroxine"]);
+  assert.deepEqual(p.history.current_medications, ["Thyroxine"]);
+});
+
+test("bench r6: a frequency different from the one said after the medicine's name is corrected", () => {
+  const T = "ডাক্তার: ন্যাটামাইসিন ৫ শতাংশ ড্রপ ডান চোখে প্রতি এক ঘণ্টা পর পর দেবেন। মক্সিফ্লক্সাসিন ড্রপ ডান চোখে দিনে চার বার। অ্যাট্রোপিন ১ শতাংশ ড্রপ ডান চোখে দিনে দুবার।";
+  const p = empty();
+  const m = (generic_name: string, frequency: string) => ({ kb_id: "", generic_name, brand_said: "", form: "E/D", strength: "", eye: "RE", dose: "1 drop", frequency, duration: "", phase: "", instructions: "", evidence: "" }) as any;
+  p.medications = [m("Natamycin", "hourly"), m("Moxifloxacin", "BD"), m("Atropine", "BD")];
+  const r = run(T, p);
+  assert.deepEqual(p.medications.map((x) => `${x.generic_name}|${x.frequency}`), ["Natamycin|hourly", "Moxifloxacin|QID", "Atropine|BD"]);
+  assert.ok(r.flags.some((f) => /Moxifloxacin: frequency "BD" changed to "QID"/.test(f)), r.flags.join("\n"));
+});
