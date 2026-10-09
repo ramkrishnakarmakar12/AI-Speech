@@ -62,7 +62,9 @@ const ROLE_WORD = /^(রোগী|রোগি|রুগী|ডাক্তা�
 
 const GREETING = /^(asun|ashun|asen|bosun|bosen|basun|bhusun|bisun|bison|namaskar|nomoskar|namaste|suprabhat|suprobhat|shubho|good|morning|evening|dr|doctor|daktar|daktarbabu|babu|sir|madam|sar|ji)$/;
 
-function patientSanity(p: Prescription, out: PostResult) {
+const AGE_SAID = /বয়স|বয়স|বয়েস|বয়েস|বছর বয়স|উমর|উম্র|उम्र|उमर|आयु|साल का|साल की|\bage\b|\baged\b|years? old|yrs? old/i;
+
+function patientSanity(p: Prescription, out: PostResult, heard = "") {
   const name = (p.patient.name ?? "").trim();
   if (name) {
     const words = normalize(name).split(" ").filter(Boolean);
@@ -74,6 +76,11 @@ function patientSanity(p: Prescription, out: PostResult) {
       out.removed.push(`Patient name "${name}" (looks like a greeting or the doctor, not the patient's name)`);
       p.patient.name = "";
     }
+  }
+  // an age needs age words: "সুগার বারো বছর" (diabetes for 12 years) became "Age: 12"
+  if (String(p.patient.age ?? "").trim() && heard && !AGE_SAID.test(heard)) {
+    out.removed.push(`Patient age "${p.patient.age}" — no age was said (the number belongs to something else)`);
+    p.patient.age = "";
   }
   const age = String(p.patient.age ?? "").trim();
   if (age && !/^\d{1,3}(\s*(y|yr|yrs|years?|m|months?))?$/i.test(age)) {
@@ -386,13 +393,15 @@ function examinationSanity(p: Prescription, heard: string, out: PostResult) {
 
 /** One line per fact: findings already printed as an examination result or a diagnosis are not repeated. */
 function layoutSanity(p: Prescription, out: PostResult) {
+  const spell = (s: string) =>
+    normalize(s).replace(/oedema/g, "edema").replace(/haemorrh/g, "hemorrh").replace(/\b(in|of|the|right|left|both|eye|eyes|re|le|be)\b/g, " ").replace(/\s+/g, " ").trim();
   const covered = (text: string, eye: string) => {
-    const n = normalize(text);
+    const n = spell(text);
     if (n.length < 4) return false;
-    const inExam = p.examination.some((e) => (e.eye === eye || e.eye === "BE" || !eye || !e.eye) && normalize(e.result).includes(n));
-    const inDx = p.diagnosis.some((d) => normalize(`${d.grade_or_notes} ${d.condition}`).includes(n) || normalize(`${d.condition} ${d.grade_or_notes}`).includes(n));
+    const inExam = p.examination.some((e) => (e.eye === eye || e.eye === "BE" || !eye || !e.eye) && spell(e.result).includes(n));
+    const inDx = p.diagnosis.some((d) => spell(`${d.grade_or_notes} ${d.condition}`).includes(n) || spell(`${d.condition} ${d.grade_or_notes}`).includes(n));
     // "Moderate NPDR with CSME" when the diagnosis already says "NPDR (Moderate)" + "Macular oedema"
-    const dxText = ` ${normalize(p.diagnosis.map((d) => `${d.condition} ${d.grade_or_notes}`).join(" "))} `;
+    const dxText = ` ${spell(p.diagnosis.map((d) => `${d.condition} ${d.grade_or_notes}`).join(" "))} `;
     const words = n.split(" ").filter((w) => w.length >= 3 && !/^(with|and|the|both|eye|eyes)$/.test(w));
     const mostlyDx = p.diagnosis.length > 0 && words.length >= 2 && words.filter((w) => dxText.includes(` ${w} `)).length / words.length >= 0.6;
     return inExam || inDx || mostlyDx;
@@ -412,6 +421,21 @@ function layoutSanity(p: Prescription, out: PostResult) {
 
   // Family history is not about the patient's eyes
   for (const h of p.history.ocular) if (/family|mother|father|sibling|brother|sister|মা|বাবা|माँ|पिता/i.test(h.item)) h.eye = "";
+}
+
+/** "Current medications: Diabetes mellitus, Hypertension" — conditions are not medicines. */
+function currentMedsSanity(p: Prescription, kb: KnowledgeBase, out: PostResult) {
+  const conditions = p.history.systemic.map((h) => normalize(h.condition ?? "")).filter(Boolean);
+  const nonMed = kb.terms.filter((t) => t.category !== "medicine");
+  const before = p.history.current_medications.length;
+  p.history.current_medications = p.history.current_medications.filter((m) => {
+    const n = normalize(m);
+    if (!n) return false;
+    if (conditions.some((c) => c === n || c.includes(n) || n.includes(c))) return false;
+    if (/^(diabetes|hypertension|thyroid|hypothyroidism|asthma|sugar|bp|blood pressure)\b/i.test(m)) return false;
+    return !nonMed.some((t) => t.category !== "medicine" && [t.name, ...t.aliases].some((a) => normalize(a) === n) && !kb.terms.some((x) => x.category === "medicine" && normalize(x.name) === n));
+  });
+  if (before !== p.history.current_medications.length) out.notes.push("Removed conditions listed as current medications.");
 }
 
 const PLAN = /দিতে হবে|দিতে হবেই|করতে হবে|করাতে হবে|করাব|করব|করে দেব|দেওয়া হবে|দেব|নিতে হবে|লাগবে|will (do|give|need)|need(s)? (an? )?|advis|plan|schedule|करेंगे|करना होगा|करवाना|लगेगा|लगाना होगा|देंगे/i;
@@ -449,7 +473,8 @@ export function postProcess(
   allergySanity(p, ctx.heardText, out);
   examinationSanity(p, ctx.heardText, out);
   procedureFallback(p, ctx.heardText, ctx.kb, ctx.positiveIds, out);
-  patientSanity(p, out);
+  patientSanity(p, out, ctx.heardText);
+  currentMedsSanity(p, ctx.kb, out);
   phaseSanity(p, ctx.heardText, out);
   subtypeCheck(p, ctx.heardText, out);
   systemicEye(p);

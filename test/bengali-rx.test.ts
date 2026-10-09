@@ -134,3 +134,24 @@ test("prescription 1 (glaucoma + early cataract): empty sections are reported; f
   const r2 = run(GLAUCOMA, p);
   assert.equal(p.examination.length, 2, r2.removed.join("\n"));
 });
+
+test("second run (14:13/14:14): age from a duration, conditions as medicines, repeated finding", () => {
+  const p = drAnswer();
+  p.patient.age = "12";
+  p.history.current_medications = ["Diabetes mellitus", "Hypertension"];
+  p.clinical_findings = [{ finding: "Macular edema in right eye", kb_id: "", eye: "RE", evidence: "ম্যাকুলার ইডিমা" }];
+  run(DR, p);
+  assert.equal(p.patient.age, "");
+  assert.deepEqual(p.history.current_medications, []);
+  assert.deepEqual(p.clinical_findings, []);
+});
+
+test("glaucoma transcript: «ছয় বাই নয়» is 6/9 not a denial; glaucoma and haloes reach the model", () => {
+  const a = analyzeTranscript(GLAUCOMA, { language: "bn" }, kb);
+  assert.ok(!a.domain.negated.some((n) => /বাই নয়/.test(n)), a.domain.negated.join(" | "));
+  const ids = a.detectedTerms.map((d) => d.id);
+  for (const id of ["SYM-017", "TST-024", "TST-013"]) assert.ok(ids.includes(id), `${id} missing: ${ids.join(",")}`);
+  assert.ok(a.domain.lexicon.some((l) => /গ্লুকোমা/.test(l.heard) && !l.negated));
+  // still a real denial
+  assert.ok(a.domain.negated.some((n) => /সুগার নেই/.test(n)));
+});

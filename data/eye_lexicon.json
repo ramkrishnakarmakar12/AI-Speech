@@ -1249,6 +1249,71 @@
    ],
    "id": "PRC-050",
    "hint": "anti-VEGF / intravitreal injection = a PROCEDURE"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "গ্লুকোমা",
+    "গ্লোকোমা",
+    "গ্লুকমা",
+    "গ্লুকোমার"
+   ],
+   "hint": "glaucoma (a DIAGNOSIS when the doctor says the patient has it): write 'Glaucoma'; add open-angle / angle-closure only if that was said"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "কাপডিস্ক রেশিও",
+    "কাপ ডিস্ক রেশিও",
+    "কাপ ডিস্ক",
+    "কাপডিস্ক",
+    "সিডিআর",
+    "সি ডি আর"
+   ],
+   "id": "TST-024",
+   "hint": "cup–disc ratio (examination, fundus) — e.g. 'শূন্য দশমিক সাত' = 0.7"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "ওসিটি",
+    "ও সি টি"
+   ],
+   "id": "TST-029",
+   "hint": "OCT — write 'OCT macula' only if ম্যাকুলা was said; in a glaucoma visit it is OCT RNFL / optic disc"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "ফিল্ড টেস্ট",
+    "ভিজুয়াল ফিল্ড",
+    "পেরিমেট্রি"
+   ],
+   "id": "TST-027",
+   "hint": "visual field test (perimetry)"
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "আলোর চারপাশে রামধনুর",
+    "আলোর চারপাশে রামধনু",
+    "রামধনুর মতো",
+    "রামধনু",
+    "রঙিন রিং",
+    "রঙিন বলয়"
+   ],
+   "id": "SYM-017",
+   "hint": "coloured haloes / rainbow rings around lights (glaucoma symptom) — not plain glare"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "इंद्रधनुष",
+    "रंगीन घेरे",
+    "रोशनी के चारों ओर रंग"
+   ],
+   "id": "SYM-017",
+   "hint": "coloured haloes around lights"
   }
  ]
 }
