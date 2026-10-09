@@ -152,10 +152,30 @@ function emptyPrescription(): Prescription {
   };
 }
 
+/** Names models use instead of the schema's (Bedrock tool input is not schema-checked). */
+const KEY_ALIASES: Record<string, string[]> = {
+  chief_complaints: ["complaints", "chief_complaint", "presenting_complaints", "symptoms", "c_o", "co"],
+  examination: ["examinations", "on_examination", "exam", "examination_findings", "o_e", "oe", "findings_examination"],
+  clinical_findings: ["findings", "clinical_finding", "signs"],
+  diagnosis: ["diagnoses", "impression"],
+  medications: ["medicines", "rx", "prescription", "drugs"],
+  investigations: ["investigation", "tests", "tests_advised"],
+  procedures: ["procedure", "surgery", "surgeries"],
+  follow_up: ["followup", "review"],
+};
+
 /** Deep-merge model output onto an empty prescription so missing keys never crash rendering. */
-function coerce(raw: any): Prescription {
+export function coerce(raw: any): Prescription {
   const base: any = emptyPrescription();
   if (!raw || typeof raw !== "object") return base;
+  // a tool answer sometimes comes wrapped ({ prescription: {...} }) or with a renamed section
+  if (raw.prescription && typeof raw.prescription === "object" && !Array.isArray(raw.prescription) && !raw.history) raw = raw.prescription;
+  raw = { ...raw };
+  for (const [k, alts] of Object.entries(KEY_ALIASES))
+    if (!Array.isArray(raw[k]) || !raw[k].length) {
+      const alt = alts.find((a) => Array.isArray(raw[a]) && raw[a].length);
+      if (alt) raw[k] = raw[alt];
+    }
   for (const k of Object.keys(base)) {
     if (k === "patient" || k === "history") base[k] = { ...base[k], ...(raw[k] ?? {}) };
     else if (Array.isArray(raw[k])) base[k] = raw[k];
@@ -481,6 +501,19 @@ export async function extractFromTranscript(transcript: string, opts: ExtractOpt
     prescriptionSchema,
   );
   const prescription = coerce(res.json);
+  // The model sometimes returns no complaints / no examination although the conversation has them (5 of 12
+  // Bengali test runs, 9 Oct 2026). Ask once more for just those sections before checking the draft.
+  let repair: { ms: number; sections: string[] } | undefined;
+  const before = emptySections(prescription, matchText);
+  if (before.length) {
+    const raw = res.json && typeof res.json === "object" ? Object.keys(res.json as object).join(", ") : typeof res.json;
+    console.warn("[extract] empty sections in the first answer:", before.join(" | "), "· answer keys:", raw, res.truncated ? `· truncated: ${res.truncated}` : "");
+    const r = await repairSections(user, prescription).catch((e) => {
+      console.warn("[extract] repair pass failed:", e?.message ?? e);
+      return undefined;
+    });
+    if (r) repair = r;
+  }
   // Eye-domain safety checks, then KB grounding (drug cautions only against what was NOT denied)
   const d = domain as any;
   const post = postProcess(prescription, {
@@ -498,6 +531,7 @@ export async function extractFromTranscript(transcript: string, opts: ExtractOpt
   // Second pass: what was said but is not in the draft? (LEF evaluation: allergy, ECG, glare, referral … dropped)
   const missed = await coverageCheck(transcript, englishForLlm, prescription).catch((e) => [`Coverage check skipped: ${e?.message ?? e}`]);
   warnings.push(...missed);
+  if (repair?.sections.length) warnings.push(`The first answer left out ${repair.sections.join(" and ")}; they were filled by a second, focused model pass — check them against the transcript.`);
   if (domain.translation.reason && opts.english?.trim()) warnings.push(`Machine English translation not used: ${domain.translation.reason}.`);
   if (res.truncated) warnings.unshift(`⚠ The model's answer was cut short (${res.truncated}); some items may be missing — check against the transcript.`);
   // A whole section left empty although the conversation clearly has it (Oct 2026 run: complaints and the full
@@ -523,8 +557,39 @@ export async function extractFromTranscript(transcript: string, opts: ExtractOpt
     prescription,
     kbRefs,
     warnings,
-    llm: { model: res.model, ms: res.ms, promptTokens: res.usage?.prompt, completionTokens: res.usage?.completion },
+    llm: { model: res.model, ms: res.ms + (repair?.ms ?? 0), promptTokens: res.usage?.prompt, completionTokens: res.usage?.completion },
   };
+}
+
+const REPAIR_SECTIONS = ["chief_complaints", "examination", "clinical_findings"] as const;
+
+/** Second, focused model call for the complaint and examination sections only; merged into p in place. */
+async function repairSections(user: string, p: Prescription): Promise<{ ms: number; sections: string[] }> {
+  const props = (prescriptionSchema as any).properties;
+  const schema = { type: "object", additionalProperties: false, required: [...REPAIR_SECTIONS], properties: Object.fromEntries(REPAIR_SECTIONS.map((k) => [k, props[k]])) };
+  const res = await chatJson(
+    [
+      { role: "system", content: SYSTEM_PROMPT },
+      {
+        role: "user",
+        content:
+          user +
+          "\n\n## TASK FOR THIS ANSWER\nReturn ONLY three sections from this conversation: chief_complaints (what the patient complains of, with eye and duration), " +
+          "examination (one row per test per eye: visual acuity, eye pressure, cup–disc ratio, slit-lamp and fundus results — values exactly as said) and " +
+          "clinical_findings (signs the doctor described). Do not leave a section empty if the conversation has it. Every row needs its evidence quote.",
+      },
+    ],
+    schema,
+  );
+  const j = coerce(res.json);
+  const sections: string[] = [];
+  if (!p.chief_complaints.length && j.chief_complaints.length) (p.chief_complaints = j.chief_complaints), sections.push("the complaints");
+  if (!p.examination.length && !p.clinical_findings.length && (j.examination.length || j.clinical_findings.length)) {
+    p.examination = j.examination;
+    p.clinical_findings = j.clinical_findings;
+    sections.push("the examination");
+  }
+  return { ms: res.ms, sections };
 }
 
 const EXAM_SAID = /দৃষ্টি|ভিশন|চোখের প্রেশার|ফান্ডাস|স্লিট|কাপ ডিস্ক|কাপডিস্ক|visual acuity|vision is|vision \d|eye pressure|fundus|slit.?lamp|cup.?disc|नज़र|नजर|आँख का प्रेशर|आंख का प्रेशर|स्लिट|फंडस|बटा|\b6\/\d{1,2}\b|ছয় বাই|ছ বাই|छह बटा/i;
