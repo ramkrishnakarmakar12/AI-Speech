@@ -127,8 +127,11 @@ test("prescription 1 (glaucoma + early cataract): empty sections are reported; f
   assert.equal(p.history.ocular[0].eye, "");
   assert.ok(/one month/i.test(p.follow_up[0].when), JSON.stringify(p.follow_up));
   assert.equal(p.advice.length, 2);
-  const gaps = emptySections(p, GLAUCOMA);
+  const gaps = emptySections(empty(), GLAUCOMA);
   assert.equal(gaps.length, 2, gaps.join(" | "));
+  // … and the words that were said are now put back: haloes / blur as complaints, both pressures
+  assert.ok(p.chief_complaints.some((c) => /halo/i.test(c.complaint)), JSON.stringify(p.chief_complaints));
+  assert.deepEqual(p.examination.filter((e) => /pressure/i.test(e.test)).map((e) => `${e.eye} ${e.result}`), ["RE 16 mmHg", "LE 26 mmHg"]);
   // the CDR values a model would write are now recognised as said
   p.examination = [{ test: "Cup-disc ratio", kb_id: "", eye: "LE", result: "0.7", evidence: "শূন্য দশমিক সাত" }, { test: "Intraocular pressure", kb_id: "", eye: "LE", result: "26 mmHg", evidence: "বাঁ চোখে ছাব্বিশ" }];
   const r2 = run(GLAUCOMA, p);
@@ -224,4 +227,35 @@ test("bench round 2: a procedure planned only 'if' something happens is advice, 
   assert.deepEqual(p.procedures, []);
   assert.ok(p.advice.some((a) => /Photodynamic therapy \(LE\) — only if conversion to wet AMD occurs/.test(a.text)), JSON.stringify(p.advice));
   assert.equal(p.advice.filter((a) => /mobile/i.test(a.text)).length, 1);
+});
+
+test("bench round 3: IOP said but missing is added, clinic tests are not investigations, 'Come for follow-up after 1 month' is Review", () => {
+  const HI = "डॉक्टर: दोनों आँखों की नज़र छह बटा छह है। प्रेशर एन सी टी से दाईं चौदह, बाईं पंद्रह। एक महीने बाद आइए।";
+  const p = empty();
+  p.investigations = [{ test: "Non-contact tonometry (NCT)", kb_id: "", eye: "", purpose: "", evidence: "एन सी टी" }, { test: "Fundus photography", kb_id: "", eye: "", purpose: "", evidence: "" }];
+  p.advice = [{ text: "Come for follow-up after 1 month", kb_id: "", evidence: "एक महीने बाद आइए" }];
+  run(HI, p);
+  assert.deepEqual(p.examination.map((e) => `${e.test}|${e.eye}|${e.result}`), ["Intraocular pressure (NCT)|RE|14 mmHg", "Intraocular pressure (NCT)|LE|15 mmHg"]);
+  assert.deepEqual(p.investigations.map((t) => t.test), ["Fundus photography"]);
+  assert.deepEqual(p.advice, []);
+  assert.match(p.follow_up[0].when, /1 month/);
+});
+
+test("bench round 3: a symptom the doctor only asked about, or the patient denied, is not added back", () => {
+  const T = "Doctor: Any headache or vomiting?\nPatient: Mild headache in the evening, but no vomiting.";
+  const p = empty();
+  run(T, p);
+  const names = p.chief_complaints.map((c) => c.complaint.toLowerCase()).join(" | ");
+  assert.ok(!/vomit|nausea/.test(names), names);
+});
+
+test("bench round 4: a procedure the doctor said is NOT needed is dropped; unnamed symptoms (metamorphopsia) come back; empty exam rows go", () => {
+  const T = "Patient: I've noticed progressive metamorphopsia and blurred vision in my left eye.\nDoctor: Since there's no active neovascular membrane, anti-VEGF intravitreal injections are not indicated. We'll perform dynamic retinoscopy.";
+  const p = empty();
+  p.procedures = [{ procedure: "Intravitreal injection", kb_id: "PRC-050", eye: "LE", notes: "Not required currently", evidence: "anti-VEGF intravitreal injections are not indicated" }];
+  p.examination = [{ test: "Dynamic retinoscopy", kb_id: "", eye: "LE", result: "", evidence: "" }];
+  run(T, p);
+  assert.deepEqual(p.procedures, []);
+  assert.deepEqual(p.examination, []);
+  assert.ok(p.chief_complaints.some((c) => /metamorphopsia/i.test(c.complaint)), JSON.stringify(p.chief_complaints));
 });
