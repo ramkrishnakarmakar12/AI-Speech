@@ -153,17 +153,26 @@ const EXIST_WORD = /^(আছে|আছেন|আছেই|হয়েছে|হ
  * When yes and no are both heard, the LAST of them is the patient's answer (the question comes first).
  * Returns null when the condition is not one tracked here or nothing decisive was said.
  */
-export function systemicAnswer(condition: string, heard: string): { answer: "yes" | "no" | "asked"; conflict: boolean } | null {
+export function systemicAnswer(condition: string, heard: string): { answer: "yes" | "no" | "asked" | "none"; conflict: boolean } | null {
   const row = SYSTEMIC_WORDS.find(([name]) => name.test(condition));
   if (!row) return null;
   let last: "yes" | "no" | null = null;
-  let yes = false, no = false, asked = false;
+  let yes = false, no = false, asked = false, mentions = 0;
   for (const text of heard.split("\n")) {
     if (!text.trim()) continue;
     const neg = findNegations(text);
     const toks = [...text.matchAll(/[^\s,।॥?!.;:"'()]+/g)].map((m) => ({ w: m[0], start: m.index!, end: m.index! + m[0].length }));
     toks.forEach((t, i) => {
       if (!row[1].test(t.w)) return;
+      // "intraocular pressure" / "চোখের প্রেশার" / "आँख का प्रेशर" is eye pressure, not blood pressure
+      if (EYE_PRESSURE_BEFORE.test(toks[i - 1]?.w ?? "") || EYE_PRESSURE_BEFORE.test(toks[i - 2]?.w ?? "")) return;
+      mentions++;
+      // "I am diabetic", "known case of DM", "BP-র জন্য", "for BP"
+      if (!neg.some((n) => t.start >= n.start && t.end <= n.end) && toks.slice(Math.max(0, i - 2), i).some((x) => HAS_BEFORE.test(x.w))) {
+        yes = true;
+        last = "yes";
+        return;
+      }
       if (neg.some((n) => t.start >= n.start && t.end <= n.end)) {
         no = true;
         last = "no";
@@ -175,8 +184,12 @@ export function systemicAnswer(condition: string, heard: string): { answer: "yes
     });
   }
   if (last) return { answer: last, conflict: yes && no };
-  return asked ? { answer: "asked", conflict: false } : null;
+  if (asked) return { answer: "asked", conflict: false };
+  // never mentioned at all (only "intraocular pressure" said) → the model invented it
+  return mentions ? null : { answer: "none", conflict: false };
 }
+const EYE_PRESSURE_BEFORE = /^(intraocular|eye|ocular|চোখের|চোখে|আইওপি|आँख|आंख|आँखों|आंखों|का|की|के)$/i;
+const HAS_BEFORE = /^(am|i'm|known|k\/c\/o)$/i;
 
 /** Drop complaints / systemic history the patient explicitly denied. */
 function negatedItems(p: Prescription, negatedIds: Set<string>, negatedText: string, positiveIds: Set<string>, out: PostResult, heard = "") {
@@ -195,6 +208,10 @@ function negatedItems(p: Prescription, negatedIds: Set<string>, negatedText: str
   p.history.systemic = p.history.systemic.filter((h) => {
     const said = heard ? systemicAnswer(h.condition ?? "", heard) : null;
     if (!said) return keepRow(h);
+    if (said.answer === "none") {
+      out.removed.push(`History "${h.condition}" — never mentioned in the conversation`);
+      return false;
+    }
     if (said.answer === "asked") {
       out.removed.push(`History "${h.condition}" — only the doctor's question mentions it; the patient did not say they have it`);
       return false;
@@ -695,6 +712,54 @@ function symptomBackfill(p: Prescription, heard: string, kb: KnowledgeBase, out:
   }
 }
 
+const HAS_INDIC = /[\u0900-\u09FF]/;
+const UNITS: [RegExp, string][] = [
+  [/মাস|মাসের|महीन|महिन|month/i, "month"],
+  [/সপ্তাহ|হপ্তা|हफ्त|हफ़्त|सप्ताह|week/i, "week"],
+  [/দিন|दिन|day/i, "day"],
+  [/বছর|साल|वर्ष|year/i, "year"],
+];
+
+const SYSTEMIC_DRUGS: [RegExp, string][] = [
+  [/থাইরক্সিন|থাইরাক্সিন|থাইরোক্সিন|এলট্রক্সিন|थायरोक्सिन|थाइरोक्सिन|थायरॉक्सिन|एल्ट्रोक्सिन/, "Thyroxine"],
+  [/মেটফর্?মিন|मेटफॉर्मिन|मेटफार्मिन/, "Metformin"],
+  [/অ্যামলোডিপি|এমলোডিপি|আমলোডিপি|एम्लोडिपि|एमलोडिपि|अम्लोडिपि/, "Amlodipine"],
+  [/টেলমিসার্টান|टेल्मिसार्टन|टेलमिसार्टन/, "Telmisartan"],
+  [/লোসার্টান|लोसार्टन/, "Losartan"],
+  [/অ্যাটেনোলল|এটেনোলল|एटेनोलोल/, "Atenolol"],
+  [/ইনসুলিন|इंसुलिन|इन्सुलिन/, "Insulin"],
+  [/গ্লিমেপিরাইড|ग्लिमेपिराइड/, "Glimepiride"],
+  [/অ্যাসপিরিন|এসপিরিন|एस्पिरिन/, "Aspirin"],
+  [/অ্যাটরভাস্টাটিন|এটরভাস্টাটিন|एटोरवास्टेटिन/, "Atorvastatin"],
+];
+
+/** "দেড় মাস পরে" → "1.5 months"; "থাইরক্সিন" → "Thyroxine": fields printed on the prescription are written in English. */
+function englishFields(p: Prescription, kb: KnowledgeBase, out: PostResult) {
+  for (const f of p.follow_up) {
+    if (!HAS_INDIC.test(f.when ?? "")) continue;
+    const unit = UNITS.find(([re]) => re.test(f.when))?.[1];
+    const n = [...allNumberValues(f.when)].filter((x) => x > 0 && x < 100).sort((a, b) => (Number.isInteger(a) ? 1 : 0) - (Number.isInteger(b) ? 1 : 0))[0];
+    if (unit && n !== undefined) {
+      const was = f.when;
+      f.when = `${n} ${unit}${n === 1 ? "" : "s"}`;
+      out.notes.push(`Review "${was}" written as "${f.when}".`);
+    }
+  }
+  const meds = { ...kb, terms: kb.terms.filter((t) => t.category === "medicine") };
+  const english = (x: string) => {
+    if (!HAS_INDIC.test(x)) return x;
+    // common systemic medicines (not in the eye vocabulary)
+    const sys = SYSTEMIC_DRUGS.find(([re]) => re.test(x));
+    if (sys) return sys[1];
+    const hit = findMatches(x, meds, { fuzzyMinIndic: 0.7, fuzzyMinLatin: 0.8 })[0]?.term;
+    return hit ? hit.name.replace(/\s*\(.*\)$/, "") : x;
+  };
+  for (const h of p.history.systemic) if (h.treatment) h.treatment = english(h.treatment);
+  p.history.current_medications = p.history.current_medications.map(english);
+  for (const x of [...p.history.systemic.map((h) => h.treatment), ...p.history.current_medications])
+    if (x && HAS_INDIC.test(x)) out.flags.push(`"${x}" is not written in English — rewrite it before signing`);
+}
+
 export function postProcess(
   p: Prescription,
   ctx: { heardText: string; kb: KnowledgeBase; negatedIds: Set<string>; negatedText: string; positiveIds: Set<string> },
@@ -722,6 +787,7 @@ export function postProcess(
   clinicTestsNotInvestigations(p, out);
   adviceSanity(p, ctx.kb, out);
   symptomBackfill(p, ctx.heardText, ctx.kb, out);
+  englishFields(p, ctx.kb, out);
   dedupe(p, out);
   return out;
 }

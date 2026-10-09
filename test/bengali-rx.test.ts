@@ -259,3 +259,18 @@ test("bench round 4: a procedure the doctor said is NOT needed is dropped; unnam
   assert.deepEqual(p.examination, []);
   assert.ok(p.chief_complaints.some((c) => /metamorphopsia/i.test(c.complaint)), JSON.stringify(p.chief_complaints));
 });
+
+test("bench round 5: Bengali review period and drug names in English; a systemic illness never mentioned is removed", () => {
+  const p = empty();
+  p.follow_up = [{ when: "দেড় মাস পরে", purpose: "" }];
+  p.history.systemic = [
+    { condition: "Hypothyroidism", kb_id: "", duration: "", treatment: "থাইরক্সিন", evidence: "থাইরয়েড আছে" },
+    { condition: "Hypertension", kb_id: "", duration: "", treatment: "", evidence: "" },
+  ];
+  p.history.current_medications = ["থাইরক্সিন"];
+  const T = "রোগী: থাইরয়েড আছে, থাইরক্সিন খাই। ডাক্তার: চোখের প্রেশার মাপব। দেড় মাস পরে আসবেন।";
+  run(T, p);
+  assert.equal(p.follow_up[0].when, "1.5 months");
+  assert.deepEqual(p.history.systemic.map((h) => `${h.condition}|${h.treatment}`), ["Hypothyroidism|Thyroxine"]);
+  assert.deepEqual(p.history.current_medications, ["Thyroxine"]);
+});
