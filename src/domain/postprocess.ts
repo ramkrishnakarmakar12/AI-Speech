@@ -27,7 +27,8 @@ const SECTIONS: [string, (p: Prescription) => any[], (x: any) => string][] = [
   ["history.systemic", (p) => p.history.systemic, (x) => x.kb_id || normalize(x.condition ?? "")],
   ["history.ocular", (p) => p.history.ocular, (x) => `${x.kb_id || normalize(x.item ?? "")}|${x.eye ?? ""}`],
   ["examination", (p) => p.examination, (x) => `${x.kb_id || normalize(x.test ?? "")}|${x.eye ?? ""}|${normalize(x.result ?? "")}`],
-  ["clinical_findings", (p) => p.clinical_findings, (x) => `${x.kb_id || normalize(x.finding ?? "")}|${x.eye ?? ""}`],
+  // by name: "Dot blot haemorrhage" and "Hard exudate" can share one vocabulary entry but are two findings
+  ["clinical_findings", (p) => p.clinical_findings, (x) => `${normalize(x.finding ?? "") || x.kb_id}|${x.eye ?? ""}`],
   ["diagnosis", (p) => p.diagnosis, (x) => `${x.kb_id || normalize(x.condition ?? "")}|${x.eye ?? ""}`],
   ["medications", (p) => p.medications, (x) => [x.kb_id || normalize(x.generic_name || x.brand_said || ""), x.form, x.eye, normalize(x.frequency ?? "")].join("|")],
   ["procedures", (p) => p.procedures, (x) => `${x.kb_id || normalize(x.procedure ?? "")}|${x.eye ?? ""}`],
@@ -495,7 +496,10 @@ function layoutSanity(p: Prescription, out: PostResult, heardAll = "") {
     const dxText = ` ${spell(p.diagnosis.map((d) => `${d.condition} ${d.grade_or_notes}`).join(" "))} `;
     const words = n.split(" ").filter((w) => w.length >= 3 && !/^(with|and|the|both|eye|eyes)$/.test(w));
     const mostlyDx = p.diagnosis.length > 0 && words.length >= 2 && words.filter((w) => dxText.includes(` ${w} `)).length / words.length >= 0.6;
-    return inExam || inDx || mostlyDx;
+    // a sign (hard exudates, haemorrhages) stays even if the diagnosis line repeats it; only a disease name
+    // copied into the findings ("Moderate NPDR with CSME") is dropped as a duplicate of the diagnosis
+    const diseaseLike = /\b(npdr|pdr|csme|dme|amd|glaucoma|cataract|keratitis|conjunctivitis|retinopathy|degeneration|uveitis|pterygium|presbyopia|myopia|blepharitis|dry eye)\b/i.test(text);
+    return inExam || ((inDx || mostlyDx) && diseaseLike);
   };
   const complaintNames = p.chief_complaints.map((c) => spell(c.complaint ?? "")).filter(Boolean);
   const before = p.clinical_findings.length;
@@ -760,6 +764,69 @@ function englishFields(p: Prescription, kb: KnowledgeBase, out: PostResult) {
     if (x && HAS_INDIC.test(x)) out.flags.push(`"${x}" is not written in English — rewrite it before signing`);
 }
 
+// ---------------------------------------------------------------------------------------------
+// Bench r6: "Moxifloxacin … BD" although the doctor said «দিনে চার বার» (4×/day). A frequency is checked against the
+// words right after the medicine's name; a different spoken count wins and is flagged.
+// ---------------------------------------------------------------------------------------------
+const COUNT_WORDS: Record<string, number> = { এক: 1, এ: 1, দু: 2, দুই: 2, তিন: 3, চার: 4, পাঁচ: 5, ছয়: 6, ছ: 6, एक: 1, दो: 2, तीन: 3, चार: 4, पांच: 5, पाँच: 5, छह: 6, छः: 6, once: 1, twice: 2, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6 };
+/** times per day said in a phrase, 24 = hourly */
+export function spokenPerDay(t: string): number | null {
+  if (/প্রতি (এক )?ঘণ্টা|ঘণ্টায় ঘণ্টায়|ঘন্টায়|প্রতি ঘন্টা|हर (एक )?घंटे|हर घण्टे|every hour|hourly|1 ?hourly/i.test(t)) return 24;
+  let m = t.match(/দিনে\s*(এক|দু|দুই|তিন|চার|পাঁচ|ছয়|ছয়|ছ)\s*(বার|বারে)|দিনে\s*(এক|দু|দুই|তিন|চার|পাঁচ|ছয়|ছয়|ছ)বার/);
+  if (m) return COUNT_WORDS[m[1] ?? m[3]] ?? null;
+  m = t.match(/(একবার|দুবার|দু'বার|তিনবার|চারবার)/);
+  if (m) return { একবার: 1, দুবার: 2, "দু'বার": 2, তিনবার: 3, চারবার: 4 }[m[1]] ?? null;
+  m = t.match(/दिन में\s*(एक|दो|तीन|चार|पांच|पाँच|छह|छः)\s*बार/);
+  if (m) return COUNT_WORDS[m[1]] ?? null;
+  m = t.match(/\b(once|twice|one|two|three|four|five|six|\d)\s*(times)?\s*(a|per)\s*day\b|\b(once|twice) daily\b/i);
+  if (m) {
+    const w = (m[1] ?? m[4]).toLowerCase();
+    return /^\d$/.test(w) ? Number(w) : COUNT_WORDS[w] ?? null;
+  }
+  return null;
+}
+/** times per day a written frequency means */
+export function writtenPerDay(f: string): number | null {
+  const t = f.toLowerCase().replace(/\s+/g, " ").trim();
+  if (!t) return null;
+  if (/hour|q1h|\b1 ?h\b/.test(t)) return 24;
+  if (/\bqid\b|four|4 ?(x|times|\/)/.test(t)) return 4;
+  if (/\btid\b|\btds\b|three|3 ?(x|times|\/)/.test(t)) return 3;
+  if (/\bbd\b|\bbid\b|twice|two times|2 ?(x|times|\/)/.test(t)) return 2;
+  if (/\bod\b|once|daily|1 ?(x|times|\/)|\bhs\b|bedtime|at night/.test(t)) return 1;
+  const m = t.match(/(\d+) ?x/);
+  return m ? Number(m[1]) : null;
+}
+
+function frequencyCheck(p: Prescription, heard: string, kb: KnowledgeBase, out: PostResult) {
+  const byId = new Map(kb.terms.map((t) => [t.id, t]));
+  const lex = scanLexicon(heard, kb);
+  for (const m of p.medications) {
+    const written = writtenPerDay(m.frequency ?? "");
+    if (written === null) continue;
+    // where the medicine was said: eye-lexicon phrase, KB name/alias, or the written name itself
+    let at = -1, len = 0;
+    const meds = { ...kb, terms: kb.terms.filter((x) => x.category === "medicine") };
+    const t = (m.kb_id ? byId.get(m.kb_id) : undefined) ?? (m.generic_name ? findMatches(m.generic_name, meds, { fuzzyMinLatin: 0.85, fuzzyMinIndic: 0.85 })[0]?.term : undefined);
+    const hit = t ? lex.find((h) => h.term?.id === t.id && h.start >= 0) : undefined;
+    if (hit) (at = hit.start), (len = hit.end - hit.start);
+    else {
+      const found = t ? findMatches(heard, { ...kb, terms: [t] }, { fuzzyMinLatin: 0.78, fuzzyMinIndic: 0.72 })[0] : undefined;
+      const said = found?.heardAs ?? m.generic_name;
+      const i = said ? heard.toLowerCase().indexOf(said.toLowerCase()) : -1;
+      if (i >= 0) (at = i), (len = said.length);
+    }
+    if (at < 0) continue;
+    const rest = heard.slice(at + len);
+    const end = rest.search(/[।.?!\n]/);
+    const spoken = spokenPerDay(rest.slice(0, end >= 0 ? Math.min(end, 120) : 120));
+    if (spoken === null || spoken === written) continue;
+    const was = m.frequency;
+    m.frequency = spoken === 24 ? "hourly" : spoken === 4 ? "QID" : spoken === 3 ? "TID" : spoken === 2 ? "BD" : spoken === 1 ? "once daily" : `${spoken}x/day`;
+    out.flags.push(`${m.generic_name || m.brand_said}: frequency "${was}" changed to "${m.frequency}" — that is what was said after the medicine's name; check it`);
+  }
+}
+
 export function postProcess(
   p: Prescription,
   ctx: { heardText: string; kb: KnowledgeBase; negatedIds: Set<string>; negatedText: string; positiveIds: Set<string> },
@@ -774,6 +841,7 @@ export function postProcess(
   patientSanity(p, out, ctx.heardText);
   currentMedsSanity(p, ctx.kb, out);
   medicineFieldIds(p, ctx.kb, out);
+  frequencyCheck(p, ctx.heardText, ctx.kb, out);
   phaseSanity(p, ctx.heardText, out);
   subtypeCheck(p, ctx.heardText, out);
   systemicEye(p);
