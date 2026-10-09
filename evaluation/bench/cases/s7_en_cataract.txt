@@ -1,0 +1,9 @@
+Doctor: Hello, what is the problem?
+Patient: My left eye vision has been dim for about a year, and I see glare from headlights at night.
+Doctor: Any eye surgery before?
+Patient: Yes, my right eye cataract was operated two years ago.
+Doctor: Sugar, BP?
+Patient: Sugar for ten years, I take metformin. BP no.
+Doctor: Vision right eye 6/9, left eye 6/36. Slit lamp: right eye has a posterior chamber IOL, well centred. Left lens shows nuclear sclerosis grade three. Fundus is normal in both eyes. Pressure by applanation is fourteen in the right and sixteen in the left.
+Doctor: You have a mature senile cataract in the left eye. We will do phaco with IOL in the left eye. Please get biometry and a fasting blood sugar done.
+Doctor: Keep your sugar under control before surgery. Follow up after one week with the reports.

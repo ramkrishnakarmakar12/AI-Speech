@@ -1,0 +1,10 @@
+Doctor: Good morning, Mr. Sharma. Please take a seat. What primary symptoms bring you to the eye clinic today?
+Patient: Good morning, Doctor. Over the last month, I've noticed progressive metamorphopsia and blurred vision in my left eye, along with persistent asthenopia and photophobia. Yesterday evening, I saw transient photopsia and a barrage of floating dark specks across my central visual field.
+Doctor: Given the sudden onset of photopsia and vitreous floaters, we must evaluate for posterior vitreous detachment or a peripheral retinal tear. First, we'll check your visual acuity, then perform dynamic retinoscopy and Goldmann applanation tonometry to measure your intraocular pressure and screen for glaucoma.
+Doctor: Under slit-lamp biomicroscopy, your anterior segment—including the cornea and iridocorneal angle—is unremarkable. However, after instilling tropicamide for pharmacological mydriasis, indirect ophthalmoscopy reveals geographic retinal pigment epithelium atrophy, drusen deposition, and mild localized macular edema.
+Patient: Is it age-related macular degeneration, Doctor? Or diabetic retinopathy?
+Doctor: It is dry Age-related Macular Degeneration. Spectral-Domain Optical Coherence Tomography shows disruption of the ellipsoid zone over sub-RPE drusen, but no choroidal neovascularization or subretinal fluid. Furthermore, fluorescein angiography showed window defects without microaneurysms or cotton wool spots.
+Patient: What is the prognosis, and what therapies are available?
+Doctor: Since there's no active neovascular membrane, anti-VEGF intravitreal injections like ranibizumab are not indicated. We'll initiate oral antioxidant AREDS2 supplements to retard disease progression, and give you an Amsler grid for home monitoring. If wet conversion occurs, photodynamic therapy will be considered.
+Patient: Understood, Doctor. I'll start the AREDS2 supplements and monitor my visual field.
+Doctor: Excellent. We will schedule a repeat OCT scan and wide-field fundus photography in three months. Take care!

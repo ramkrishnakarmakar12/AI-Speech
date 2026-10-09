@@ -76,7 +76,7 @@ export const prescriptionSchema = obj({
   procedures: arr(obj({ procedure: str(), kb_id: kbId, eye, notes: str(), evidence })),
   investigations: arr(obj({ test: str("one test per row, e.g. 'Fasting blood sugar', 'HbA1c', 'ECG', 'A-scan biometry'"), kb_id: kbId, eye: eyeOrNone, purpose: str(), evidence })),
   glasses: arr(obj({ eye: en(["RE", "LE"]), sph: str(), cyl: str(), axis: str(), add: str(), notes: str() })),
-  advice: arr(obj({ text: str("only advice the doctor actually spoke in THIS conversation"), kb_id: kbId, evidence })),
+  advice: arr(obj({ text: str("only advice the doctor actually spoke in THIS conversation, written in English (the evidence keeps the original words)"), kb_id: kbId, evidence })),
   follow_up: arr(obj({ when: str(), purpose: str() })),
   terms: arr(
     obj({ heard: str("exact words in transcript"), kb_id: kbId, canonical: str("KB name"), category: str() }),

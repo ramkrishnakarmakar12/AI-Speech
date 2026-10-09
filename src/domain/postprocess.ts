@@ -31,7 +31,8 @@ const SECTIONS: [string, (p: Prescription) => any[], (x: any) => string][] = [
   ["diagnosis", (p) => p.diagnosis, (x) => `${x.kb_id || normalize(x.condition ?? "")}|${x.eye ?? ""}`],
   ["medications", (p) => p.medications, (x) => [x.kb_id || normalize(x.generic_name || x.brand_said || ""), x.form, x.eye, normalize(x.frequency ?? "")].join("|")],
   ["procedures", (p) => p.procedures, (x) => `${x.kb_id || normalize(x.procedure ?? "")}|${x.eye ?? ""}`],
-  ["investigations", (p) => p.investigations, (x) => `${x.kb_id || normalize(x.test ?? "")}|${x.eye ?? ""}`],
+  // by name: "KOH mount" and "Corneal scraping (smear and culture)" share a vocabulary entry but are two tests
+  ["investigations", (p) => p.investigations, (x) => `${normalize(x.test ?? "") || x.kb_id}|${x.eye ?? ""}`],
   ["advice", (p) => p.advice, (x) => x.kb_id || normalize(x.text ?? "")],
   ["follow_up", (p) => p.follow_up, (x) => normalize(`${x.when} ${x.purpose}`)],
   ["glasses", (p) => p.glasses, (x) => [x.eye, x.sph, x.cyl, x.axis, x.add].join("|")],
@@ -368,6 +369,11 @@ function examinationSanity(p: Prescription, heard: string, out: PostResult) {
   const said = allNumberValues(heard);
   p.examination = p.examination.filter((e) => {
     if (!IOP_TEST.test(e.test) && !VA_TEST.test(e.test)) return true;
+    // "we'll check your vision / pressure" is a plan, not a result: no value → no row ("Normal" here was invented)
+    if (!/\d|\b(cf|fc|hm|hmcf|pl|npl|pr|nlp|counting fingers?|hand movements?|perception of light|no perception)\b|[০-৯०-९]/i.test(e.result ?? "")) {
+      out.removed.push(`${e.test}${e.eye ? ` (${e.eye})` : ""}${e.result ? ` "${e.result}"` : ""} — no value was said for it`);
+      return false;
+    }
     const nums = (e.result.match(/\d+(?:\.\d+)?/g) ?? []).map(Number);
     const missing = nums.filter((n) => !said.has(n));
     if (!missing.length) return true;
@@ -384,7 +390,14 @@ function examinationSanity(p: Prescription, heard: string, out: PostResult) {
     time = iopTime(heard.slice(a.index!, a.index! + 140));
     if (time) break;
   }
+  const OTHER_TONO = /schi[oø]tz|tono.?pen|perkins|indentation/i;
   for (const e of iop) {
+    // a tonometer named in the test that is not the one said ("Schiøtz / iCare / Tono-Pen tonometry" for an NCT reading)
+    const named = IOP_METHODS.filter(([, re]) => re.test(e.test)).map(([m]) => m);
+    if ((named.length && named.some((m) => !methods.includes(m))) || (OTHER_TONO.test(e.test) && !OTHER_TONO.test(heard))) {
+      out.notes.push(`"${e.test}" → "Intraocular pressure": that tonometer was not said.`);
+      e.test = "Intraocular pressure";
+    }
     // a method the model wrote that nobody said ("(NCT)" copied from an example) is taken out
     for (const [m] of IOP_METHODS)
       if (!methods.includes(m) && new RegExp(`\\(\\s*${m}\\s*\\)|\\b${m}\\b`).test(e.test)) {
@@ -397,6 +410,36 @@ function examinationSanity(p: Prescription, heard: string, out: PostResult) {
   }
 }
 
+const INDIC = /[\u0900-\u09FF]/g;
+/** The doctor's own plan for the next visit ("প্রেশার দেখব" = I will check the pressure) is not advice to the patient. */
+const DOCTOR_PLAN = /(দেখব|দেখবো|মাপব|মাপবো|করব|করবো|দেখে নেব)\s*[।.]?$|देखेंगे|देखूंगा|देखूँगा|जांचेंगे|\b(i|we)('ll| will) (check|see|recheck|measure)\b/i;
+
+/** Advice in English, and the doctor's next-visit plan moved to Review. */
+function adviceSanity(p: Prescription, kb: KnowledgeBase, out: PostResult) {
+  const counselling = { ...kb, terms: kb.terms.filter((t) => t.category === "counselling") };
+  p.advice = p.advice.filter((a) => {
+    const text = a.text.trim();
+    if (DOCTOR_PLAN.test(text)) {
+      const raw = text.replace(/[।.]$/, "");
+      const plan = /প্রেশার|প্রেসার|प्रेशर|pressure/i.test(raw) ? "Recheck eye pressure" : /দৃষ্টি|नज़र|नजर|vision/i.test(raw) ? "Recheck vision" : raw;
+      if (p.follow_up.length) p.follow_up[0].purpose = [p.follow_up[0].purpose, plan].filter(Boolean).join("; ");
+      else p.follow_up.push({ when: "", purpose: plan });
+      out.notes.push(`"${text}" is the doctor's plan for the next visit — moved from Advice to Review.`);
+      return false;
+    }
+    const indic = (text.match(INDIC) ?? []).length;
+    const letters = (text.match(/\p{L}/gu) ?? []).length || 1;
+    if (indic / letters > 0.3) {
+      const hit = (a.kb_id && kb.terms.find((t) => t.id === a.kb_id && t.category === "counselling")) || findMatches(text, counselling).filter((m) => m.score >= 0.8)[0]?.term;
+      if (hit) {
+        out.notes.push(`Advice "${text}" written in English from the vocabulary: "${hit.name}".`);
+        a.text = hit.name;
+      } else out.flags.push(`Advice "${text}" was not written in English — rewrite it before signing`);
+    }
+    return true;
+  });
+}
+
 const MACULA_SAID = /macula|ম্যাকুলা|ম্যাকুলার|মেকুলা|मैक्युला|मैकुला|मैक्यूला/i;
 
 /** "OCT of macula" when the doctor only said "OCT" (a glaucoma visit needs OCT RNFL, not macula). */
@@ -407,6 +450,11 @@ function investigationSanity(p: Prescription, heard: string, out: PostResult) {
       const was = t.test;
       t.test = t.test.replace(/\s*(\(|-|–)?\s*(of\s+(the\s+)?)?macula(r)?\s*\)?/i, "").trim();
       out.notes.push(`"${was}" → "${t.test}": macula was not said.`);
+    }
+  for (const t of p.investigations)
+    if (/\boct\b|optical coherence/i.test(t.test) && /macula/i.test(t.purpose ?? "")) {
+      t.purpose = t.purpose.replace(/\b(the\s+)?macula(r)?(\s+(and|&)\s+)?|(\s+(and|&)\s+)?(the\s+)?macula(r)?\b/i, "").replace(/\s+/g, " ").trim();
+      if (/^(assessment|assess|evaluation|evaluate|to assess|to evaluate)( of)?$/i.test(t.purpose)) t.purpose = "";
     }
 }
 
@@ -425,8 +473,10 @@ function layoutSanity(p: Prescription, out: PostResult) {
     const mostlyDx = p.diagnosis.length > 0 && words.length >= 2 && words.filter((w) => dxText.includes(` ${w} `)).length / words.length >= 0.6;
     return inExam || inDx || mostlyDx;
   };
+  const complaintNames = p.chief_complaints.map((c) => spell(c.complaint ?? "")).filter(Boolean);
   const before = p.clinical_findings.length;
-  p.clinical_findings = p.clinical_findings.filter((f) => !covered(f.finding, f.eye));
+  // a symptom copied into the findings ("Headache", "Coloured haloes") is not an examination finding
+  p.clinical_findings = p.clinical_findings.filter((f) => !covered(f.finding, f.eye) && !complaintNames.includes(spell(f.finding ?? "")));
   if (before !== p.clinical_findings.length) out.notes.push(`Removed ${before - p.clinical_findings.length} finding${before - p.clinical_findings.length > 1 ? "s" : ""} already shown in the examination or diagnosis.`);
 
   // Follow-up belongs in Review, not Advice
@@ -440,6 +490,48 @@ function layoutSanity(p: Prescription, out: PostResult) {
 
   // Family history is not about the patient's eyes
   for (const h of p.history.ocular) if (/family|mother|father|sibling|brother|sister|মা|বাবা|माँ|पिता/i.test(h.item)) h.eye = "";
+}
+
+const CONDITIONAL = /\bif\b|\bin case\b|\bunless\b|\bshould (it|the|this)\b|considered if|যদি|হলে তবে|हो जाए तो|अगर|यदि|अगर .* तो/i;
+
+/** "Photodynamic therapy if it turns wet": a procedure for a future "if" is not advised today — it becomes advice. */
+function conditionalProcedures(p: Prescription, out: PostResult) {
+  p.procedures = p.procedures.filter((x) => {
+    const cond = CONDITIONAL.test(x.notes ?? "") ? x.notes : CONDITIONAL.test(x.evidence ?? "") ? x.evidence : "";
+    if (!cond) return true;
+    const text = `${x.procedure}${x.eye ? ` (${x.eye})` : ""} — only ${CONDITIONAL.test(x.notes ?? "") ? x.notes.replace(/^(to be )?(considered )?/i, "").replace(/^./, (c) => c.toLowerCase()) : "if the condition changes, as discussed"}`;
+    p.advice.push({ text, kb_id: "", evidence: x.evidence ?? "" });
+    out.notes.push(`"${x.procedure}" is planned only if something happens — moved from Procedure advised to Advice.`);
+    return false;
+  });
+}
+
+/** Two advice lines quoting the same words are the same advice said twice. */
+function adviceDuplicates(p: Prescription, out: PostResult) {
+  const seen: string[] = [];
+  const before = p.advice.length;
+  p.advice = p.advice.filter((a) => {
+    const ev = normalize(a.evidence ?? "");
+    // the same quote exactly (one sentence can carry two different pieces of advice, so containment is not enough)
+    if (ev.length >= 6 && seen.includes(ev)) return false;
+    if (ev) seen.push(ev);
+    return true;
+  });
+  if (before !== p.advice.length) out.notes.push(`Removed ${before - p.advice.length} advice line(s) that repeated the same spoken advice.`);
+}
+
+/** "Latanoprost — ABR-068": a knowledge-base id written into a medicine field is replaced by what it stands for. */
+function medicineFieldIds(p: Prescription, kb: KnowledgeBase, out: PostResult) {
+  const byId = new Map(kb.terms.map((t) => [t.id, t]));
+  for (const m of p.medications)
+    for (const k of ["frequency", "dose", "duration", "strength", "form", "instructions"] as const) {
+      const v = String((m as any)[k] ?? "").trim();
+      if (!/^[A-Z]{3}-\d{3}$/.test(v)) continue;
+      const t = byId.get(v);
+      const name = t ? (t.aliases.find((a) => a.length <= 6 && /^[A-Z.]+$/.test(a)) ?? t.name) : "";
+      (m as any)[k] = name;
+      out.flags.push(`${m.generic_name || "Medicine"}: the ${k} came back as a code (${v})${name ? ` — written as "${name}"` : ""}; check it against the recording`);
+    }
 }
 
 /** "Current medications: Diabetes mellitus, Hypertension" — conditions are not medicines. */
@@ -494,13 +586,17 @@ export function postProcess(
   procedureFallback(p, ctx.heardText, ctx.kb, ctx.positiveIds, out);
   patientSanity(p, out, ctx.heardText);
   currentMedsSanity(p, ctx.kb, out);
+  medicineFieldIds(p, ctx.kb, out);
   phaseSanity(p, ctx.heardText, out);
   subtypeCheck(p, ctx.heardText, out);
   systemicEye(p);
   fieldSanity(p, ctx.heardText, out);
   evidenceCheck(p, ctx.heardText, out);
+  conditionalProcedures(p, out);
   layoutSanity(p, out);
+  adviceDuplicates(p, out);
   investigationSanity(p, ctx.heardText, out);
+  adviceSanity(p, ctx.kb, out);
   dedupe(p, out);
   return out;
 }

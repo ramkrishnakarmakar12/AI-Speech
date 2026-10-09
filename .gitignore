@@ -6,7 +6,9 @@ test/.last-request.json
 
 # macOS
 .DS_Store
-evaluation
+# evaluation runs stay local — except the readiness bench (its cases are needed by npm test in CI)
+evaluation/*
+!evaluation/bench/
 # patient data: doctor-approved visits and exported training sets stay local
 data/approved/
 data/training/
@@ -16,3 +18,6 @@ evaluation/general/20*/
 # one-off AWS setup files
 /iam.json
 /trust.json
+
+# readiness bench runs (npm run bench)
+evaluation/bench/out/

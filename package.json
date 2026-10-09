@@ -19,7 +19,8 @@
     "serve": "tsx src/server.ts",
     "test": "tsx --test test/*.test.ts",
     "typecheck": "tsc --noEmit",
-    "export-training": "tsx src/cli.ts export-training"
+    "export-training": "tsx src/cli.ts export-training",
+    "bench": "tsx src/bench/run.ts"
   },
   "dependencies": {
     "exceljs": "^4.4.0"
