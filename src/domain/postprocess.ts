@@ -11,7 +11,9 @@
 import type { KnowledgeBase } from "../kb/types.js";
 import type { Prescription } from "../llm/schema.js";
 import { findMatches, normalize } from "../match/matcher.js";
-import { findNumbers } from "./numbers.js";
+import { allNumberValues, findNumbers } from "./numbers.js";
+import { findNegations } from "./negation.js";
+import { scanLexicon } from "./lexicon.js";
 
 export interface PostResult {
   removed: string[];
@@ -55,13 +57,20 @@ function dedupe(p: Prescription, out: PostResult) {
   }
 }
 
+/** speaker labels read aloud in the recording ("ডাক্তার … রোগী …") are not the patient's name */
+const ROLE_WORD = /^(রোগী|রোগি|রুগী|ডাক্তার|ডাক্তারবাবু|ডাক্তারবাবুর|patient|rogi|rogee|doctor|মরিজ|मरीज़|मरीज|रोगी|डॉक्टर|डाक्टर|डॉक्टरसाहब)$/i;
+
 const GREETING = /^(asun|ashun|asen|bosun|bosen|basun|bhusun|bisun|bison|namaskar|nomoskar|namaste|suprabhat|suprobhat|shubho|good|morning|evening|dr|doctor|daktar|daktarbabu|babu|sir|madam|sar|ji)$/;
 
 function patientSanity(p: Prescription, out: PostResult) {
   const name = (p.patient.name ?? "").trim();
   if (name) {
     const words = normalize(name).split(" ").filter(Boolean);
-    if (/\b(dr|doctor)\b\.?/i.test(name) || /babu/i.test(name) || (words.length && words.filter((w) => GREETING.test(w)).length >= Math.ceil(words.length / 2))) {
+    const raw = name.split(/[\s,.]+/).filter(Boolean);
+    if (raw.length && raw.every((w) => ROLE_WORD.test(w))) {
+      out.removed.push(`Patient name "${name}" (a speaker label — "patient"/"রোগী" — not the patient's name)`);
+      p.patient.name = "";
+    } else if (/\b(dr|doctor)\b\.?/i.test(name) || /babu/i.test(name) || (words.length && words.filter((w) => GREETING.test(w)).length >= Math.ceil(words.length / 2))) {
       out.removed.push(`Patient name "${name}" (looks like a greeting or the doctor, not the patient's name)`);
       p.patient.name = "";
     }
@@ -108,7 +117,7 @@ function medicinesHeard(p: Prescription, heardText: string, kb: KnowledgeBase, o
   });
 }
 
-const SURGERY = /(surgery|operation|operate|phaco|sics|lasik|laser|injection|অপারেশন|অপারেশান|সার্জারি|ऑपरेशन|आपरेशन|सर्जरी|ইনজেকশন|इंजेक्शन)/i;
+const SURGERY = /(surgery|operation|operate|phaco|sics|lasik|laser|injection|অপারেশন|অপারেশান|সার্জারি|ऑपरेशन|आपरेशन|सर्जरी|ইনজেকশন|ইন্জেকশন|ইঞ্জেকশন|इंजेक्शन)/i;
 
 function phaseSanity(p: Prescription, text: string, out: PostResult) {
   if (p.procedures.length || SURGERY.test(text)) return;
@@ -117,8 +126,52 @@ function phaseSanity(p: Prescription, text: string, out: PostResult) {
   if (n) out.notes.push(`Cleared "pre-op/post-op" on ${n} medicine${n > 1 ? "s" : ""} (no surgery was discussed).`);
 }
 
+// Systemic history words as spoken in Bengali / Hindi / English consultations
+const SYSTEMIC_WORDS: [RegExp, RegExp][] = [
+  [/diabet|sugar|\bdm\b|glucose/i, /^(সুগার|সুগারের|ডায়াবেটিস|ডায়াবেটিস|শুগার|शुगर|मधुमेह|डायबिटीज|डायबिटीज़|sugar|diabetes|diabetic|dm)$/i],
+  [/hypertens|blood pressure|\bhtn\b|\bbp\b/i, /^(প্রেশার|প্রেসার|প্রেশারও|প্রেশারের|বিপি|बीपी|प्रेशर|प्रेसर|pressure|bp|hypertension)$/i],
+  [/thyro/i, /^(থাইরয়েড|থাইরয়েড|থাইরয়েডার|থাইরয়েডের|থাইরাইড|থাইরক্সিন|থাইরাক্সিন|थायराइड|थाइरॉइड|थायरॉइड|thyroid|thyroxine|eltroxin)$/i],
+  [/asthma/i, /^(হাঁপানি|অ্যাজমা|এজমা|अस्थमा|दमा|asthma)$/i],
+];
+const OR_WORD = /^(বা|কিংবা|অথবা|या|अथवा|or)$/i;
+/** words after a condition that say the patient HAS it ("সুগার আছে", "शुगर है", "BP for 5 years") */
+const EXIST_WORD = /^(আছে|আছেন|আছেই|হয়েছে|হয়েছে|খাই|খাচ্ছি|নিই|ছিল|ধরে|বছর|বছরের|है|हैं|था|थी|हुआ|हुई|साल|लेता|लेती|खाता|खाती|have|has|had|since|for|years?|taking|diagnosed)$/i;
+
+/**
+ * What did the patient say about a systemic illness? Every mention is classified:
+ *   no    — inside a denial ("সুগার প্রেশার নেই");
+ *   asked — inside the doctor's "সুগার, প্রেশার বা থাইরয়েড আছে?" list, or followed by "?";
+ *   yes   — followed by an existence word ("থাইরয়েড আছে", "BP for five years").
+ * When yes and no are both heard, the LAST of them is the patient's answer (the question comes first).
+ * Returns null when the condition is not one tracked here or nothing decisive was said.
+ */
+export function systemicAnswer(condition: string, heard: string): { answer: "yes" | "no" | "asked"; conflict: boolean } | null {
+  const row = SYSTEMIC_WORDS.find(([name]) => name.test(condition));
+  if (!row) return null;
+  let last: "yes" | "no" | null = null;
+  let yes = false, no = false, asked = false;
+  for (const text of heard.split("\n")) {
+    if (!text.trim()) continue;
+    const neg = findNegations(text);
+    const toks = [...text.matchAll(/[^\s,।॥?!.;:"'()]+/g)].map((m) => ({ w: m[0], start: m.index!, end: m.index! + m[0].length }));
+    toks.forEach((t, i) => {
+      if (!row[1].test(t.w)) return;
+      if (neg.some((n) => t.start >= n.start && t.end <= n.end)) {
+        no = true;
+        last = "no";
+      } else if (toks.slice(Math.max(0, i - 2), i + 3).some((x) => OR_WORD.test(x.w)) || /^\s*\?/.test(text.slice(t.end, t.end + 3))) asked = true;
+      else if (toks.slice(i + 1, i + 4).some((x) => EXIST_WORD.test(x.w))) {
+        yes = true;
+        last = "yes";
+      }
+    });
+  }
+  if (last) return { answer: last, conflict: yes && no };
+  return asked ? { answer: "asked", conflict: false } : null;
+}
+
 /** Drop complaints / systemic history the patient explicitly denied. */
-function negatedItems(p: Prescription, negatedIds: Set<string>, negatedText: string, positiveIds: Set<string>, out: PostResult) {
+function negatedItems(p: Prescription, negatedIds: Set<string>, negatedText: string, positiveIds: Set<string>, out: PostResult, heard = "") {
   const neg = normalize(negatedText);
   const isNeg = (id: string, name: string) =>
     (id && negatedIds.has(id) && !positiveIds.has(id)) || (!!name && normalize(name).length >= 4 && neg.includes(normalize(name)) && !(id && positiveIds.has(id)));
@@ -130,7 +183,27 @@ function negatedItems(p: Prescription, negatedIds: Set<string>, negatedText: str
       }
   };
   drop(p.chief_complaints, "complaint", "Complaint");
-  drop(p.history.systemic, "condition", "History");
+  // Systemic history: decided from the patient's answer, not from the doctor's question
+  p.history.systemic = p.history.systemic.filter((h) => {
+    const said = heard ? systemicAnswer(h.condition ?? "", heard) : null;
+    if (!said) return keepRow(h);
+    if (said.answer === "asked") {
+      out.removed.push(`History "${h.condition}" — only the doctor's question mentions it; the patient did not say they have it`);
+      return false;
+    }
+    if (said.answer === "no") {
+      out.removed.push(`History "${h.condition}" — the patient said they do NOT have it`);
+      if (said.conflict) out.flags.push(`History "${h.condition}" — heard as both present and absent; the patient's last answer was "no" — confirm`);
+      return false;
+    }
+    if (said.conflict) out.flags.push(`History "${h.condition}" — heard as both present and absent; the patient's last answer was "yes" — confirm`);
+    return true;
+  });
+  function keepRow(h: any) {
+    if (!isNeg(h.kb_id ?? "", h.condition ?? "")) return true;
+    out.removed.push(`History "${h.condition}" — the patient said they do NOT have it`);
+    return false;
+  }
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -237,19 +310,152 @@ function fieldSanity(p: Prescription, transcript: string, out: PostResult) {
   }
 }
 
+// ---------------------------------------------------------------------------------------------
+// Checks added after the Bengali test runs of Oct 2026 (script 9 / glaucoma-cataract recording):
+// "No known drug allergy" when allergy was never discussed, IOP left "8" for «আঠেরো», no IOP method/time,
+// examination findings printed twice, the follow-up printed in Advice and Review, family history with an eye side,
+// and an anti-VEGF injection that was advised but never reached the prescription.
+// ---------------------------------------------------------------------------------------------
+const ALLERGY_SAID = /allerg|অ্যালার্জি|অ্যালার্জি|এলার্জি|অ্যালার্জী|এ্যালার্জি|एलर्जी|ऐलर्जी|एलर्जि|sulfa|সালফা|सल्फा|reaction to/i;
+
+/** Allergy status only when allergy was talked about. */
+function allergySanity(p: Prescription, heard: string, out: PostResult) {
+  if (ALLERGY_SAID.test(heard)) return;
+  if (p.history.allergy_status === "none known" || p.history.allergy_status === "present" || p.history.allergies.length) {
+    out.removed.push(`Allergy status "${p.history.allergies.join(", ") || p.history.allergy_status}" — allergy was not discussed in the conversation`);
+    p.history.allergy_status = "not discussed";
+    p.history.allergies = [];
+  }
+}
+
+const IOP_TEST = /pressure|\biop\b|tonometr|intraocular|\bnct\b|applanation/i;
+const VA_TEST = /acuity|vision|\bva\b|ucva|bcva|pinhole|snellen/i;
+const IOP_METHODS: [string, RegExp][] = [
+  ["NCT", /\bnct\b|এনসিটি|এন সি টি|নন ?কন্ট্যাক্ট|non.?contact|एनसीटी|एन सी टी|नॉन ?कॉन्टैक्ट|air.?puff/i],
+  ["AT", /applanation|অ্যাপ্লানেশন|এপ্লানেশন|অ্যাপলানেশন|goldmann|গোল্ডম্যান|गोल्डमैन|एप्लानेशन|अप्लानेशन|\bGAT\b/i],
+  ["RT", /rebound|icare|আইকেয়ার|রিবাউন্ড|रिबाउंड|आईकेयर/i],
+];
+/** "সকাল এগারোটায়" / "सुबह दस बजे" / "at ten thirty" / "at 10:30" → "11 am" / "10 am" / "10:30" */
+function iopTime(heard: string): string {
+  const d = heard.match(/\b(?:at\s+)?(\d{1,2})[:.](\d{2})\s*(am|pm)?\b/i);
+  if (d && Number(d[1]) < 24 && Number(d[2]) < 60) return `${d[1]}:${d[2]}${d[3] ? ` ${d[3].toLowerCase()}` : ""}`;
+  const m = heard.match(/(সকাল|বিকেল|বিকাল|দুপুর|সন্ধ্যা|সন্ধে|রাত|सुबह|दोपहर|शाम|रात)\s+(\S+?)(?:টায়|টায়|টা|টার|টে)?(?:\s+(বেজে|बजे))?(?=[\s,।.]|$)/);
+  if (m) {
+    const n = [...allNumberValues(m[2])].find((x) => x >= 1 && x <= 12);
+    if (n !== undefined) {
+      const pm = /বিকেল|বিকাল|সন্ধ্যা|সন্ধে|রাত|शाम|रात/.test(m[1]) || (/দুপুর|दोपहर/.test(m[1]) && n < 6);
+      return `${n} ${pm ? "pm" : "am"}`;
+    }
+  }
+  const e = heard.match(/\bat\s+(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)(?:\s+(thirty|fifteen|forty.?five|o'?clock))?\b/i);
+  if (e) {
+    const n = [...allNumberValues(e[1])][0];
+    const mm = e[2] ? (/thirty/i.test(e[2]) ? "30" : /fifteen/i.test(e[2]) ? "15" : /forty/i.test(e[2]) ? "45" : "00") : "00";
+    if (n) return `${n}:${mm}`;
+  }
+  return "";
+}
+
+/** Examination values that were never said are removed; IOP rows get the method and time that were said. */
+function examinationSanity(p: Prescription, heard: string, out: PostResult) {
+  const said = allNumberValues(heard);
+  p.examination = p.examination.filter((e) => {
+    if (!IOP_TEST.test(e.test) && !VA_TEST.test(e.test)) return true;
+    const nums = (e.result.match(/\d+(?:\.\d+)?/g) ?? []).map(Number);
+    const missing = nums.filter((n) => !said.has(n));
+    if (!missing.length) return true;
+    out.removed.push(`${e.test}${e.eye ? ` (${e.eye})` : ""} "${e.result}" — ${missing.join(", ")} was not said in the conversation`);
+    return false;
+  });
+  const iop = p.examination.filter((e) => IOP_TEST.test(e.test));
+  if (!iop.length) return;
+  const methods = IOP_METHODS.filter(([, re]) => re.test(heard)).map(([m]) => m);
+  // the time is looked for only right after the eye-pressure / method words, not anywhere (drop timings)
+  const ANCHOR = /চোখের প্রেশার|চোখের চাপ|eye pressure|pressure by|\biop\b|intraocular|tonometr|आँख का प्रेशर|आंख का प्रेशर|आँखों का प्रेशर|\bnct\b|এনসিটি|এন সি টি|एनसीटी|एन सी टी|applanation|অ্যাপ্লানেশন|एप्लानेशन/gi;
+  let time = "";
+  for (const a of heard.matchAll(ANCHOR)) {
+    time = iopTime(heard.slice(a.index!, a.index! + 140));
+    if (time) break;
+  }
+  for (const e of iop) {
+    const has = IOP_METHODS.some(([m, re]) => re.test(e.test) || re.test(e.result) || new RegExp(`\\b${m}\\b`).test(`${e.test} ${e.result}`));
+    if (!has && methods.length === 1) e.test = `${e.test} (${methods[0]})`;
+    if (time && !/\d{1,2}[:.]\d{2}|\b(am|pm)\b/i.test(e.result)) e.result = `${e.result}${/mm ?hg/i.test(e.result) ? "" : " mmHg"} at ${time}`.trim();
+  }
+}
+
+/** One line per fact: findings already printed as an examination result or a diagnosis are not repeated. */
+function layoutSanity(p: Prescription, out: PostResult) {
+  const covered = (text: string, eye: string) => {
+    const n = normalize(text);
+    if (n.length < 4) return false;
+    const inExam = p.examination.some((e) => (e.eye === eye || e.eye === "BE" || !eye || !e.eye) && normalize(e.result).includes(n));
+    const inDx = p.diagnosis.some((d) => normalize(`${d.grade_or_notes} ${d.condition}`).includes(n) || normalize(`${d.condition} ${d.grade_or_notes}`).includes(n));
+    // "Moderate NPDR with CSME" when the diagnosis already says "NPDR (Moderate)" + "Macular oedema"
+    const dxText = ` ${normalize(p.diagnosis.map((d) => `${d.condition} ${d.grade_or_notes}`).join(" "))} `;
+    const words = n.split(" ").filter((w) => w.length >= 3 && !/^(with|and|the|both|eye|eyes)$/.test(w));
+    const mostlyDx = p.diagnosis.length > 0 && words.length >= 2 && words.filter((w) => dxText.includes(` ${w} `)).length / words.length >= 0.6;
+    return inExam || inDx || mostlyDx;
+  };
+  const before = p.clinical_findings.length;
+  p.clinical_findings = p.clinical_findings.filter((f) => !covered(f.finding, f.eye));
+  if (before !== p.clinical_findings.length) out.notes.push(`Removed ${before - p.clinical_findings.length} finding${before - p.clinical_findings.length > 1 ? "s" : ""} already shown in the examination or diagnosis.`);
+
+  // Follow-up belongs in Review, not Advice
+  const FOLLOW = /^(come back|come again|review|follow.?up|revisit|see me|return)\b|আবার (আসবেন|দেখাবেন|আসুন)|फिर (आइए|आना|दिखाइए)|दोबारा आ/i;
+  const followAdvice = p.advice.filter((a) => FOLLOW.test(a.text.trim()));
+  if (followAdvice.length) {
+    if (!p.follow_up.length) p.follow_up = followAdvice.map((a) => ({ when: a.text.replace(/^(come back|come again|review|follow.?up|revisit|return)\s*(after|in)?\s*/i, "").trim() || a.text, purpose: "" }));
+    p.advice = p.advice.filter((a) => !followAdvice.includes(a));
+    out.notes.push("Follow-up moved from Advice to Review.");
+  }
+
+  // Family history is not about the patient's eyes
+  for (const h of p.history.ocular) if (/family|mother|father|sibling|brother|sister|মা|বাবা|माँ|पिता/i.test(h.item)) h.eye = "";
+}
+
+const PLAN = /দিতে হবে|দিতে হবেই|করতে হবে|করাতে হবে|করাব|করব|করে দেব|দেওয়া হবে|দেব|নিতে হবে|লাগবে|will (do|give|need)|need(s)? (an? )?|advis|plan|schedule|करेंगे|करना होगा|करवाना|लगेगा|लगाना होगा|देंगे/i;
+const PAST = /হয়েছিল|হয়েছিল|করা হয়েছিল|করেছিলাম|আগে|ago|previous|earlier|had (a|an)? ?|हुआ था|हुई थी|करवाया था|पहले/i;
+
+/** A KB procedure the doctor ADVISED (plan words right after it) that the model left out is added, flagged for checking. */
+function procedureFallback(p: Prescription, heard: string, kb: KnowledgeBase, positiveIds: Set<string>, out: PostResult) {
+  const have = new Set(p.procedures.map((x) => x.kb_id).filter(Boolean));
+  const haveNames = p.procedures.map((x) => normalize(x.procedure));
+  for (const t of kb.terms) {
+    if (t.category !== "procedure" || !positiveIds.has(t.id) || have.has(t.id)) continue;
+    if (haveNames.some((n) => [t.name, ...t.aliases].some((a) => n.includes(normalize(a)) || normalize(a).includes(n)))) continue;
+    // where it was said: an eye-lexicon phrase ("অ্যান্টিভিইজিএফ ইন্জেকশন") or the KB name itself
+    const lexHit = scanLexicon(heard, kb).find((h) => h.term?.id === t.id && h.start >= 0);
+    const kbHit = lexHit ? null : findMatches(heard, { ...kb, terms: [t] }).filter((x) => x.score >= 0.85)[0];
+    const heardAs = lexHit ? lexHit.heard : kbHit?.heardAs ?? "";
+    const at = lexHit ? lexHit.start : heardAs ? heard.indexOf(heardAs) : -1;
+    if (at < 0) continue;
+    const after = heard.slice(at, at + heardAs.length + 45);
+    const before = heard.slice(Math.max(0, at - 40), at);
+    if (!PLAN.test(after) || PAST.test(after)) continue;
+    const eye = /ডান|right|दाईं|दायीं|दाहिनी/i.test(before) ? "RE" : /বাম|বাঁ|left|बाईं|बायीं/i.test(before) ? "LE" : "";
+    p.procedures.push({ procedure: t.name, kb_id: t.id, eye, notes: "", evidence: (before.split(/\s+/).slice(-3).join(" ") + " " + after).trim() } as any);
+    out.flags.push(`Procedure "${t.name}"${eye ? ` (${eye})` : ""} was advised in the conversation but missing from the model's draft — added; confirm it`);
+  }
+}
+
 export function postProcess(
   p: Prescription,
   ctx: { heardText: string; kb: KnowledgeBase; negatedIds: Set<string>; negatedText: string; positiveIds: Set<string> },
 ): PostResult {
   const out: PostResult = { removed: [], notes: [], flags: [] };
   medicinesHeard(p, ctx.heardText, ctx.kb, out, ctx.positiveIds);
-  negatedItems(p, ctx.negatedIds, ctx.negatedText, ctx.positiveIds, out);
+  negatedItems(p, ctx.negatedIds, ctx.negatedText, ctx.positiveIds, out, ctx.heardText);
+  allergySanity(p, ctx.heardText, out);
+  examinationSanity(p, ctx.heardText, out);
+  procedureFallback(p, ctx.heardText, ctx.kb, ctx.positiveIds, out);
   patientSanity(p, out);
   phaseSanity(p, ctx.heardText, out);
   subtypeCheck(p, ctx.heardText, out);
   systemicEye(p);
   fieldSanity(p, ctx.heardText, out);
   evidenceCheck(p, ctx.heardText, out);
+  layoutSanity(p, out);
   dedupe(p, out);
   return out;
 }

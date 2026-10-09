@@ -249,7 +249,7 @@
     "থাইরাইড",
     "থাইরাক্সিন"
    ],
-   "hint": "thyroid problem on thyroxine = hypothyroidism (systemic history), NOT thyroid eye disease unless the doctor diagnoses it",
+   "hint": "thyroid disorder = systemic history (only if the patient says they HAVE it; write the thyroxine treatment only if they say they take it), NOT thyroid eye disease unless the doctor diagnoses it",
    "block": [
     "DIS-149"
    ]
@@ -1222,6 +1222,33 @@
    "block": [
     "SYM-043"
    ]
+  },
+  {
+   "lang": "bn",
+   "match": [
+    "অ্যান্টিভিইজিএফ",
+    "অ্যান্টি ভিইজিএফ",
+    "অ্যান্টি ভি ই জি এফ",
+    "এন্টি ভিইজিএফ",
+    "অ্যান্টি-ভিইজিএফ",
+    "অ্যান্টিভেজিএফ",
+    "ইন্ট্রাভিট্রিয়াল ইনজেকশন",
+    "চোখে ইনজেকশন"
+   ],
+   "id": "PRC-050",
+   "hint": "anti-VEGF / intravitreal injection = a PROCEDURE (put it in procedures, not medicines, unless a drug name is said)"
+  },
+  {
+   "lang": "hi",
+   "match": [
+    "एंटी वीईजीएफ",
+    "एंटीवीईजीएफ",
+    "एंटी वी ई जी एफ",
+    "आंख में इंजेक्शन",
+    "आँख में इंजेक्शन"
+   ],
+   "id": "PRC-050",
+   "hint": "anti-VEGF / intravitreal injection = a PROCEDURE"
   }
  ]
 }

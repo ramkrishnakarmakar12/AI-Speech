@@ -1,0 +1,136 @@
+/**
+ * Regressions from the Bengali prescription runs of 9 Oct 2026 (rx-lef): real transcripts, and model answers
+ * that reproduce the errors printed on those prescriptions.
+ */
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { loadKb } from "../src/kb/build-kb.js";
+import { postProcess, systemicAnswer } from "../src/domain/postprocess.js";
+import { allNumberValues, findNumbers } from "../src/domain/numbers.js";
+import { analyzeTranscript, emptySections } from "../src/pipeline.js";
+import type { Prescription } from "../src/llm/schema.js";
+
+const kb = loadKb();
+
+const DR =
+  "ডাক্তার বলুন কি অসুবিধা রোগী ডান চোখে দুই মাস ধরে ঝাপসা দেখছি সুগার বারো বছর ধরে প্রেশারও আছে ডাক্তার থাইরয়েড রোগী না থাইরয়েড নেই ডাক্তার আগে চোখে কিছু করা হয়েছে রোগী দুই বছর আগে বামচোখে লেজার হয়েছিল ডাক্তার দৃষ্টি ডান চোখে ছয় বাই আঠেরো বাম চোখে ছয় বাই বারো চোখের প্রেশার এনসিটিতে ডান ষোলো বাম আঠেরো সকাল এগারোটায় ফান্ডাসে ডান চোখে ডট ব্লট হেমরেজ হার্ড এক্সুডেট আর ম্যাকুলার ইডিমা বাম চোখে মাইল্ড এনপিডিআর ডাক্তার ডান চোখে মডারেট এনপিডিআর উইথ সিএসএমই আজ ওসিটি ম্যাকুলা আর এফএফএ করাবেন ডান চোখে অ্যান্টিভিইজিএফ ইন্জেকশন দিতে হবে ডাক্তার সুগার আর প্রেশার নিয়ন্ত্রণে রাখবেন এক মাস পরে আবার দেখাবেন";
+
+const GLAUCOMA =
+  "নমস্কার বসুন বলুন কিী সমস্যা ডাক্তারবাবু ছ মাস ধরে বাঁ চোখে ঝাপসা দেখছি রাতে আলোর চারপাশে রামধনুর মতো দেখি সুগার আছে প্রেশার আছে সুগার নেই প্রেশার আছে পাঁচ বছর ধরে অ্যামলোডিপিং খাই আপনার বাড়িতে কারও গ্লুকোমা আছে হ্যাঁ আমার মায়ের গ্লুকোমা ছিল দেখছি ডান চোখে দৃষ্টি ছয় বাই নয় বাঁ চোখে ছয় বাই আঠেরো চোখের প্রেশার ডান চোখে ষোলো বাঁ চোখে ছাব্বিশ স্লিটল্যাম্পে দুই চোখের কর্ণিয়া পরিষ্কার বাঁ চোখে ছানি শুরু হয়েছে ফান্ডাসে ডান চোখে কাপডিস্ক রেশিও শূন্য দশমিক চার বাঁ চোখে শূন্য দশমিক সাত বাঁ চোখে গ্লুকোমা হয়েছে সাথে ছানি শুরু হয়েছে একটা ফিল্ড টেস্ট আর ওসিটি করাতে হবে মোবাইল কম দেখবেন ড্রপ নিজে থেকে বন্ধ করবেন না এক মাস পরে আবার আসবেন প্রেশার দেখব";
+
+const empty = (): Prescription =>
+  ({
+    patient: { name: "", age: "", sex: "" },
+    chief_complaints: [],
+    history: { systemic: [], ocular: [], current_medications: [], allergies: [] },
+    examination: [], clinical_findings: [], diagnosis: [], medications: [], procedures: [],
+    investigations: [], glasses: [], advice: [], follow_up: [], terms: [],
+  }) as any;
+
+function run(transcript: string, p: Prescription) {
+  const a = analyzeTranscript(transcript, { language: "bn" }, kb);
+  const d = a.domain as any;
+  return postProcess(p, { heardText: transcript, kb, negatedIds: new Set(a.domain.negatedIds), negatedText: d._negatedText ?? "", positiveIds: new Set<string>(d._positiveIds ?? []) });
+}
+
+/** What the model returned for the diabetic-retinopathy recording (prescription 2). */
+function drAnswer(): Prescription {
+  const p = empty();
+  p.patient.name = "রোগী";
+  p.chief_complaints = [{ complaint: "Diminution of vision", kb_id: "SYM-001", eye: "RE", duration: "2 months", character: "", patient_words: "", evidence: "ডান চোখে দুই মাস ধরে ঝাপসা দেখছি" }];
+  p.history.systemic = [
+    { condition: "Diabetes mellitus", kb_id: "ABR-005", duration: "12 years", treatment: "", evidence: "সুগার বারো বছর ধরে" },
+    { condition: "Hypertension", kb_id: "ABR-006", duration: "", treatment: "", evidence: "প্রেশারও আছে" },
+    { condition: "Thyroid problem on thyroxine", kb_id: "", duration: "", treatment: "thyroxine", evidence: "ডাক্তার থাইরয়েড" },
+  ];
+  p.history.ocular = [{ item: "Laser treatment", kb_id: "", eye: "LE", evidence: "দুই বছর আগে বামচোখে লেজার হয়েছিল" }];
+  p.history.allergy_status = "none known";
+  p.examination = [
+    { test: "Visual acuity", kb_id: "", eye: "RE", result: "6/18", evidence: "ডান চোখে ছয় বাই আঠেরো" },
+    { test: "Visual acuity", kb_id: "", eye: "LE", result: "6/12", evidence: "বাম চোখে ছয় বাই বারো" },
+    { test: "Intraocular pressure", kb_id: "", eye: "RE", result: "16 mmHg", evidence: "ডান ষোলো" },
+    { test: "Intraocular pressure", kb_id: "", eye: "LE", result: "8 mmHg", evidence: "বাম আঠেরো" },
+    { test: "Fundus examination", kb_id: "", eye: "RE", result: "Dot blot haemorrhage, hard exudate, macular oedema", evidence: "ফান্ডাসে ডান চোখে ডট ব্লট হেমরেজ" },
+    { test: "Fundus examination", kb_id: "", eye: "LE", result: "Mild NPDR", evidence: "বাম চোখে মাইল্ড এনপিডিআর" },
+  ];
+  p.clinical_findings = [
+    { finding: "Dot blot haemorrhage", kb_id: "", eye: "RE", evidence: "ডট ব্লট হেমরেজ" },
+    { finding: "Hard exudate", kb_id: "", eye: "RE", evidence: "হার্ড এক্সুডেট" },
+    { finding: "Macular oedema", kb_id: "", eye: "RE", evidence: "ম্যাকুলার ইডিমা" },
+    { finding: "Mild NPDR", kb_id: "", eye: "LE", evidence: "মাইল্ড এনপিডিআর" },
+    { finding: "Moderate NPDR with CSME", kb_id: "", eye: "RE", evidence: "মডারেট এনপিডিআর উইথ সিএসএমই" },
+  ];
+  p.diagnosis = [
+    { condition: "Diabetic retinopathy (NPDR)", kb_id: "", eye: "RE", grade_or_notes: "Moderate", certainty: "confirmed", evidence: "ডান চোখে মডারেট এনপিডিআর" },
+    { condition: "Macular oedema", kb_id: "", eye: "RE", grade_or_notes: "", certainty: "confirmed", evidence: "উইথ সিএসএমই" },
+  ];
+  p.advice = [
+    { text: "Keep sugar and pressure under control", kb_id: "", evidence: "সুগার আর প্রেশার নিয়ন্ত্রণে রাখবেন" },
+    { text: "Come back in one month", kb_id: "", evidence: "এক মাস পরে আবার দেখাবেন" },
+  ];
+  p.follow_up = [{ when: "1 month", purpose: "Review" }];
+  return p;
+}
+
+test("numbers: spoken spellings, decimals and English digits in Bengali script", () => {
+  assert.ok(findNumbers("বাম আঠেরো").some((h) => h.value === 18));
+  assert.ok(allNumberValues("কাপডিস্ক রেশিও শূন্য দশমিক চার").has(0.4));
+  assert.ok(allNumberValues("প্লাস ওয়ান পয়েন্ট ফাইভ অ্যাড").has(1.5));
+  assert.ok(allNumberValues("চোখের প্রেশার এনসিটিতে ডান ষোলো").has(16));
+  assert.ok(allNumberValues("दाईं चौदह, बाईं पंद्रह").has(15));
+  assert.ok(allNumberValues("cup disc ratio zero point seven").has(0.7));
+});
+
+test("systemic history: the doctor's question is not an answer; the patient's last answer wins", () => {
+  assert.equal(systemicAnswer("Hypothyroidism", DR)?.answer, "no");
+  assert.equal(systemicAnswer("Diabetes mellitus", DR)?.answer, "yes");
+  assert.equal(systemicAnswer("Hypertension", DR)?.answer, "yes");
+  assert.equal(systemicAnswer("Diabetes mellitus", GLAUCOMA)?.answer, "no");
+  assert.equal(systemicAnswer("Hypertension", GLAUCOMA)?.answer, "yes");
+  assert.equal(systemicAnswer("Diabetes", "সুগার, প্রেশার বা থাইরয়েড আছে? থাইরয়েড আছে, থাইরক্সিন খাই। সুগার প্রেশার নেই।")?.answer, "no");
+  assert.equal(systemicAnswer("Hypothyroidism", "সুগার, প্রেশার বা থাইরয়েড আছে? থাইরয়েড আছে, থাইরক্সিন খাই। সুগার প্রেশার নেই।")?.answer, "yes");
+  assert.equal(systemicAnswer("Asthma", "Do you have sugar, BP or asthma?")?.answer, "asked");
+});
+
+test("prescription 2 (diabetic retinopathy): every error on the printed prescription is fixed or flagged", () => {
+  const p = drAnswer();
+  const r = run(DR, p);
+  // denied thyroid, unsaid allergy, speaker label as name
+  assert.deepEqual(p.history.systemic.map((h) => h.condition), ["Diabetes mellitus", "Hypertension"]);
+  assert.equal(p.history.allergy_status, "not discussed");
+  assert.equal(p.patient.name, "");
+  // IOP: the "8" nobody said is removed; method and time added to the value that was said
+  const iop = p.examination.filter((e) => /pressure/i.test(e.test));
+  assert.deepEqual(iop.map((e) => `${e.test}|${e.eye}|${e.result}`), ["Intraocular pressure (NCT)|RE|16 mmHg at 11 am"]);
+  assert.ok(r.removed.some((x) => /8 was not said/.test(x)), r.removed.join("\n"));
+  // anti-VEGF injection advised → procedure added and flagged
+  assert.deepEqual(p.procedures.map((x) => `${x.kb_id}|${x.eye}`), ["PRC-050|RE"]);
+  assert.ok(r.flags.some((f) => /Intravitreal injection/.test(f)));
+  // no repeated findings; follow-up only in Review; the past laser is not an advised procedure
+  assert.deepEqual(p.clinical_findings.map((f) => f.finding), []);
+  assert.deepEqual(p.advice.map((a) => a.text), ["Keep sugar and pressure under control"]);
+  assert.equal(p.follow_up.length, 1);
+});
+
+test("prescription 1 (glaucoma + early cataract): empty sections are reported; family history has no eye", () => {
+  const p = empty();
+  p.patient.name = "patient";
+  p.history.systemic = [{ condition: "Hypertension", kb_id: "ABR-006", duration: "5 years", treatment: "Amlodipine", evidence: "প্রেশার আছে পাঁচ বছর ধরে অ্যামলোডিপিং খাই" }];
+  p.history.ocular = [{ item: "Family history of glaucoma", kb_id: "", eye: "BE", evidence: "আমার মায়ের গ্লুকোমা ছিল" }];
+  p.advice = [
+    { text: "Use mobile less", kb_id: "", evidence: "মোবাইল কম দেখবেন" },
+    { text: "Do not stop drops on your own", kb_id: "", evidence: "ড্রপ নিজে থেকে বন্ধ করবেন না" },
+    { text: "Come back in one month", kb_id: "", evidence: "এক মাস পরে আবার আসবেন" },
+  ];
+  run(GLAUCOMA, p);
+  assert.equal(p.patient.name, "");
+  assert.equal(p.history.ocular[0].eye, "");
+  assert.ok(/one month/i.test(p.follow_up[0].when), JSON.stringify(p.follow_up));
+  assert.equal(p.advice.length, 2);
+  const gaps = emptySections(p, GLAUCOMA);
+  assert.equal(gaps.length, 2, gaps.join(" | "));
+  // the CDR values a model would write are now recognised as said
+  p.examination = [{ test: "Cup-disc ratio", kb_id: "", eye: "LE", result: "0.7", evidence: "শূন্য দশমিক সাত" }, { test: "Intraocular pressure", kb_id: "", eye: "LE", result: "26 mmHg", evidence: "বাঁ চোখে ছাব্বিশ" }];
+  const r2 = run(GLAUCOMA, p);
+  assert.equal(p.examination.length, 2, r2.removed.join("\n"));
+});

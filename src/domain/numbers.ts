@@ -17,7 +17,14 @@ const BN: string[] = [
   "একাশি", "বিরাশি", "তিরাশি", "চুরাশি", "পঁচাশি", "ছিয়াশি", "সাতাশি", "অষ্টআশি", "উননব্বই", "নব্বই",
   "একানব্বই", "বিরানব্বই", "তিরানব্বই", "চুরানব্বই", "পঁচানব্বই", "ছিয়ানব্বই", "সাতানব্বই", "আটানব্বই", "নিরানব্বই",
 ];
-const BN_ALT: Record<string, number> = { দু: 2, ছ: 6, চৌদ্দ: 14, বিশ: 20, ত্রিশ: 30, একশো: 100, একশ: 100, শো: 100 };
+const BN_ALT: Record<string, number> = {
+  দু: 2, ছ: 6, চৌদ্দ: 14, বিশ: 20, ত্রিশ: 30, একশো: 100, একশ: 100, শো: 100,
+  // spoken / ASR spellings of the same numbers ("বাম আঠেরো" was read as 8 in a real run)
+  এগার: 11, তের: 13, চোদ্দো: 14, পনের: 15, ষোল: 16, সতের: 17, আঠেরো: 18, আঠের: 18, আঠার: 18, আঠাশ: 28,
+  শূন্য: 0, শুন্য: 0, জিরো: 0,
+  // English digits spoken in Bengali script ("ওয়ান পয়েন্ট ফাইভ অ্যাড")
+  ওয়ান: 1, থ্রি: 3, ফোর: 4, ফাইভ: 5, সিক্স: 6, সেভেন: 7, এইট: 8, নাইন: 9,
+};
 
 const HI: string[] = [
   "", "एक", "दो", "तीन", "चार", "पांच", "छह", "सात", "आठ", "नौ", "दस",
@@ -31,7 +38,7 @@ const HI: string[] = [
   "इक्यासी", "बयासी", "तिरासी", "चौरासी", "पचासी", "छियासी", "सत्तासी", "अट्ठासी", "नवासी", "नब्बे",
   "इक्यानवे", "बानवे", "तिरानवे", "चौरानवे", "पचानवे", "छियानवे", "सत्तानवे", "अट्ठानवे", "निन्यानवे",
 ];
-const HI_ALT: Record<string, number> = { पाँच: 5, छः: 6, छे: 6, सौ: 100, "एक सौ": 100 };
+const HI_ALT: Record<string, number> = { पाँच: 5, छः: 6, छे: 6, सौ: 100, "एक सौ": 100, अट्ठारह: 18, शून्य: 0, जीरो: 0, ज़ीरो: 0, वन: 1, थ्री: 3, फोर: 4, फाइव: 5, सिक्स: 6, सेवन: 7, नाइन: 9 };
 
 /** Spelling-insensitive key: drop chandrabindu/anusvara/nukta and unify য়/য, ড়/ড. */
 const key = (w: string) =>
@@ -49,6 +56,14 @@ const UNIT = /^(বছর|বছরের|মাস|মাসের|দিন|�
 /** endings speech recognition glues onto a number word; anything else (বিশেষ, তিনি) is a different word */
 const SUFFIX = /^(ছে|ের|এর|ে|টা|টি|ও|তে|য|ই|वां|वीं|वें)?$/;
 
+/** "শূন্য দশমিক চার" / "जीरो पॉइंट सात" / "zero point four" = 0.4, 0.7 (cup–disc ratio, add power) */
+const DECIMAL = /^(দশমিক|পয়েন্ট|পয়েন্ট|পইন্ট|দশমলব|दशमलव|पॉइंट|पॉइन्ट|प्वाइंट|point)$/i;
+const EN_NUM: Record<string, number> = {
+  zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+  eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19,
+  twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60,
+};
+
 export interface NumberHit {
   heard: string;
   value: number;
@@ -65,7 +80,22 @@ export function findNumbers(text: string): NumberHit[] {
     const w = WORDS.find((x) => x.length >= 3 && k.startsWith(x) && (x.length >= 5 || SUFFIX.test(k.slice(x.length))));
     return w ? { n: TABLE.get(w)!, word: tok } : null;
   };
+  const digitOf = (tok: string | undefined): number | null => {
+    if (!tok) return null;
+    if (/^\d$/.test(tok)) return Number(tok);
+    const v = valueOf(tok);
+    return v && v.n < 10 ? v.n : EN_NUM[tok.toLowerCase()] ?? null;
+  };
   for (let i = 0; i < toks.length; i++) {
+    const lead = valueOf(toks[i]) ?? (EN_NUM[toks[i].toLowerCase()] !== undefined ? { n: EN_NUM[toks[i].toLowerCase()], word: toks[i] } : null);
+    // decimal: <number> দশমিক/point <digit> [<digit>]
+    if (lead && toks[i + 1] && DECIMAL.test(toks[i + 1]) && digitOf(toks[i + 2]) !== null) {
+      let j = i + 2, frac = "";
+      while (digitOf(toks[j]) !== null && frac.length < 2) frac += String(digitOf(toks[j++]));
+      out.push({ heard: toks.slice(i, j).join(" "), value: Number(`${lead.n}.${frac}`) });
+      i = j - 1;
+      continue;
+    }
     const a = valueOf(toks[i]);
     if (!a) continue;
     let n = a.n, heard = toks[i], j = i;
@@ -94,4 +124,35 @@ export function numbersNote(text: string): string {
     "NUMBERS (number words in the transcript, decoded — use these values for age, durations, VA and pressure)\n" +
     hits.map((h) => `- «${h.heard}» = ${h.value}`).join("\n")
   );
+}
+
+/**
+ * Every number value said in the text — digits (ASCII, Bengali, Devanagari), English number words, Bengali/Hindi
+ * number words of any size and decimals (findNumbers() only reports ≥ 11 or numbers with a unit). Used to check
+ * that a value in the draft (IOP, visual acuity) was really said.
+ */
+export function allNumberValues(text: string): Set<number> {
+  const out = new Set<number>();
+  const ascii = text.replace(/[০-৯]/g, (c) => String(c.charCodeAt(0) - 0x09e6)).replace(/[०-९]/g, (c) => String(c.charCodeAt(0) - 0x0966));
+  for (const m of ascii.match(/\d+(?:\.\d+)?/g) ?? []) out.add(Number(m));
+  for (const h of findNumbers(text)) out.add(h.value);
+  const toks = text.toLowerCase().split(/[\s,।.?!;:()"'“”‘’-]+/).filter(Boolean);
+  for (let i = 0; i < toks.length; i++) {
+    const k = key(toks[i]);
+    if (TABLE.has(k)) out.add(TABLE.get(k)!);
+    else {
+      // a number word with a case ending glued on ("আঠেরোতে", "ষোলোয়")
+      const w = WORDS.find((x) => x.length >= 3 && k.startsWith(x) && SUFFIX.test(k.slice(x.length)));
+      if (w) out.add(TABLE.get(w)!);
+    }
+    const en = EN_NUM[toks[i]];
+    if (en !== undefined) {
+      const next = EN_NUM[toks[i + 1] ?? ""];
+      if (en >= 20 && en % 10 === 0 && next !== undefined && next > 0 && next < 10) out.add(en + next);
+      out.add(en);
+    }
+  }
+  if (/দেড়|দেড়|ডেড়|डेढ़|डेढ|one and a half/i.test(text)) out.add(1.5);
+  if (/আড়াই|আড়াই|ढाई|two and a half/i.test(text)) out.add(2.5);
+  return out;
 }
