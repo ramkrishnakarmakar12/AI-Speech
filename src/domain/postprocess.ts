@@ -385,10 +385,29 @@ function examinationSanity(p: Prescription, heard: string, out: PostResult) {
     if (time) break;
   }
   for (const e of iop) {
+    // a method the model wrote that nobody said ("(NCT)" copied from an example) is taken out
+    for (const [m] of IOP_METHODS)
+      if (!methods.includes(m) && new RegExp(`\\(\\s*${m}\\s*\\)|\\b${m}\\b`).test(e.test)) {
+        e.test = e.test.replace(new RegExp(`\\s*\\(\\s*${m}\\s*\\)|\\s*\\b${m}\\b`), "").trim();
+        out.notes.push(`IOP method "${m}" removed: the method was not said.`);
+      }
     const has = IOP_METHODS.some(([m, re]) => re.test(e.test) || re.test(e.result) || new RegExp(`\\b${m}\\b`).test(`${e.test} ${e.result}`));
     if (!has && methods.length === 1) e.test = `${e.test} (${methods[0]})`;
     if (time && !/\d{1,2}[:.]\d{2}|\b(am|pm)\b/i.test(e.result)) e.result = `${e.result}${/mm ?hg/i.test(e.result) ? "" : " mmHg"} at ${time}`.trim();
   }
+}
+
+const MACULA_SAID = /macula|ম্যাকুলা|ম্যাকুলার|মেকুলা|मैक्युला|मैकुला|मैक्यूला/i;
+
+/** "OCT of macula" when the doctor only said "OCT" (a glaucoma visit needs OCT RNFL, not macula). */
+function investigationSanity(p: Prescription, heard: string, out: PostResult) {
+  if (MACULA_SAID.test(heard)) return;
+  for (const t of p.investigations)
+    if (/\boct\b|optical coherence/i.test(t.test) && /macula/i.test(t.test)) {
+      const was = t.test;
+      t.test = t.test.replace(/\s*(\(|-|–)?\s*(of\s+(the\s+)?)?macula(r)?\s*\)?/i, "").trim();
+      out.notes.push(`"${was}" → "${t.test}": macula was not said.`);
+    }
 }
 
 /** One line per fact: findings already printed as an examination result or a diagnosis are not repeated. */
@@ -481,6 +500,7 @@ export function postProcess(
   fieldSanity(p, ctx.heardText, out);
   evidenceCheck(p, ctx.heardText, out);
   layoutSanity(p, out);
+  investigationSanity(p, ctx.heardText, out);
   dedupe(p, out);
   return out;
 }
